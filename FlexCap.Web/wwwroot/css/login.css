@@ -18,17 +18,34 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    position: relative;
 }
 
     .left-panel h2 {
-        color: orange;
+        font-size: 2rem;
         font-weight: bold;
+        color: white;
+        margin-bottom: 2rem;
+    }
+
+        .left-panel h2 span {
+            color: orange;
+        }
+
+    .left-panel form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        max-width: 320px;
     }
 
     .left-panel input {
         border-radius: 30px;
         padding: 10px 20px;
         margin-bottom: 1rem;
+        border: none;
+        outline: none;
     }
 
 .btn-submit {
@@ -39,7 +56,12 @@
     color: white;
     font-weight: bold;
     margin-bottom: 1rem;
+    transition: background-color 0.3s;
 }
+
+    .btn-submit:hover {
+        background-color: #00691f;
+    }
 
 .btn-outline {
     border: 2px solid #ffc107;
@@ -47,6 +69,29 @@
     padding: 8px 20px;
     border-radius: 30px;
     text-decoration: none;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+    .btn-outline:hover {
+        background-color: #ffc107;
+        color: #0d2a4a;
+    }
+
+.left-panel a {
+    color: #ccc;
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+
+    .left-panel a:hover {
+        text-decoration: underline;
+    }
+
+hr {
+    width: 100%;
+    border: 0.5px solid #ccc;
+    opacity: 0.3;
+    margin: 1.5rem 0;
 }
 
 .right-panel {
@@ -58,7 +103,8 @@
 }
 
     .right-panel img {
-        max-width: 90%;
+        max-width: 100%;
+        height: auto;
     }
 
 .logo {
