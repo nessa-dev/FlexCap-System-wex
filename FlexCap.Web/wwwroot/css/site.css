@@ -1,54 +1,78 @@
-/* CORPO */
+/* CORPO GERAL */
 body {
     margin: 0;
     font-family: 'Segoe UI', sans-serif;
+    display: flex; /* Permite que .d-flex no body funcione corretamente */
+    min-height: 100vh; /* Garante que o body ocupe toda a altura da viewport */
 }
 
-/* SIDEBAR */
+/* SIDEBAR - A ABA LATERAL AZUL */
+/* SIDEBAR - A ABA LATERAL AZUL */
 .sidebar {
     width: 240px;
-    min-height: 100vh;
-    background-color: #001637;
+    min-height: 100vh; /* Ocupa a altura total da tela */
+    background-color: #0d6efd; /* ESTA É A COR AZUL DO BOOTSTRAP PRIMARY, QUE DEVE SER A DA IMAGEM ORIGINAL */
     padding: 1rem;
+    display: flex; /* Habilita flexbox para organizar os itens da sidebar */
+    flex-direction: column; /* Organiza os itens em coluna */
 }
 
+    /* O restante do CSS da sidebar continua igual */
     .sidebar .nav-link {
         padding: 10px;
         margin-bottom: 5px;
         border-radius: 5px;
-        color: white;
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        color: white; /* Cor do texto dos links */
+        display: flex; /* Habilita flexbox para alinhar ícone e texto */
+        align-items: center; /* Alinha ícone e texto verticalmente */
+        gap: 10px; /* Espaço entre o ícone e o texto */
         font-weight: 500;
-        transition: background-color 0.3s;
+        transition: background-color 0.3s; /* Transição suave no hover */
     }
 
         .sidebar .nav-link:hover {
-            background-color: #1c2b4f;
-            text-decoration: none;
+            background-color: #1c2b4f; /* Um azul mais escuro para o efeito hover */
+            text-decoration: none; /* Remove sublinhado ao passar o mouse */
         }
 
-        /* COR DO LINK "Change Password" */
+        .sidebar .nav-link i { /* Estilo para os ícones dentro dos links da sidebar */
+            font-size: 1.2rem; /* Tamanho dos ícones */
+            line-height: 1; /* Garante alinhamento correto */
+        }
+
+        /* COR DO LINK "Change Password" - A cor amarela */
         .sidebar .nav-link.text-warning {
-            color: #ffc107 !important;
+            color: #ffc107 !important; /* Cor amarela do Bootstrap warning, !important para garantir a sobreposição */
+        }
         }
 
-/* LOGO */
+        .sidebar .nav-link i { /* Estilo para os ícones dentro dos links da sidebar */
+            font-size: 1.2rem; /* Tamanho dos ícones */
+            line-height: 1; /* Garante alinhamento correto */
+        }
+
+        /* COR DO LINK "Change Password" - A cor amarela */
+        .sidebar .nav-link.text-warning {
+            color: #ffc107 !important; /* Cor amarela do Bootstrap warning, !important para garantir a sobreposição */
+        }
+
+/* LOGO FLEX-X-CAP */
 .logo {
     font-size: 22px;
     font-weight: bold;
     color: white;
     margin-bottom: 2rem;
+    text-align: center; /* Centraliza o logo na sidebar */
 }
 
     .logo span {
-        color: orange;
+        color: orange; /* A cor laranja do "X" */
     }
 
-/* CONTEÚDO PRINCIPAL */
+/* CONTEÚDO PRINCIPAL (o "miolo" branco) */
 .content {
-    background-color: #f8f9fa;
-    min-height: 100vh;
-    padding: 2rem;
+    background-color: #f8f9fa; /* Um cinza bem claro, quase branco, para o fundo do conteúdo */
+    min-height: 100vh; /* Garante que o conteúdo ocupe a altura total */
+    padding: 2rem; /* Espaçamento interno para o conteúdo */
+    flex-grow: 1; /* Permite que o conteúdo principal ocupe todo o espaço restante */
 }

@@ -1,5 +1,12 @@
 ﻿@{
-    ViewData["Title"] = "Minha Página";
+    // Define o título da página
+    ViewData["Title"] = "Home"; // Aparecerá na aba do navegador como "Home - FlexCap"
+    // ESSA LINHA É O SEGREDO! Ela diz para esta View usar o seu _Layout.cshtml
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<h2>Olá, conteúdo aqui!</h2>
+
+<div class="text-center">
+    <h1 class="display-4">Bem-vindo ao FlexCap!</h1>
+    <p>Use o menu lateral para navegar entre as seções do sistema.</p>
+    <img src="https://via.placeholder.com/600x300?text=Sua+pagina+aqui" alt="Placeholder para conteúdo" class="img-fluid mt-4" />
+</div>
