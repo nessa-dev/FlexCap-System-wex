@@ -1,58 +1,50 @@
 ﻿<!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <title>@ViewData["Title"] - FlexCap</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexCap</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-    <div class="d-flex">
-        <nav class="sidebar d-flex flex-column">
-            <div class="logo text-center">
-                Flex<span>X</span>Cap
-            </div>
+    <div class="sidebar">
+        <div class="logo">
+            <img src="https://via.placeholder.com/150x50?text=FlexCap" alt="FlexCap Logo">
+        </div>
+        <a href="#" class="menu-item active">
+            <span class="material-icons">home</span>
+            Home
+        </a>
+        <a href="#" class="menu-item">
+            <span class="material-icons">people</span>
+            Collaborators
+        </a>
+        <a href="#" class="menu-item">
+            <span class="material-icons">timeline</span>
+            Sprints & Gantt
+        </a>
+        <a href="#" class="menu-item">
+            <span class="material-icons">calendar_today</span>
+            Corporate Calendar
+        </a>
+        <a href="#" class="menu-item">
+            <span class="material-icons">description</span>
+            Requests
+        </a>
 
-            <ul class="nav nav-pills flex-column mb-auto">
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Home" asp-action="Index">
-                        <i class="bi bi-house"></i> Home
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" asp-controller="Colaboradores" asp-action="Index">
-                        <i class="bi bi-people"></i> Collaborators
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" asp-controller="Sprints" asp-action="Index">
-                        <i class="bi bi-kanban"></i> Sprints & Gantt
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" asp-controller="Calendario" asp-action="Index">
-                        <i class="bi bi-calendar-event"></i> Corporate Calendar
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" asp-controller="Requests" asp-action="Index">
-                        <i class="bi bi-envelope"></i> Requests
-                    </a>
-                </li>
-            </ul>
-
-            <div class="mt-auto">
-                <a class="nav-link text-warning" href="#"><i class="bi bi-key"></i> Change Password</a>
-                <a class="nav-link text-white" href="#"><i class="bi bi-box-arrow-left"></i> Log Out</a>
-            </div>
-        </nav>
-
-        <main class="content w-100">
-            @RenderBody()
-        </main>
+        <div class="bottom-menu">
+            <a href="#" class="menu-item">
+                <span class="material-icons">vpn_key</span>
+                Change Password
+            </a>
+            <a href="#" class="menu-item">
+                <span class="material-icons">logout</span>
+                Log Out
+            </a>
+        </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="content">
+    </div>
 </body>
 </html>

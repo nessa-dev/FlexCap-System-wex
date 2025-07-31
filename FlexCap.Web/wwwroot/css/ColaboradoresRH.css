@@ -1,0 +1,12 @@
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace FlexCap.Web.wwwroot.css
+{
+    public class ColaboradoresRH : Controller
+    {
+        public IActionResult Index()
+        {
+            return View();
+        }
+    }
+}

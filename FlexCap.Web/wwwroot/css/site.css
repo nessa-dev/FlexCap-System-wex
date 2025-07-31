@@ -1,78 +1,81 @@
-/* CORPO GERAL */
 body {
     margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    display: flex; /* Permite que .d-flex no body funcione corretamente */
-    min-height: 100vh; /* Garante que o body ocupe toda a altura da viewport */
+    font-family: Arial, sans-serif;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #f0f2f5; 
 }
 
-/* SIDEBAR - A ABA LATERAL AZUL */
-/* SIDEBAR - A ABA LATERAL AZUL */
 .sidebar {
-    width: 240px;
-    min-height: 100vh; /* Ocupa a altura total da tela */
-    background-color: #0d6efd; /* ESTA É A COR AZUL DO BOOTSTRAP PRIMARY, QUE DEVE SER A DA IMAGEM ORIGINAL */
-    padding: 1rem;
-    display: flex; /* Habilita flexbox para organizar os itens da sidebar */
-    flex-direction: column; /* Organiza os itens em coluna */
-}
-
-    /* O restante do CSS da sidebar continua igual */
-    .sidebar .nav-link {
-        padding: 10px;
-        margin-bottom: 5px;
-        border-radius: 5px;
-        color: white; /* Cor do texto dos links */
-        display: flex; /* Habilita flexbox para alinhar ícone e texto */
-        align-items: center; /* Alinha ícone e texto verticalmente */
-        gap: 10px; /* Espaço entre o ícone e o texto */
-        font-weight: 500;
-        transition: background-color 0.3s; /* Transição suave no hover */
-    }
-
-        .sidebar .nav-link:hover {
-            background-color: #1c2b4f; /* Um azul mais escuro para o efeito hover */
-            text-decoration: none; /* Remove sublinhado ao passar o mouse */
-        }
-
-        .sidebar .nav-link i { /* Estilo para os ícones dentro dos links da sidebar */
-            font-size: 1.2rem; /* Tamanho dos ícones */
-            line-height: 1; /* Garante alinhamento correto */
-        }
-
-        /* COR DO LINK "Change Password" - A cor amarela */
-        .sidebar .nav-link.text-warning {
-            color: #ffc107 !important; /* Cor amarela do Bootstrap warning, !important para garantir a sobreposição */
-        }
-        }
-
-        .sidebar .nav-link i { /* Estilo para os ícones dentro dos links da sidebar */
-            font-size: 1.2rem; /* Tamanho dos ícones */
-            line-height: 1; /* Garante alinhamento correto */
-        }
-
-        /* COR DO LINK "Change Password" - A cor amarela */
-        .sidebar .nav-link.text-warning {
-            color: #ffc107 !important; /* Cor amarela do Bootstrap warning, !important para garantir a sobreposição */
-        }
-
-/* LOGO FLEX-X-CAP */
-.logo {
-    font-size: 22px;
-    font-weight: bold;
+    width: 250px;
+    background-color: #002147; 
     color: white;
-    margin-bottom: 2rem;
-    text-align: center; /* Centraliza o logo na sidebar */
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    position: relative;
 }
 
-    .logo span {
-        color: orange; /* A cor laranja do "X" */
+.logo {
+    padding: 0 20px 30px 20px;
+    text-align: left;
+}
+
+    .logo img {
+        max-width: 150px; 
+        height: auto;
     }
 
-/* CONTEÚDO PRINCIPAL (o "miolo" branco) */
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: #ccc;
+    text-decoration: none;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+    .menu-item.active {
+        background-color: #003366; 
+        border-left: 5px solid #ffcc00; 
+        padding-left: 15px; 
+    }
+
+    .menu-item:hover:not(.active) {
+        background-color: #002a5c; 
+        color: white;
+    }
+
+    .menu-item .material-icons {
+        margin-right: 15px;
+        font-size: 24px;
+    }
+
+.bottom-menu {
+    margin-top: auto; 
+    padding-top: 20px;
+    border-top: 1px solid #003366;
+}
+
+    .bottom-menu .menu-item {
+        color: #999; 
+        font-size: 0.9em;
+    }
+
+        .bottom-menu .menu-item:hover {
+            color: white;
+        }
+
+        .bottom-menu .menu-item .material-icons {
+            font-size: 20px;
+        }
+
 .content {
-    background-color: #f8f9fa; /* Um cinza bem claro, quase branco, para o fundo do conteúdo */
-    min-height: 100vh; /* Garante que o conteúdo ocupe a altura total */
-    padding: 2rem; /* Espaçamento interno para o conteúdo */
-    flex-grow: 1; /* Permite que o conteúdo principal ocupe todo o espaço restante */
+    flex-grow: 1;
+    background-color: white;
+    padding: 20px;
+    overflow-y: auto;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
 }
