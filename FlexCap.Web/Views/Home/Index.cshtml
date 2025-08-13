@@ -1,12 +1,99 @@
 ﻿﻿@{
-// Define o título da página
-ViewData["Title"] = "Home"; // Aparecerá na aba do navegador como "Home - FlexCap"
-                            // ESSA LINHA É O SEGREDO! Ela diz para esta View usar o seu _Layout.cshtml
-Layout = "~/Views/Shared/_Layout.cshtml";
+ViewData["Title"] = "Home"; 
+Layout = "~/Views/Shared/Template.cshtml";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Bem-vindo ao FlexCap!</h1>
-    <p>Use o menu lateral para navegar entre as seções do sistema.</p>
-    <img src="https://via.placeholder.com/600x300?text=Sua+pagina+aqui" alt="Placeholder para conteúdo" class="img-fluid mt-4" />
+<div class="container-fluid p-4">
+    <h1 class="fw-bold">Visão Geral - Recursos Humanos</h1>
+    <p class="text-muted">
+        Olá! Aqui está um resumo das atividades recentes e cadastros aguardando sua aprovação.
+    </p>
+
+    <!-- Cards de resumo -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h2 class="fw-bold mb-0">58</h2>
+                    <p class="text-muted mb-3">Cadastrados</p>
+                    <a href="#" class="btn btn-primary btn-sm">Ver detalhes</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h2 class="fw-bold mb-0">4</h2>
+                    <p class="text-muted">Aguardando análise</p>
+                    <small class="text-muted">Pedidos pendentes de aprovação</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h2 class="fw-bold mb-0">5</h2>
+                    <p class="text-muted">Setores</p>
+                    <small class="text-muted">Setores Ativos</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de pedidos -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Últimos Pedidos de Cadastro</h5>
+            <div>
+                <a href="#" class="btn btn-primary btn-sm">Ver todos os colaboradores</a>
+                <button class="btn btn-outline-primary btn-sm ms-2">+</button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Cargo</th>
+                        <th>Setor</th>
+                        <th>Status</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>João Silva</td>
+                        <td>Dev Full Stack</td>
+                        <td>TI</td>
+                        <td>Aguardando</td>
+                        <td class="text-center">
+                            <button class="btn btn-success btn-sm">✔</button>
+                            <button class="btn btn-danger btn-sm">✖</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Mariana Santos</td>
+                        <td>PO</td>
+                        <td>Produto</td>
+                        <td>Aguardando</td>
+                        <td class="text-center">
+                            <button class="btn btn-success btn-sm">✔</button>
+                            <button class="btn btn-danger btn-sm">✖</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Lucas Ferreira</td>
+                        <td>QA</td>
+                        <td>Qualidade</td>
+                        <td>Aprovado</td>
+                        <td class="text-center">
+                            <span class="text-muted">—</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>

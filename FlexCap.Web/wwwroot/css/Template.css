@@ -1,3 +1,4 @@
+/* Template Geral */
 
 html, body {
     height: 100%;
@@ -6,17 +7,16 @@ html, body {
 
 body {
     display: flex;
-    min-height: 100vh; /* garante altura total da janela */
-}
+    min-height: 100vh; 
 
 .sidebar {
-    background-color: #003366; /* azul da sua imagem */
+    background-color: #001637; 
     color: white;
     width: 250px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 100vh; /* barra lateral até o rodapé */
+    min-height: 100vh; 
 }
 
 .menu-item {
@@ -39,4 +39,32 @@ body {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
+/* RH homme */
+
+.card {
+    border-radius: 8px;
+}
+
+.card-header {
+    background-color: white;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* RH aba colaboradores */
+.table td, .table th {
+    vertical-align: middle;
+}
+
+.table img {
+    object-fit: cover;
+}
 
