@@ -26,19 +26,22 @@ namespace FlexCap.Web.Controllers
         //Page Home
         public IActionResult Rh()
         {
-            ViewData["Title"] = "Home RH";
+            ViewData["UserRole"] = "Home RH";
+            ViewData["Profile"] = "Rh";
             return View();
         }
 
         public IActionResult Manager()
         {
-            ViewData["Title"] = "Home Manager";
+            ViewData["UserRole"] = "Home Manager";
+            ViewData["Profile"] = "Manager";
             return View();
         }
 
         public IActionResult Colaborador()
         {
-            ViewData["Title"] = "Home Colaborador";
+            ViewData["UserRole"] = "Home Colaborador";
+            ViewData["Profile"] = "Colaborador";
             return View();
         }
 

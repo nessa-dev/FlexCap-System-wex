@@ -9,66 +9,80 @@
     <link rel="stylesheet" href="~/css/Template.css" asp-append-version="true" />
 </head>
 <body class="d-flex">
-    <!-- Sidebar -->
+    @{
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+        var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+        var currentProfile = ViewData["Profile"]?.ToString();
+    }
     <div class="sidebar">
         <div>
             <div class="p-3 text-center">
                 <img src="~/img/logo.png" alt="FlexCap Logo" class="img-fluid">
-
             </div>
 
-            <!-- Home -->
-
-            <a href="#" class="menu-item active">
+            <a asp-controller="Home" asp-action="@currentProfile" class="menu-item @(currentController == "Home" ? "active" : "")">
                 <span class="material-icons">home</span> Home
             </a>
 
-            <!-- Colaboradores -->
-
-            <a href="#" class="menu-item">
-                <span class="material-icons">people</span> Collaborators
-            </a>
-
-            <!-- Sprint e Gantt -->
-
-            <a href="#" class="menu-item">
-                <span class="material-icons">timeline</span> Sprints & Gantt
-            </a>
-
-            <!-- Corporate Calendar -->
-
-            <a href="#" class="menu-item">
-                <span class="material-icons">calendar_today</span> Corporate Calendar
-            </a>
-
-            <!-- C -->
-
-            <a href="#" class="menu-item">
-                <span class="material-icons">description</span> Requests
-            </a>
-
-
-
-
-
-
-
-
+            @if (currentProfile == "Manager")
+            {
+                <a asp-controller="Colaboradores" asp-action="Manager" class="menu-item action @(currentController == "Colaboradores" ? "active" : "")">
+                    <span class="material-icons">people</span> Collaborators
+                </a>
+                <a asp-controller="Sprint" asp-action="Manager" class="menu-item action @(currentController == "Sprint" ? "active" : "")">
+                    <span class="material-icons">timeline</span> Sprints & Gantt
+                </a>
+                <a asp-controller="Calendar" asp-action="Manager" class="menu-item action @(currentController == "Calendar" ? "active" : "")">
+                    <span class="material-icons">calendar_today</span> Corporate Calendar
+                </a>
+                <a asp-controller="Requests" asp-action="Manager" class="menu-item action @(currentController == "Requests" ? "active" : "")">
+                    <span class="material-icons">description</span> Requests
+                </a>
+            }
+            else if (currentProfile == "Rh")
+            {
+                <a asp-controller="Colaboradores" asp-action="Rh" class="menu-item action @(currentController == "Colaboradores" ? "active" : "")">
+                    <span class="material-icons">people</span> Collaborators
+                </a>
+                <a asp-controller="Sprint" asp-action="Rh" class="menu-item action @(currentController == "Sprint" ? "active" : "")">
+                    <span class="material-icons">timeline</span> Sprints & Gantt
+                </a>
+                <a asp-controller="Calendar" asp-action="Rh" class="menu-item action @(currentController == "Calendar" ? "active" : "")">
+                    <span class="material-icons">calendar_today</span> Corporate Calendar
+                </a>
+                <a asp-controller="Requests" asp-action="Rh" class="menu-item action @(currentController == "Requests" ? "active" : "")">
+                    <span class="material-icons">description</span> Requests
+                </a>
+            }
+            else if (currentProfile == "Colaborador")
+            {
+                <a asp-controller="Colaboradores" asp-action="Colaborador" class="menu-item action @(currentController == "Colaboradores" ? "active" : "")">
+                    <span class="material-icons">people</span> Collaborators
+                </a>
+                <a asp-controller="Sprint" asp-action="Colaborador" class="menu-item action @(currentController == "Sprint" ? "active" : "")">
+                    <span class="material-icons">timeline</span> Sprints & Gantt
+                </a>
+                <a asp-controller="Calendar" asp-action="Colaborador" class="menu-item action @(currentController == "Calendar" ? "active" : "")">
+                    <span class="material-icons">calendar_today</span> Corporate Calendar
+                </a>
+                <a asp-controller="Requests" asp-action="Colaborador" class="menu-item action @(currentController == "Requests" ? "active" : "")">
+                    <span class="material-icons">description</span> Requests
+                </a>
+            }
         </div>
+
         <div class="bottom-menu p-3">
-            <a href="#" class="menu-item">
+            <a asp-controller="Account" asp-action="ChangePassword" class="menu-item">
                 <span class="material-icons">vpn_key</span> <span class="text-warning">Change Password</span>
             </a>
-            <a href="#" class="menu-item">
+            <a asp-controller="Account" asp-action="Logout" class="menu-item">
                 <span class="material-icons">logout</span> Log Out
             </a>
         </div>
     </div>
 
-    <!-- Conteúdo -->
     <div class="flex-grow-1 p-4 bg-light">
         @RenderBody()
-
     </div>
 
 </body>
