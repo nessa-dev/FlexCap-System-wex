@@ -3,10 +3,12 @@ ViewData["Title"] = "Home Rh";
 Layout = "~/Views/Shared/Template.cshtml";
 }
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
 <div class="container-fluid p-4">
-    <h1 class="fw-bold">Visão Geral - Recursos Humanos</h1>
-    <p class="text-muted">
-        Olá! Aqui está um resumo das atividades recentes e cadastros aguardando sua aprovação.
+    <h1 class="fw-bold">Overview - Human Resources</h1>
+    <p class="text-muted" style="font-size: 1.3em;">
+        Hello! Here is a summary of recent activities and registrations awaiting your approval.
     </p>
 
     <!-- Cards de resumo -->
@@ -14,9 +16,9 @@ Layout = "~/Views/Shared/Template.cshtml";
         <div class="col-md-4">
             <div class="card text-center h-100">
                 <div class="card-body">
-                    <h2 class="fw-bold mb-0">58</h2>
-                    <p class="text-muted mb-3">Cadastrados</p>
-                    <a href="#" class="btn btn-primary btn-sm">Ver detalhes</a>
+                    <h2 class="fw-bold mb-0 ">58</h2>
+                    <p class="text-muted mb-3">Registered</p>
+                    <a asp-controller="Colaboradores" asp-action="@ViewData["Profile"]" class="btn btn-primary btn-sm">View Details</a>
                 </div>
             </div>
         </div>
@@ -25,8 +27,8 @@ Layout = "~/Views/Shared/Template.cshtml";
             <div class="card text-center h-100">
                 <div class="card-body">
                     <h2 class="fw-bold mb-0">4</h2>
-                    <p class="text-muted">Aguardando análise</p>
-                    <small class="text-muted">Pedidos pendentes de aprovação</small>
+                    <p class="text-muted">Awaiting review</p>
+                    <small class="text-muted">Requests pending approval</small>
                 </div>
             </div>
         </div>
@@ -35,8 +37,8 @@ Layout = "~/Views/Shared/Template.cshtml";
             <div class="card text-center h-100">
                 <div class="card-body">
                     <h2 class="fw-bold mb-0">5</h2>
-                    <p class="text-muted">Setores</p>
-                    <small class="text-muted">Setores Ativos</small>
+                    <p class="text-muted">Sectors</p>
+                    <small class="text-muted">Active Sectors</small>
                 </div>
             </div>
         </div>
@@ -45,21 +47,21 @@ Layout = "~/Views/Shared/Template.cshtml";
     <!-- Tabela de pedidos -->
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Últimos Pedidos de Cadastro</h5>
+            <h5 class="mb-0">Latest Registration Requests</h5>
             <div>
-                <a href="#" class="btn btn-primary btn-sm">Ver todos os colaboradores</a>
-                <button class="btn btn-outline-primary btn-sm ms-2">+</button>
+                <a href="#" class="btn btn-primary btn-sm">View all contributors</a>
+                <!-- <button class="btn btn-outline-primary btn-sm ms-2">+</button>-->
             </div>
         </div>
         <div class="table-responsive">
             <table class="table mb-0">
                 <thead>
                     <tr>
-                        <th>Nome</th>
-                        <th>Cargo</th>
-                        <th>Setor</th>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Sectors</th>
                         <th>Status</th>
-                        <th class="text-center">Ações</th>
+                        <th class="text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -69,8 +71,12 @@ Layout = "~/Views/Shared/Template.cshtml";
                         <td>TI</td>
                         <td>Aguardando</td>
                         <td class="text-center">
-                            <button class="btn btn-success btn-sm">✔</button>
-                            <button class="btn btn-danger btn-sm">✖</button>
+                            <button class="btn btn-success btn-sm">
+                                <i class="bi bi-check-lg text-white"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm">
+                                <i class="bi bi-x-lg text-white"></i>
+                            </button>
                         </td>
                     </tr>
                     <tr>
@@ -79,8 +85,12 @@ Layout = "~/Views/Shared/Template.cshtml";
                         <td>Produto</td>
                         <td>Aguardando</td>
                         <td class="text-center">
-                            <button class="btn btn-success btn-sm">✔</button>
-                            <button class="btn btn-danger btn-sm">✖</button>
+                            <button class="btn btn-success btn-sm">
+                                <i class="bi bi-check-lg text-white"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm">
+                                <i class="bi bi-x-lg text-white"></i>
+                            </button>
                         </td>
                     </tr>
                     <tr>
