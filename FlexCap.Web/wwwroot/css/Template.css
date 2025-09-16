@@ -59,7 +59,23 @@ body {
     font-size: 0.875rem;
 }
 
+.col-md-4 {
+    min-height: 200px;
+}
 
+.btn-custom {
+    background-color: #001637;
+    border-color: #001637;
+    color: white; 
+    
+}
+
+    .btn-custom:hover,
+    .btn-custom:focus {
+        background-color: #002147; 
+        border-color: #002147;
+        color: white;
+    }
 /* RH aba colaboradores */
 .table td, .table th {
     vertical-align: middle;
@@ -67,5 +83,50 @@ body {
 
 .table img {
     object-fit: cover;
+}
+
+.scrollable-body {
+    display: block; 
+    max-height: 350px; 
+    overflow-y: auto; 
+}
+    .scrollable-body tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .thead, .scrollable-body tr {
+        width: 100%;
+    }
+
+        .thead th {
+            position: sticky;
+            top: 0;
+            background-color: #f8f9fa;
+            z-index: 2;
+        }
+
+.scrollable-table {
+    max-height: 500px;
+    overflow-y: auto;
+}
+    .scrollable-table thead th {
+        position: sticky;
+        top: 0;
+        background-color: #f8f9fa; 
+        z-index: 10; 
+    }
+
+/* Manager aba Home */
+
+.card-altura{
+    height: 260px;
+    width: 480px;
+}
+
+.texto-flexcap {
+    color: #001637;
+
 }
 

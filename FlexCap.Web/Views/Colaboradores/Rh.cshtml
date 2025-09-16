@@ -2,84 +2,89 @@
     ViewData["Title"] = "Gestão de Colaboradores (RH)";
     Layout = "~/Views/Shared/Template.cshtml";
 }
+@model List<FlexCap.Web.Models.Colaborador>
 
 <div class="container-fluid py-4">
-    <h2 class="fw-bold mb-4">Collaborators</h2>
+    <h2 class="fw-bold mb-4">Colaboradores</h2>
 
-    <!-- Filtros -->
-    <div class="row g-2 mb-4">
-        <div class="col-md">
-            <input type="text" class="form-control" placeholder="Search name">
+    <div class="row g-2 mb-4 d-flex align-items-end">
+        <div class="col-md-2">
+            <label for="search-name" class="form-label">Name</label>
+            <input type="text" id="search-name" class="form-control" placeholder="Search name">
         </div>
-        <div class="col-md">
-            <select class="form-select">
+        <div class="col-md-2">
+            <label for="status" class="form-label">Status</label>
+            <select id="status" class="form-select">
                 <option>Active</option>
                 <option>Inactive</option>
             </select>
         </div>
-        <div class="col-md">
-            <select class="form-select">
+        <div class="col-md-2">
+            <label for="country" class="form-label">Country</label>
+            <select id="country" class="form-select">
                 <option>Select country</option>
                 <option>Brazil</option>
-                <option>EUA</option>
+                <option>United States</option>
+                <option>Japan</option>
+                <option>Italy</option>
+                <option>Canada</option>
             </select>
         </div>
-        <div class="col-md">
-            <input type="text" class="form-control" placeholder="Sector">
+        <div class="col-md-2">
+            <label for="sector" class="form-label">Sector</label>
+            <select id="sector" class="form-select">
+                <option>Select Sector</option>
+                <option>Benefits</option>
+                <option>Mobility</option>
+                <option>Corporate Payments</option>
+            </select>
         </div>
-        <div class="col-md">
-            <input type="text" class="form-control" placeholder="Team">
+        <div class="col-md-2">
+            <label for="team" class="form-label">Team</label>
+            <select id="team" class="form-select">
+                <option>Select Team</option>
+                <option>Titans</option>
+                <option>Code Warriors</option>
+                <option>Bug Busters</option>
+            </select>
         </div>
         <div class="col-auto">
-            <button class="btn btn-dark">
+            <button class="btn btn-dark btn-sm">
                 <span class="material-icons">search</span>
             </button>
         </div>
     </div>
 
     <!-- Tabela -->
-    <div class="table-responsive">
+    <div class="table-responsive scrollable-table">
         <table class="table align-middle">
             <thead class="table-light">
                 <tr>
-                    <th>Foto</th>
-                    <th>Nome completo</th>
-                    <th>Cargo</th>
-                    <th>País</th>
-                    <th>Status atual</th>
+                    <th>Photo</th>
+                    <th>Name</th>
+                    <th>Position</th>
+                    <th>Country</th>
+                    <th>Current Status</th>
                     <th>Sector</th>
                     <th>Team</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td><img src="https://randomuser.me/api/portraits/women/44.jpg" class="rounded-circle" width="50"></td>
-                    <td><strong>Júlia Freitas</strong></td>
-                    <td>Dev Pleno</td>
-                    <td>Brazil</td>
-                    <td>Ativo</td>
-                    <td>Fleet</td>
-                    <td>Titans</td>
-                </tr>
-                <tr>
-                    <td><img src="https://randomuser.me/api/portraits/men/45.jpg" class="rounded-circle" width="50"></td>
-                    <td><strong>Jon Brown</strong></td>
-                    <td>QA Senior</td>
-                    <td>EUA</td>
-                    <td>Inactive</td>
-                    <td>Health</td>
-                    <td>Ninjas</td>
-                </tr>
-                <tr>
-                    <td><img src="https://randomuser.me/api/portraits/men/46.jpg" class="rounded-circle" width="50"></td>
-                    <td><strong>Jon Brown</strong></td>
-                    <td>Dev Senior</td>
-                    <td>EUA</td>
-                    <td>Ativo</td>
-                    <td>Health</td>
-                    <td>Avangers</td>
-                </tr>
+                @if (Model != null)
+                {
+                    @foreach (var colaborador in Model)
+                    {
+                        <tr>
+                            <td><img src="@colaborador.FotoUrl" class="rounded-circle" width="50"></td>
+                            <td><strong>@colaborador.NomeCompleto</strong></td>
+                            <td>@colaborador.Cargo</td>
+                            <td>@colaborador.Pais</td>
+                            <td>@colaborador.Status</td>
+                            <td>@colaborador.Setor</td>
+                            <td>@colaborador.Time</td>
+                        </tr>
+                    }
+                }
             </tbody>
         </table>
     </div>
-</div>

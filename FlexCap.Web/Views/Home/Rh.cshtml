@@ -1,4 +1,7 @@
-﻿﻿@{
+﻿﻿
+@model List<FlexCap.Web.Models.Colaborador>
+
+@{
 ViewData["Title"] = "Home Rh"; 
 Layout = "~/Views/Shared/Template.cshtml";
 }
@@ -16,9 +19,10 @@ Layout = "~/Views/Shared/Template.cshtml";
         <div class="col-md-4">
             <div class="card text-center h-100">
                 <div class="card-body">
-                    <h2 class="fw-bold mb-0 ">58</h2>
+                    <h5 class="card-title fw-bold">Total number of employees</h5>
+                    <h1 class="fw-bold mb-0 ">58</h1>
                     <p class="text-muted mb-3">Registered</p>
-                    <a asp-controller="Colaboradores" asp-action="@ViewData["Profile"]" class="btn btn-primary btn-sm">View Details</a>
+                    <a asp-controller="Colaboradores" asp-action="@ViewData["Profile"]" class="btn btn-custom btn-lg"><small>View Details</small></a>
                 </div>
             </div>
         </div>
@@ -26,9 +30,9 @@ Layout = "~/Views/Shared/Template.cshtml";
         <div class="col-md-4">
             <div class="card text-center h-100">
                 <div class="card-body">
-                    <h2 class="fw-bold mb-0">4</h2>
+                    <h5 class="card-title fw-bold">Requests pending approval</h5>
+                    <h1 class="fw-bold mb-0">4</h1>
                     <p class="text-muted">Awaiting review</p>
-                    <small class="text-muted">Requests pending approval</small>
                 </div>
             </div>
         </div>
@@ -36,20 +40,20 @@ Layout = "~/Views/Shared/Template.cshtml";
         <div class="col-md-4">
             <div class="card text-center h-100">
                 <div class="card-body">
-                    <h2 class="fw-bold mb-0">5</h2>
+                    <h5 class="card-title fw-bold">Active Sectors</h5>
+                    <h1 class="fw-bold mb-0">5</h1>
                     <p class="text-muted">Sectors</p>
-                    <small class="text-muted">Active Sectors</small>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Tabela de pedidos -->
-    <div class="card">
+   <!-- Tabela de pedidos -->
+     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Latest Registration Requests</h5>
             <div>
-                <a href="#" class="btn btn-primary btn-sm">View all contributors</a>
+                <a href="#" class="btn btn-custom btn-sm">View all contributors</a>
                 <!-- <button class="btn btn-outline-primary btn-sm ms-2">+</button>-->
             </div>
         </div>
@@ -65,43 +69,21 @@ Layout = "~/Views/Shared/Template.cshtml";
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>João Silva</td>
-                        <td>Dev Full Stack</td>
-                        <td>TI</td>
-                        <td>Aguardando</td>
-                        <td class="text-center">
-                            <button class="btn btn-success btn-sm">
-                                <i class="bi bi-check-lg text-white"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm">
-                                <i class="bi bi-x-lg text-white"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Mariana Santos</td>
-                        <td>PO</td>
-                        <td>Produto</td>
-                        <td>Aguardando</td>
-                        <td class="text-center">
-                            <button class="btn btn-success btn-sm">
-                                <i class="bi bi-check-lg text-white"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm">
-                                <i class="bi bi-x-lg text-white"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Lucas Ferreira</td>
-                        <td>QA</td>
-                        <td>Qualidade</td>
-                        <td>Aprovado</td>
-                        <td class="text-center">
-                            <span class="text-muted">—</span>
-                        </td>
-                    </tr>
+                    @if (Model != null)
+                    {
+                        @foreach (var colaborador in Model)
+                        {
+                            <tr>
+                                <td><img src="@colaborador.FotoUrl" class="rounded-circle" width="50"></td>
+                                <td><strong>@colaborador.NomeCompleto</strong></td>
+                                <td>@colaborador.Cargo</td>
+                                <td>@colaborador.Pais</td>
+                                <td>@colaborador.Status</td>
+                                <td>@colaborador.Setor</td>
+                                <td>@colaborador.Time</td>
+                            </tr>
+                        }
+                    }
                 </tbody>
             </table>
         </div>

@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using FlexCap.Web.Models; // importa a model Usuario
-
+using FlexCap.Web.Models; 
 namespace FlexCap.Web.Data
 {
     public class AppDbContext : DbContext
@@ -10,5 +9,6 @@ namespace FlexCap.Web.Data
         }
 
         public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Colaborador> Colaboradores { get; set; }
     }
 }
