@@ -15,7 +15,5 @@ namespace FlexCap.Web.Models
         public string Pais { get; set; }
         public string Time { get; set; }
 
-
-
     }
 }

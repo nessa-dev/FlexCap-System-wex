@@ -14,13 +14,13 @@ Layout = "~/Views/Shared/Template.cshtml";
         Hello! Here is a summary of recent activities and registrations awaiting your approval.
     </p>
 
-    <!-- Cards de resumo -->
+    <!-- Card de resumo -->
     <div class="row g-3 mb-4">
         <div class="col-md-4">
             <div class="card text-center h-100">
                 <div class="card-body">
                     <h5 class="card-title fw-bold">Total number of employees</h5>
-                    <h1 class="fw-bold mb-0 ">58</h1>
+                    <h1 class="fw-bold mb-0">@ViewData["TotalColaboradores"]</h1>
                     <p class="text-muted mb-3">Registered</p>
                     <a asp-controller="Colaboradores" asp-action="@ViewData["Profile"]" class="btn btn-custom btn-lg"><small>View Details</small></a>
                 </div>
@@ -41,7 +41,7 @@ Layout = "~/Views/Shared/Template.cshtml";
             <div class="card text-center h-100">
                 <div class="card-body">
                     <h5 class="card-title fw-bold">Active Sectors</h5>
-                    <h1 class="fw-bold mb-0">5</h1>
+                    <h1 class="fw-bold mb-0">@ViewData["TotalSetores"]</h1>
                     <p class="text-muted">Sectors</p>
                 </div>
             </div>
@@ -54,7 +54,6 @@ Layout = "~/Views/Shared/Template.cshtml";
             <h5 class="mb-0">Latest Registration Requests</h5>
             <div>
                 <a href="#" class="btn btn-custom btn-sm">View all contributors</a>
-                <!-- <button class="btn btn-outline-primary btn-sm ms-2">+</button>-->
             </div>
         </div>
         <div class="table-responsive">
@@ -69,21 +68,7 @@ Layout = "~/Views/Shared/Template.cshtml";
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Model != null)
-                    {
-                        @foreach (var colaborador in Model)
-                        {
-                            <tr>
-                                <td><img src="@colaborador.FotoUrl" class="rounded-circle" width="50"></td>
-                                <td><strong>@colaborador.NomeCompleto</strong></td>
-                                <td>@colaborador.Cargo</td>
-                                <td>@colaborador.Pais</td>
-                                <td>@colaborador.Status</td>
-                                <td>@colaborador.Setor</td>
-                                <td>@colaborador.Time</td>
-                            </tr>
-                        }
-                    }
+                    
                 </tbody>
             </table>
         </div>

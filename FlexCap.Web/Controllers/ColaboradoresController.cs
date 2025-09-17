@@ -50,16 +50,46 @@ namespace FlexCap.Web.Controllers
         {
             ViewData["Title"] = "Colaboradores da Equipe";
             ViewData["Profile"] = "Colaborador";
-            var colaboradores = _context.Colaboradores.ToList();
-            return View(colaboradores);
+
+            string emailDoUsuarioLogado = "pedro.souza@flexcap.com";
+
+            var colaboradorLogado = _context.Colaboradores
+                                            .FirstOrDefault(c => c.Email == emailDoUsuarioLogado);
+
+            if (colaboradorLogado != null)
+            {
+                var timeDoUsuario = colaboradorLogado.Time;
+                var colaboradoresDoTime = _context.Colaboradores
+                                                  .Where(c => c.Time == timeDoUsuario)
+                                                  .ToList();
+                return View(colaboradoresDoTime);
+            }
+            return View(new List<Colaborador>());
+
+
+
+
         }
 
         public IActionResult Manager()
         {
             ViewData["Title"] = "Gestão de Colaboradores";
             ViewData["Profile"] = "Manager";
-            var colaboradores = _context.Colaboradores.ToList();
-            return View(colaboradores);
+            string emailDoGestorLogado = "jon.brown@flexcap.com"; 
+
+            var gestorLogado = _context.Colaboradores
+                                        .FirstOrDefault(c => c.Email == emailDoGestorLogado);
+
+            if (gestorLogado != null)
+            {
+                var timeDoGestor = gestorLogado.Time;
+                var colaboradoresDoTime = _context.Colaboradores
+                                                    .Where(c => c.Time == timeDoGestor)
+                                                    .ToList();
+
+                return View(colaboradoresDoTime);
+            }
+            return View(new List<Colaborador>());
         }
 
         public IActionResult Rh()
