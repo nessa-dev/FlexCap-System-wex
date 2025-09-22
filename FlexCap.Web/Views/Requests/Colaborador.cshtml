@@ -4,7 +4,7 @@
 }
 
 <div class="container-geral">
-    <div class="container py-4" style="max-width: 700px;">
+    <div class="container-fluid py-4" style="max-width: 700px; margin-left: 0;">
         <h1 class="fw-bold mb-4">Submit Request</h1>
         <div class="mb-3">
             <input type="text" class="form-control" placeholder="Subject" aria-label="Subject">
@@ -20,19 +20,59 @@
                 </select>
             </div>
             <div class="flex-grow-1">
-                <input type="text" class="form-control" placeholder="DD/MM/YYYY" aria-label="Data Início">
+                <input type="date" class="form-control" placeholder="DD/MM/YYYY" aria-label="Start Date">
             </div>
             <div class="flex-grow-1">
-                <input type="text" class="form-control" placeholder="DD/MM/YYYY" aria-label="Data Fim">
+                <input type="date" class="form-control" placeholder="DD/MM/YYYY" aria-label="End date">
             </div>
         </div>
 
         <div class="mb-3">
             <textarea class="form-control" placeholder="Description" rows="4" aria-label="Description"></textarea>
         </div>
+        <div class="mb-3">
+            <label for="attach-file" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 w-auto">
+                <i class="bi bi-paperclip"></i>
+                Attach File
+                <input type="file" id="attach-file" class="d-none">
+            </label>
+        </div>
 
         <div class="d-grid">
             <button type="submit" class="btn btn-primary btn-lg">Send Request</button>
         </div>
+
+        
+
+        <h5 class="fw-bold mt-5 mb-3">Requests History</h5>
+        <table class="table align-middle">
+            <tbody>
+                <tr>
+                    <td>Vacation</td>
+                    <td>April 20</td>
+                    <td><span class="badge bg-success">Approved</span></td>
+                </tr>
+                <tr>
+                    <td>Day Off</td>
+                    <td>March 15</td>
+                    <td><span class="badge bg-danger">Rejected</span></td>
+                </tr>
+                <tr>
+                    <td>Personal License</td>
+                    <td>February 5</td>
+                    <td><span class="badge bg-warning text-dark">Pending</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+
+
+        <div class="mt-4">
+            <button class="btn btn-custom btn-lg">Request access as Manager</button>
+        </div>
+    </div>
+
+
+
     </div>
 </div>
