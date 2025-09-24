@@ -20,16 +20,12 @@ namespace FlexCap.Web.Controllers
 
             if (colaborador == null)
             {
-                // Redireciona para a página de login se o usuário não for encontrado
-                // Vamos usar a Home como um placeholder por enquanto.
                 return RedirectToAction("Index", "Home");
             }
 
-            // Armazena o ID e o perfil do colaborador em TempData
             TempData["UserId"] = colaborador.Id;
             TempData["UserProfile"] = colaborador.Cargo;
 
-            // Redireciona para a Action correspondente ao cargo do usuário
             if (colaborador.Cargo == "Gerente de Projeto")
             {
                 return RedirectToAction("Manager", "Home");
