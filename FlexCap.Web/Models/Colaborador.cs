@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FlexCap.Web.Models
 {
@@ -13,6 +14,7 @@ namespace FlexCap.Web.Models
         public string Setor { get; set; }
         public string Status { get; set; }
         public string Pais { get; set; }
+        [Column ("Team")]
         public string Time { get; set; }
 
     }

@@ -32,10 +32,7 @@ namespace FlexCap.Web.Controllers
         {
             ViewData["Profile"] = "Manager";
 
-            // Lê o ID do TempData
             int? userId = TempData["UserId"] as int?;
-
-            // Se o ID existir, busca o colaborador com base nele
             if (userId.HasValue)
             {
                 var colaboradorLogado = await _context.Colaboradores.FindAsync(userId.Value);
@@ -65,10 +62,8 @@ namespace FlexCap.Web.Controllers
         {
             ViewData["Profile"] = "Colaborador";
 
-            // Lê o ID do TempData
             int? userId = TempData["UserId"] as int?;
 
-            // Se o ID existir, busca o colaborador com base nele
             if (userId.HasValue)
             {
                 var colaboradorLogado = await _context.Colaboradores.FindAsync(userId.Value);
@@ -101,7 +96,7 @@ namespace FlexCap.Web.Controllers
 
             ViewData["TotalColaboradores"] = colaboradores.Count;
             ViewData["TotalSetores"] = colaboradores.Select(c => c.Setor).Distinct().Count();
-
+             
             return View(colaboradores);
         }
 
