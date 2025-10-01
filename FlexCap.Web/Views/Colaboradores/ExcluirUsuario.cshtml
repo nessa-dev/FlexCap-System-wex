@@ -1,0 +1,37 @@
+﻿@model FlexCap.Web.Models.Usuario
+
+<h2 class="text-danger mb-4">Excluir Usuário</h2>
+
+<div class="alert alert-danger shadow-sm">
+    <h4 class="mb-2"><i class="bi bi-exclamation-triangle-fill"></i> Confirmação Necessária</h4>
+    <p>Você realmente deseja excluir o usuário <strong>@Model.FullName</strong>?</p>
+    <p class="mb-0">⚠️ Esta ação é irreversível e o registro será removido do sistema.</p>
+</div>
+
+<h4 class="mt-4">Detalhes do Usuário</h4>
+<dl class="row border p-3 bg-light rounded shadow-sm">
+    <dt class="col-sm-3">Nome Completo</dt>
+    <dd class="col-sm-9">@Model.FullName</dd>
+
+    <dt class="col-sm-3">E-mail</dt>
+    <dd class="col-sm-9">@Model.EmailAddress</dd>
+
+    <dt class="col-sm-3">Cargo</dt>
+    <dd class="col-sm-9">@Model.Position</dd>
+
+    <dt class="col-sm-3">Departamento</dt>
+    <dd class="col-sm-9">@Model.Department</dd>
+</dl>
+
+<form asp-action="Excluir" method="post" class="mt-4">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="d-flex gap-3">
+        <button type="submit" class="btn btn-danger btn-lg">
+            <i class="bi bi-trash-fill"></i> Excluir Definitivamente
+        </button>
+        <a asp-action="ListarUsuarios" class="btn btn-secondary btn-lg">
+            <i class="bi bi-x-circle-fill"></i> Cancelar
+        </a>
+    </div>
+</form>

@@ -24,7 +24,6 @@ namespace FlexCap.Web.Controllers
             return View(await _context.Usuarios.ToListAsync());
         }
 
-        // GET: Usuarios/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -42,7 +41,6 @@ namespace FlexCap.Web.Controllers
             return View(usuario);
         }
 
-        // GET: Usuarios/Create
         public IActionResult Create()
         {
             return View();

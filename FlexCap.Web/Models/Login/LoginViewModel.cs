@@ -1,26 +1,17 @@
-﻿// using FlexCap.Web.Models.Login;
-// using Microsoft.AspNetCore.Mvc;
-//
-// namespace FlexCap.Web.Controllers.Login
-// {
-//     public class LoginController : Controller
-//     {
-//         [HttpGet]
-//         public IActionResult Index()
-//         {
-//             return View();
-//         }
-//
-//         [HttpPost]
-//         public IActionResult Login(LoginViewModel model)
-//         {
-//             if (ModelState.IsValid)
-//             {
-//                 return RedirectToAction("Index", "Home");
-//             }
-//
-//             return View("Index");
-//         }
-//     }
-//
-// }
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FlexCap.Web.Models.Login
+{
+    public class LoginViewModel
+    {
+        [Required(ErrorMessage = "O campo E-mail é obrigatório.")]
+        [EmailAddress(ErrorMessage = "O formato do e-mail é inválido.")]
+        [Display(Name = "E-mail")]
+        public string? Email { get; set; } 
+
+        [Required(ErrorMessage = "O campo Senha é obrigatório.")]
+        [DataType(DataType.Password)]
+        [Display(Name = "Senha")]
+        public string? Senha { get; set; } 
+    }
+}

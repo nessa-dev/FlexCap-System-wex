@@ -1,0 +1,36 @@
+﻿body {
+    background-color: #0d2a4a;
+    color: white;
+    margin: 0;
+}
+
+/* Inputs e selects */
+.form-control, .form-select {
+    border-radius: 20px;
+    height: 35px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+/* Botão de submit */
+.btn-success-custom {
+    background-color: #28a745;
+    border-color: #28a745;
+    height: 45px;
+    border-radius: 25px;
+    font-weight: bold;
+    color: white;
+}
+
+/* Logo */
+.logo-footer-img {
+    width: 180px;
+    max-width: 220px;
+}
+
+/* Card do formulário */
+.form-card {
+    max-width: 350px;
+    padding: 20px;
+    text-align: center;
+}

@@ -1,0 +1,43 @@
+﻿@model FlexCap.Web.Models.Usuario
+
+<h2>Editar Usuário</h2>
+
+<form asp-action="Editar" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group mb-3">
+        <label asp-for="FullName" class="form-label">Nome Completo</label>
+        <input asp-for="FullName" class="form-control" />
+        <span asp-validation-for="FullName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="EmailAddress" class="form-label">E-mail</label>
+        <input asp-for="EmailAddress" class="form-control" />
+        <span asp-validation-for="EmailAddress" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Position" class="form-label">Cargo</label>
+        <input asp-for="Position" class="form-control" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Department" class="form-label">Departamento</label>
+        <input asp-for="Department" class="form-control" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Team" class="form-label">Time</label>
+        <input asp-for="Team" class="form-control" />
+    </div>
+
+    <div class="form-group mb-4">
+        <label asp-for="CountryOfOperation" class="form-label">País de Operação</label>
+        <input asp-for="CountryOfOperation" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+    <a asp-action="ListarUsuarios" class="btn btn-secondary">Cancelar</a>
+
+</form>

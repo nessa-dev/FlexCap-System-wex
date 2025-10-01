@@ -1,63 +1,62 @@
-﻿﻿
-@model List<FlexCap.Web.Models.Colaborador>
+﻿@model List<FlexCap.Web.Models.Colaborador>
 
 @{
-ViewData["Title"] = "Home Rh"; 
-Layout = "~/Views/Shared/Template.cshtml";
+    ViewData["Title"] = "Home Rh";
+    Layout = "~/Views/Shared/Template.cshtml";
 }
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-
-<div class="container-fluid p-4">
-    <h1 class="fw-bold">Overview - Human Resources</h1>
-    <p class="text-muted" style="font-size: 1.3em;">
+<div class="py-4" style="max-width: 850px; width: 100%; margin-left: 0.5rem; margin-right: auto; overflow: hidden; height: 100%;">
+    <h3 class="fw-bold mb-2">Overview - Human Resources</h3>
+    <p class="text-muted mb-4" style="font-size: 1em;">
         Hello! Here is a summary of recent activities and registrations awaiting your approval.
     </p>
-
-    <!-- Card de resumo -->
     <div class="row g-3 mb-4">
+
+        <!-- Total Employees -->
         <div class="col-md-4">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold">Total number of employees</h5>
-                    <h1 class="fw-bold mb-0">@ViewData["TotalColaboradores"]</h1>
-                    <p class="text-muted mb-3">Registered</p>
-                    <a asp-controller="Colaboradores" asp-action="@ViewData["Profile"]" class="btn btn-custom btn-lg"><small>View Details</small></a>
+            <div class="card text-center h-100 shadow-sm">
+                <div class="card-body p-2">
+                    <h6 class="card-title fw-bold mb-1">Total number of employees</h6>
+                    <h2 class="fw-bold mb-0">@ViewData["TotalColaboradores"]</h2>
+                    <p class="text-muted mb-2 small">Registered</p>
+                    <a asp-controller="Colaboradores" asp-action="@ViewData["Profile"]" class="btn btn-custom btn-sm"><small>View Details</small></a>
                 </div>
             </div>
         </div>
 
+        <!-- Requests Pending -->
         <div class="col-md-4">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold">Requests pending approval</h5>
-                    <h1 class="fw-bold mb-0">4</h1>
-                    <p class="text-muted">Awaiting review</p>
+            <div class="card text-center h-100 shadow-sm">
+                <div class="card-body p-2">
+                    <h6 class="card-title fw-bold mb-1">Requests pending approval</h6>
+                    <h2 class="fw-bold mb-0">4</h2>
+                    <p class="text-muted mb-3 small">Awaiting review</p>
                 </div>
             </div>
         </div>
 
+        <!-- Active Sectors -->
         <div class="col-md-4">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold">Active Sectors</h5>
-                    <h1 class="fw-bold mb-0">@ViewData["TotalSetores"]</h1>
-                    <p class="text-muted">Sectors</p>
+            <div class="card text-center h-100 shadow-sm">
+                <div class="card-body p-2">
+                    <h6 class="card-title fw-bold mb-1">Active Sectors</h6>
+                    <h2 class="fw-bold mb-0">@ViewData["TotalSetores"]</h2>
+                    <p class="text-muted mb-3 small">Sectors</p>
                 </div>
             </div>
         </div>
     </div>
 
-   <!-- Tabela de pedidos -->
-     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Latest Registration Requests</h5>
+    <!-- Order table -->
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center p-2">
+            <h6 class="mb-0 fw-bold">Latest Registration Requests</h6> 
             <div>
-                <a href="#" class="btn btn-custom btn-sm">View all contributors</a>
+                <a href="#" class="btn btn-custom btn-sm"><small>View all contributors</small></a>
             </div>
         </div>
         <div class="table-responsive">
-            <table class="table mb-0">
+            <table class="table mb-0 table-sm">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -68,7 +67,27 @@ Layout = "~/Views/Shared/Template.cshtml";
                     </tr>
                 </thead>
                 <tbody>
-                    
+                    <!-- Example lines -->
+                    <tr>
+                        <td>Janaína Lima</td>
+                        <td>UX Designer</td>
+                        <td>Design</td>
+                        <td><span class="badge bg-warning text-dark">Pending</span></td>
+                        <td class="text-center">
+                            <button class="btn btn-success btn-sm me-1"><i class="bi bi-check2"></i></button>
+                            <button class="btn btn-danger btn-sm"><i class="bi bi-x"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Roberto Cunha</td>
+                        <td>Fullstack Dev</td>
+                        <td>Technology</td>
+                        <td><span class="badge bg-warning text-dark">Pending</span></td>
+                        <td class="text-center">
+                            <button class="btn btn-success btn-sm me-1"><i class="bi bi-check2"></i></button>
+                            <button class="btn btn-danger btn-sm"><i class="bi bi-x"></i></button>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>

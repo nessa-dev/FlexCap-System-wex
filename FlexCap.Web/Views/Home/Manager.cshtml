@@ -2,29 +2,29 @@
     ViewData["Title"] = "Home Manager";
     Layout = "~/Views/Shared/Template.cshtml";
 }
-    <div class="container-fluid py-4" style="max-width: 1250px; margin-left: 0;">
 
-    <h1 class="fw-bold mb-4">Welcome, @ViewData["FirstName"]!</h1>
+<div class="py-4" style="max-width: 850px; width: 100%; margin-left: 0.5rem; margin-right: auto; overflow: hidden; height: 100%;">
+
+    <!-- Title -->
+    <h3 class="fw-bold mb-4">Welcome, @ViewData["FirstName"]!</h3>
     <div class="row g-4 mb-4">
 
-
-
-
+        <!-- Team Overview -->
         <div class="col-12 col-md-6">
-            <div class="card shadow-sm card-altura">
-                <div class="card-body">
-                    <h3 class="card-title texto-flexcap fw-bold mb-3">Team Overview</h3>
+            <div class="card shadow-sm">
+                <div class="card-body p-2">
+                    <h5 class="card-title texto-flexcap fw-bold mb-2">Team Overview</h5>
                     <div class="d-flex align-items-center">
-                        <div class="d-flex flex-column rounded shadow-sm overflow-hidden me-3" style="width: 200px; height: 150px;">
-                            <div class="d-flex justify-content-center align-items-center text-white" ; style="height: 55%; background-color: #001637;">
-                                <h5 class="fw-bold mb-0">@ViewData["UserTeam"]</h5>
+                        <div class="d-flex flex-column rounded shadow-sm overflow-hidden me-2" style="width: 140px; height: 110px;">
+                            <div class="d-flex justify-content-center align-items-center text-white" style="height: 55%; background-color: #001637;">
+                                <h6 class="fw-bold mb-0">@ViewData["UserTeam"]</h6>
                             </div>
                             <div class="d-flex justify-content-center align-items-center bg-white" style="height: 40%;">
-                                <i class="bi bi-check-lg" style="font-size: 3.0rem; color: #001637;"></i>
+                                <i class="bi bi-check-lg" style="font-size: 1.5rem; color: #001637;"></i>
                             </div>
                         </div>
-                        <div class="d-flex flex-column justify-content-center p-3 rounded shadow-sm border" style="height: 100px; flex-grow: 1;">
-                            <p class="mb-2">@ViewData["ActiveMembers"] Active Members</p>
+                        <div class="d-flex flex-column justify-content-center p-2 rounded shadow-sm border" style="height: 90px; flex-grow: 1; font-size: 0.8rem;">
+                            <p class="mb-1">@ViewData["ActiveMembers"] Active Members</p>
                             <p class="mb-0">1 Sprint in Progress</p>
                         </div>
                     </div>
@@ -33,53 +33,43 @@
         </div>
 
 
-
-
-
+        <!-- Upcoming Sprint -->
         <div class="col-12 col-md-6">
-            <div class="card shadow-sm card-altura">
-                <div class="card-body">
-                    <h3 class="card-title texto-flexcap fw-bold mb-4">Upcoming Sprint</h3>
-                    <div class="mb-3">
-                        <div class="progress" role="progressbar" aria-label="Upcoming Sprint Progress" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100" style="height: 50px; background-color: #e9ecef;">
+            <div class="card shadow-sm">
+                <div class="card-body p-2">
+                    <h5 class="card-title texto-flexcap fw-bold mb-2">Upcoming Sprint</h5>
+                    <div class="mb-2">
+                        <div class="progress" role="progressbar" aria-label="Upcoming Sprint Progress" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100" style="height: 25px; background-color: #e9ecef;">
                             <div class="progress-bar bg-primary text-white d-flex align-items-center justify-content-center" style="width: 30%;">
-                                <p class="mb-0  fs-6">June 1-25</p>
+                                <small class="mb-0">June 1-25</small>
                             </div>
                         </div>
-                        <p class="mt-2 mb-0 fs-5">Progress: 30%</p>
+                        <p class="mt-1 mb-0 small">Progress: 30%</p>
                     </div>
-                    <div class="alert alert-warning d-flex align-items-center p-2 mt-2" role="alert">
-                        <i class="bi bi-fire me-2" style="font-size: 1.5rem; color: #dc3545;"></i>
+                    <div class="alert alert-warning d-flex align-items-center p-1 mt-1" role="alert" style="font-size: 0.75rem;">
+                        <i class="bi bi-fire me-1" style="font-size: 0.9rem; color: #dc3545;"></i>
                         <p class="mb-0">Heads up! 30% of the team will be out June 10-12 due to holidays.</p>
                     </div>
                 </div>
             </div>
         </div>
 
-
-
-
-
-        <div class="row g-4">
-            <div class="col-12 col-md-6">
-                <div class="card shadow-sm card-altura">
-                    <div class="card-body">
-                        <h3 class="card-title texto-flexcap fw-bold">Pending Requests</h3>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-md-6">
-                <div class="card shadow-sm card-altura">
-                    <div class="card-body">
-                        <h3 class="card-title texto-flexcap fw-bold">This Week</h3>
-                    </div>
+        <!-- Pending Requests -->
+        <div class="col-12 col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-2">
+                    <h5 class="card-title texto-flexcap fw-bold mb-0">Pending Requests</h5>
                 </div>
             </div>
         </div>
 
-
-
-
-
+        <!-- This Week -->
+        <div class="col-12 col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-2">
+                    <h5 class="card-title texto-flexcap fw-bold mb-0">This Week</h5>
+                </div>
+            </div>
+        </div>
     </div>
+</div>

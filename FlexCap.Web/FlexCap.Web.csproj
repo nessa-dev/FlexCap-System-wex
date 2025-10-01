@@ -7,6 +7,26 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\**" />
+    <Compile Remove="Views\Usuarios\**" />
+    <Content Remove="Migrations\**" />
+    <Content Remove="Views\Usuarios\**" />
+    <EmbeddedResource Remove="Migrations\**" />
+    <EmbeddedResource Remove="Views\Usuarios\**" />
+    <None Remove="Migrations\**" />
+    <None Remove="Views\Usuarios\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Views\Login\Cadastro.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="local.sqlite" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Core" Version="1.6.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
       <PrivateAssets>all</PrivateAssets>

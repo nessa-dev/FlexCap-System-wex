@@ -10,12 +10,6 @@ namespace FlexCap.Web.Data
             _configuration = configuration;
         }
 
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-            builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-        }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlite(

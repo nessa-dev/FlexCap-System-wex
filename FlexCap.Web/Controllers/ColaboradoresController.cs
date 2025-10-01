@@ -46,6 +46,59 @@ namespace FlexCap.Web.Controllers
             return RedirectToAction("Rh");
         }
 
+        // Listar
+        public IActionResult ListarUsuarios()
+        {
+            ViewData["Title"] = "Todos os Usuários Cadastrados";
+            var usuarios = _context.Usuarios.ToList();
+            return View(usuarios);
+        }
+
+        // Editar (GET)"
+        public IActionResult Editar(int id)
+        {
+            var usuario = _context.Usuarios.Find(id);
+            if (usuario == null) return NotFound();
+            return View("EditarUsuario", usuario);
+        }
+
+        // Editar (POST)
+        [HttpPost]
+        public IActionResult Editar(Usuario usuario)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Usuarios.Update(usuario);
+                _context.SaveChanges();
+                return RedirectToAction("ListarUsuarios");
+            }
+            return View("EditarUsuario", usuario); 
+        }
+
+        // Excluir (GET - confirmação)"
+        public IActionResult Excluir(int id)
+        {
+            var usuario = _context.Usuarios.Find(id);
+            if (usuario == null) return NotFound();
+
+            return View("ExcluirUsuario", usuario);
+        }
+
+        // Excluir (POST - confirmar exclusão)
+        [HttpPost, ActionName("Excluir")]
+        public IActionResult ConfirmarExcluir(int id)
+        {
+            var usuario = _context.Usuarios.Find(id);
+            if (usuario == null) return NotFound();
+
+            _context.Usuarios.Remove(usuario);
+            _context.SaveChanges();
+            return RedirectToAction("ListarUsuarios");
+        }
+
+
+
+
         public IActionResult Colaborador()
         {
             ViewData["Title"] = "Colaboradores da Equipe";

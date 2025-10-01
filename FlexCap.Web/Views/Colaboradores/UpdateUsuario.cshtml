@@ -1,0 +1,34 @@
+﻿@model List<FlexCap.Web.Models.Usuario>
+
+<h2>@ViewData["Title"]</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>E-mail</th>
+            <th>Cargo</th>
+            <th>Departamento</th>
+            <th>Time</th>
+            <th>País</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var usuario in Model)
+        {
+            <tr>
+                <td>@usuario.FullName</td>
+                <td>@usuario.EmailAddress</td>
+                <td>@usuario.Position</td>
+                <td>@usuario.Department</td>
+                <td>@usuario.Team</td>
+                <td>@usuario.CountryOfOperation</td>
+                <td>
+                    <a asp-action="Editar" asp-route-id="@usuario.Id" class="btn btn-sm btn-warning">Editar</a>
+                    <a asp-action="Excluir" asp-route-id="@usuario.Id" class="btn btn-sm btn-danger">Excluir</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
