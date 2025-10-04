@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using FlexCap.Web.Data;
+﻿using FlexCap.Web.Data;
 using FlexCap.Web.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlexCap.Web.Controllers
@@ -54,11 +55,22 @@ namespace FlexCap.Web.Controllers
             return View(usuarios);
         }
 
-        // Editar (GET)"
+
+
+
+
+
+        // Editar (GET)
         public IActionResult Editar(int id)
         {
             var usuario = _context.Usuarios.Find(id);
             if (usuario == null) return NotFound();
+
+            // Populando selects
+            ViewBag.Departments = new SelectList(new[] { "TI", "RH", "Financeiro", "Marketing" });
+            ViewBag.Teams = new SelectList(new[] { "Time A", "Time B", "Time C" });
+            ViewBag.Countries = new SelectList(new[] { "Brasil", "Portugal", "EUA" });
+
             return View("EditarUsuario", usuario);
         }
 
@@ -68,12 +80,43 @@ namespace FlexCap.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Usuarios.Update(usuario);
+                var usuarioOriginal = _context.Usuarios.Find(usuario.Id);
+                if (usuarioOriginal == null) return NotFound();
+
+                // Atualiza apenas os campos permitidos
+                usuarioOriginal.FullName = usuario.FullName;
+                usuarioOriginal.EmailAddress = usuario.EmailAddress;
+                usuarioOriginal.Position = usuario.Position;
+                usuarioOriginal.Department = usuario.Department;
+                usuarioOriginal.Team = usuario.Team;
+                usuarioOriginal.CountryOfOperation = usuario.CountryOfOperation;
+
+                // Força o EF a reconhecer a alteração
+                _context.Entry(usuarioOriginal).State = EntityState.Modified;
                 _context.SaveChanges();
+
                 return RedirectToAction("ListarUsuarios");
             }
-            return View("EditarUsuario", usuario); 
+
+            // repopula caso dê erro
+            ViewBag.Departments = new SelectList(new[] { "TI", "RH", "Financeiro", "Marketing" });
+            ViewBag.Teams = new SelectList(new[] { "Time A", "Time B", "Time C" });
+            ViewBag.Countries = new SelectList(new[] { "Brasil", "Portugal", "EUA" });
+
+            return View("EditarUsuario", usuario);
         }
+
+
+
+
+
+
+
+
+
+
+
+
 
         // Excluir (GET - confirmação)"
         public IActionResult Excluir(int id)
