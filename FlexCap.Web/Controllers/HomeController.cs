@@ -4,7 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using FlexCap.Web.Data;
 using System.Linq;
-using System.Security.Claims; 
+using System.Security.Claims;
+using System.Threading.Tasks;
+using System.Collections.Generic; // Necessário para List<Colaborador>()
 
 namespace FlexCap.Web.Controllers
 {
@@ -19,92 +21,109 @@ namespace FlexCap.Web.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Colaborador()
+        // Action de Index: Deve ser simples e focar em redirecionamento ou saudação básica
+        public async Task<IActionResult> Index()
         {
-            ViewData["Profile"] = "Colaborador";
-            Colaborador colaboradorLogado = null;
+            // O nome completo (formatado em Title Case) é obtido via ClaimTypes.Name do LoginController
+            var fullNameClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
 
-            int? userId = TempData["UserId"] as int?;
-            if (userId.HasValue)
+            if (!string.IsNullOrEmpty(fullNameClaim))
             {
-                colaboradorLogado = await _context.Colaboradores.FindAsync(userId.Value);
-            }
+                // Extrai apenas o primeiro nome para a saudação
+                ViewData["FirstName"] = fullNameClaim.Split(' ')[0];
 
-            if (colaboradorLogado == null && User?.Identity?.IsAuthenticated == true)
-            {
-                var userEmail = User.Identity.Name;
-                colaboradorLogado = await _context.Colaboradores
-                    .FirstOrDefaultAsync(c => c.Email == userEmail);
-            }
-
-            if (colaboradorLogado != null)
-            {
-                string primeiroNome = colaboradorLogado.NomeCompleto?.Split(' ')[0] ?? "Usuário";
-
-                string nomeDoTime = string.IsNullOrEmpty(colaboradorLogado.Time)
-                    ? "Time Não Informado"
-                    : colaboradorLogado.Time;
-
-                ViewData["FirstName"] = primeiroNome;
-                ViewData["UserTeam"] = nomeDoTime;
-
-                ViewData["ActiveMembers"] = nomeDoTime != "Time Não Informado"
-                    ? _context.Colaboradores.Count(c => c.Time == nomeDoTime && c.Status == "Ativo")
-                    : 1;
+                // Se o usuário estiver autenticado, você pode redirecionar para a Home/Colaborador
+                // return RedirectToAction("Colaborador"); 
             }
             else
             {
-                ViewData["FirstName"] = "Usuário";
-                ViewData["UserTeam"] = "Sem Time";
-                ViewData["ActiveMembers"] = 0;
+                ViewData["FirstName"] = "Visitor"; // Traduzido para Inglês
             }
 
-            return View(await _context.Colaboradores.ToListAsync());
+            return View(); // Retorna a View Index com a saudação
         }
 
+        // Action Colaborador: Lista apenas os membros do time do usuário logado
+        public async Task<IActionResult> Colaborador()
+        {
+            // Tenta obter o nome do time via Claim (foi salvo no LoginController)
+            var userTeamName = User.Claims.FirstOrDefault(c => c.Type == "TeamName")?.Value;
+            var fullName = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+
+            // Se a Claim do time não foi encontrada (ou está vazia)
+            if (string.IsNullOrEmpty(userTeamName))
+            {
+                // Retorna a View com uma lista vazia ou exibe uma mensagem de erro
+                ViewData["UserTeam"] = "No Team Assigned"; // Traduzido
+                ViewData["FirstName"] = fullName?.Split(' ')[0] ?? "Colleague";
+                ViewData["CurrentUserName"] = fullName;
+
+                return View(new List<Colaborador>());
+            }
+
+            // --- LÓGICA DE FILTRAGEM POR TIME ---
+            var colaboradoresDoTime = await _context.Colaboradores
+                                            .Where(c => c.TeamName == userTeamName)
+                                            .OrderBy(c => c.FullName)
+                                            .ToListAsync();
+
+            // Cálculos para o Overview Card
+            var activeMembers = colaboradoresDoTime.Count(c => c.Status == "Ativo");
+
+            // Preparação dos dados para a View
+            ViewData["FirstName"] = fullName?.Split(' ')[0];
+            ViewData["CurrentUserName"] = fullName; // Usado na View para marcar o próprio usuário
+            ViewData["UserTeam"] = userTeamName;
+            ViewData["ActiveMembers"] = activeMembers;
 
 
+            return View(colaboradoresDoTime); // Envia apenas os membros do time para a View
+        }
 
-
+        // Action Manager: Já faz a filtragem, apenas ajustada para Claims e Async
         public async Task<IActionResult> Manager()
         {
             ViewData["Profile"] = "Manager";
 
-            int? userId = TempData["UserId"] as int?;
-            if (userId.HasValue)
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+
+            if (!string.IsNullOrEmpty(userEmail))
             {
-                var colaboradorLogado = await _context.Colaboradores.FindAsync(userId.Value);
+                var colaboradorLogado = await _context.Colaboradores.FirstOrDefaultAsync(c => c.Email == userEmail);
+
                 if (colaboradorLogado != null)
                 {
-                    string primeiroNome = colaboradorLogado.NomeCompleto.Split(' ')[0];
-                    string nomeDoTime = colaboradorLogado.Time;
+                    string nomeDoTime = colaboradorLogado.TeamName;
 
-                    ViewData["FirstName"] = primeiroNome;
+                    ViewData["FirstName"] = colaboradorLogado.FullName?.Split(' ')[0] ?? "Manager";
                     ViewData["UserTeam"] = nomeDoTime;
 
-                    int membrosAtivos = _context.Colaboradores.Count(c => c.Time == nomeDoTime && c.Status == "Ativo");
+                    var colaboradoresDoTime = await _context.Colaboradores
+                                                            .Where(c => c.TeamName == nomeDoTime)
+                                                            .ToListAsync();
+
+                    int membrosAtivos = colaboradoresDoTime.Count(c => c.Status == "Ativo");
                     ViewData["ActiveMembers"] = membrosAtivos;
+
+                    return View(colaboradoresDoTime);
                 }
             }
-            else
-            {
-                ViewData["FirstName"] = "Usuário";
-                ViewData["UserTeam"] = "Sem Time";
-                ViewData["ActiveMembers"] = 0;
-            }
 
-            return View();
+            // Retorna lista vazia e dados padrão se não puder carregar o perfil
+            ViewData["FirstName"] = "Manager";
+            ViewData["UserTeam"] = "No Team Assigned";
+            ViewData["ActiveMembers"] = 0;
+            return View(new List<Colaborador>());
         }
-
-        
 
         public IActionResult Rh()
         {
-            ViewData["Profile"] = "Rh";
+            // Manter como estava, listando todos para o RH
+            ViewData["Profile"] = "HR";
             var colaboradores = _context.Colaboradores.ToList();
 
             ViewData["TotalColaboradores"] = colaboradores.Count;
-            ViewData["TotalSetores"] = colaboradores.Select(c => c.Setor).Distinct().Count();
+            ViewData["TotalSetores"] = colaboradores.Select(c => c.Department).Distinct().Count();
 
             return View(colaboradores);
         }
@@ -114,24 +133,5 @@ namespace FlexCap.Web.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 }

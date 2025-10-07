@@ -9,7 +9,6 @@
     <h3 class="fw-bold mb-3">Collaborators</h3>
     <p class="text-muted mb-4">@Model.Count members</p>
 
-    <!-- Lista de Colaboradores -->
     <div class="row g-2">
         @if (Model != null)
         {
@@ -17,22 +16,21 @@
             {
                 var statusColorClass = colaborador.Status == "Ativo" ? "text-success" : "text-danger";
                 var dotColorClass = colaborador.Status == "Ativo" ? "bg-success" : "bg-danger";
-
-                var nomeDisplay = colaborador.NomeCompleto;
-                if (colaborador.NomeCompleto == "Carlos Tavares")
+                var nomeDisplay = colaborador.FullName;
+                if (colaborador.FullName == "Carlos Tavares")
                 {
                     nomeDisplay += " (You)";
                 }
 
                 <div class="col-12 mb-2">
                     <div class="card p-2 shadow-sm d-flex flex-row align-items-center">
-                        <img src="@colaborador.FotoUrl" class="rounded-circle me-3" width="40" height="40" alt="Foto do Colaborador"> 
+                        <img src="@colaborador.PhotoUrl" class="rounded-circle me-3" width="40" height="40" alt="Foto do Colaborador">
                         <div>
-                            <h6 class="mb-0 fw-bold">@nomeDisplay</h6> 
-                            <small class="text-muted">@colaborador.Cargo</small>
+                            <h6 class="mb-0 fw-bold">@nomeDisplay</h6>
+                            <small class="text-muted">@colaborador.Position</small>
                         </div>
                         <div class="ms-auto d-flex align-items-center">
-                            <span class="@statusColorClass me-2 fw-bold small">@colaborador.Status</span> 
+                            <span class="@statusColorClass me-2 fw-bold small">@colaborador.Status</span>
                             <span class="dot @dotColorClass"></span>
                         </div>
                     </div>

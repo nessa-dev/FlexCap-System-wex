@@ -1,24 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using FlexCap.Web.Models; 
+using FlexCap.Web.Models;
+
 namespace FlexCap.Web.Data
 {
     public class AppDbContext : DbContext
     {
-        private readonly IConfiguration _configuration;
-        public AppDbContext(IConfiguration configuration, DbContextOptions<AppDbContext> options) : base(options)
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options)
         {
-            _configuration = configuration;
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlite(
-                _configuration.GetConnectionString("ConexaoSqlite"),
-                b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)
-            );
-        }
-
-        public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Colaborador> Colaboradores { get; set; }
     }
 }

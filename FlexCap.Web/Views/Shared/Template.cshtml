@@ -14,8 +14,10 @@
     @{
         var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
         var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
-        var currentProfile = ViewData["Profile"]?.ToString();
+        var isAuthenticated = User?.Identity?.IsAuthenticated == true;
+        var currentProfile = ViewData["Profile"]?.ToString() ?? (isAuthenticated ? "Colaborador" : null);
     }
+
     <div class="sidebar">
         <div>
             <div class="p-3 text-center">

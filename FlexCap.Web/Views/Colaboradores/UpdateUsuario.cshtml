@@ -1,32 +1,32 @@
-﻿@model List<FlexCap.Web.Models.Usuario>
+﻿@model List<FlexCap.Web.Models.Colaborador>
 
 <h2>@ViewData["Title"]</h2>
 
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>Nome</th>
+            <th>Name</th>
             <th>E-mail</th>
-            <th>Cargo</th>
-            <th>Departamento</th>
-            <th>Time</th>
-            <th>País</th>
-            <th>Ações</th>
+            <th>Position</th>
+            <th>Department</th>
+            <th>Team</th>
+            <th>Country</th>
+            <th>Action</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var usuario in Model)
+        @foreach (var colaborador in Model)
         {
             <tr>
-                <td>@usuario.FullName</td>
-                <td>@usuario.EmailAddress</td>
-                <td>@usuario.Position</td>
-                <td>@usuario.Department</td>
-                <td>@usuario.Team</td>
-                <td>@usuario.CountryOfOperation</td>
+                <td>@colaborador.FullName</td>
+                <td>@colaborador.Email</td>
+                <td>@colaborador.Position</td>
+                <td>@colaborador.Department</td>
+                <td>@colaborador.TeamName</td> 
+                <td>@colaborador.Country</td>
                 <td>
-                    <a asp-action="Editar" asp-route-id="@usuario.Id" class="btn btn-sm btn-warning">Editar</a>
-                    <a asp-action="Excluir" asp-route-id="@usuario.Id" class="btn btn-sm btn-danger">Excluir</a>
+                    <a asp-action="Editar" asp-route-id="@colaborador.Id" class="btn btn-sm btn-warning">Edit</a>
+                    <a asp-action="Excluir" asp-route-id="@colaborador.Id" class="btn btn-sm btn-danger">Delete</a>
                 </td>
             </tr>
         }

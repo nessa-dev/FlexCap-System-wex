@@ -10,18 +10,18 @@ using FlexCap.Web.Models;
 
 namespace FlexCap.Web.Controllers
 {
-    public class UsuariosController : Controller
+    public class ColaboradoresCRUDController : Controller
     {
         private readonly AppDbContext _context;
 
-        public UsuariosController(AppDbContext context)
+        public ColaboradoresCRUDController(AppDbContext context)
         {
             _context = context;
         }
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Usuarios.ToListAsync());
+            return View(await _context.Colaboradores.ToListAsync());
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -31,14 +31,15 @@ namespace FlexCap.Web.Controllers
                 return NotFound();
             }
 
-            var usuario = await _context.Usuarios
+            var colaborador = await _context.Colaboradores
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (usuario == null)
+
+            if (colaborador == null)
             {
                 return NotFound();
             }
 
-            return View(usuario);
+            return View(colaborador);
         }
 
         public IActionResult Create()
@@ -46,18 +47,17 @@ namespace FlexCap.Web.Controllers
             return View();
         }
 
-        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,Email")] Usuario usuario)
+        public async Task<IActionResult> Create([Bind("Id,NomeCompleto,Email,Cargo,Setor,Time,Pais,FotoUrl,Status")] Colaborador colaborador)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(usuario);
+                _context.Add(colaborador);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(usuario);
+            return View(colaborador);
         }
 
         public async Task<IActionResult> Edit(int? id)
@@ -67,20 +67,19 @@ namespace FlexCap.Web.Controllers
                 return NotFound();
             }
 
-            var usuario = await _context.Usuarios.FindAsync(id);
-            if (usuario == null)
+            var colaborador = await _context.Colaboradores.FindAsync(id);
+            if (colaborador == null)
             {
                 return NotFound();
             }
-            return View(usuario);
+            return View(colaborador);
         }
 
-        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Email")] Usuario usuario)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,NomeCompleto,Email,Cargo,Setor,Time,Pais,FotoUrl,Status")] Colaborador colaborador)
         {
-            if (id != usuario.Id)
+            if (id != colaborador.Id)
             {
                 return NotFound();
             }
@@ -89,12 +88,12 @@ namespace FlexCap.Web.Controllers
             {
                 try
                 {
-                    _context.Update(usuario);
+                    _context.Update(colaborador);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!UsuarioExists(usuario.Id))
+                    if (!ColaboradorExists(colaborador.Id)) 
                     {
                         return NotFound();
                     }
@@ -105,7 +104,7 @@ namespace FlexCap.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(usuario);
+            return View(colaborador);
         }
 
         public async Task<IActionResult> Delete(int? id)
@@ -115,33 +114,35 @@ namespace FlexCap.Web.Controllers
                 return NotFound();
             }
 
-            var usuario = await _context.Usuarios
+            var colaborador = await _context.Colaboradores
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (usuario == null)
+
+            if (colaborador == null)
             {
                 return NotFound();
             }
 
-            return View(usuario);
+            return View(colaborador);
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var usuario = await _context.Usuarios.FindAsync(id);
-            if (usuario != null)
+            var colaborador = await _context.Colaboradores.FindAsync(id);
+
+            if (colaborador != null)
             {
-                _context.Usuarios.Remove(usuario);
+                _context.Colaboradores.Remove(colaborador);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool UsuarioExists(int id)
+        private bool ColaboradorExists(int id)
         {
-            return _context.Usuarios.Any(e => e.Id == id);
+            return _context.Colaboradores.Any(e => e.Id == id);
         }
     }
 }

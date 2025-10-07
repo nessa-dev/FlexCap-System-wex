@@ -7,24 +7,33 @@ namespace FlexCap.Web.Models
     {
         [Key]
         public int Id { get; set; }
-        // CORRIGIDO: Inicializado para resolver CS8618
-        public string FotoUrl { get; set; } = string.Empty;
-        // CORRIGIDO: Inicializado
-        public string NomeCompleto { get; set; } = string.Empty;
-        // CORRIGIDO: Inicializado
+
+        [Display(Name = "URL da Foto")]
+        public string PhotoUrl { get; set; } = string.Empty;
+
+        [Display(Name = "Nome Completo")]
+        public string FullName { get; set; } = string.Empty;
+
+        [Display(Name = "E-mail")]
         public string Email { get; set; } = string.Empty;
-        // CORRIGIDO: Inicializado
-        public string Cargo { get; set; } = string.Empty;
-        // CORRIGIDO: Inicializado
-        public string Setor { get; set; } = string.Empty;
-        // CORRIGIDO: Inicializado
+
+        public string PasswordHash { get; set; } = string.Empty;
+
+        [Display(Name = "Cargo")]
+        public string Position { get; set; } = string.Empty;
+
+        [Display(Name = "Setor")]
+        public string Department { get; set; } = string.Empty;
+
+        [Display(Name = "Status")]
         public string Status { get; set; } = string.Empty;
-        // CORRIGIDO: Inicializado
-        public string Pais { get; set; } = string.Empty;
+
+        [Display(Name = "Country")]
+        public string Country { get; set; } = string.Empty;
 
         [Column("Team")]
-        // CORRIGIDO: Inicializado
-        public string Time { get; set; } = string.Empty;
+        [Display(Name = "Time")]
+        public string TeamName { get; set; } = string.Empty;
 
     }
 }

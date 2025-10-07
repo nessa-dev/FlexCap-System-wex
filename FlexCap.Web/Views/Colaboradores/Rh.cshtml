@@ -85,18 +85,20 @@
                 </tr>
             </thead>
             <tbody>
+
+
                 @if (Model != null)
                 {
                     @foreach (var colaborador in Model)
                     {
                         <tr>
-                            <td><img src="@colaborador.FotoUrl" class="rounded-circle" width="30" height="30"></td>
-                            <td><strong>@colaborador.NomeCompleto</strong></td>
-                            <td>@colaborador.Cargo</td>
-                            <td>@colaborador.Pais</td>
+                            <td><img src="@colaborador.PhotoUrl" class="rounded-circle" width="30" height="30"></td>
+                            <td><strong>@colaborador.FullName</strong></td>
+                            <td>@colaborador.Position</td>
+                            <td>@colaborador.Country</td>
                             <td>@colaborador.Status</td>
-                            <td>@colaborador.Setor</td>
-                            <td>@colaborador.Time</td>
+                            <td>@colaborador.Department</td>
+                            <td>@colaborador.TeamName</td>
                         </tr>
                     }
                 }

@@ -7,22 +7,26 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\**" />
+    <Compile Remove="Data\Migrations\**" />
     <Compile Remove="Views\Usuarios\**" />
-    <Content Remove="Migrations\**" />
+    <Content Remove="Data\Migrations\**" />
     <Content Remove="Views\Usuarios\**" />
-    <EmbeddedResource Remove="Migrations\**" />
+    <EmbeddedResource Remove="Data\Migrations\**" />
     <EmbeddedResource Remove="Views\Usuarios\**" />
-    <None Remove="Migrations\**" />
+    <None Remove="Data\Migrations\**" />
     <None Remove="Views\Usuarios\**" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\BaseController.cs" />
+    <Compile Remove="Controllers\UsuariosController.cs" />
+    <Compile Remove="Models\Usuario.cs" />
     <Compile Remove="Views\Login\Cadastro.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="local.sqlite" />
+    <None Remove="local.sqlite-shm" />
+    <None Remove="local.sqlite-wal" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,38 +1,49 @@
-﻿@model List<FlexCap.Web.Models.Usuario>
+﻿@model List<FlexCap.Web.Models.Colaborador>
 
-<h2>@ViewData["Title"]</h2>
+@{
+    ViewData["Title"] = "Employee Directory";
+}
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Nome</th>
-            <th>E-mail</th>
-            <th>Cargo</th>
-            <th>Departamento</th>
-            <th>Time</th>
-            <th>País</th>
-            <th>Ações</th> 
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var usuario in Model)
-        {
-            <tr>
-                <td>@usuario.FullName</td>
-                <td>@usuario.EmailAddress</td>
-                <td>@usuario.Position</td>
-                <td>@usuario.Department</td>
-                <td>@usuario.Team</td>
-                <td>@usuario.CountryOfOperation</td>
-                <td>
+<div class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-3xl font-bold">@ViewData["Title"]</h2>
+        <a asp-controller="Colaborador" asp-action="Register" class="btn btn-primary shadow-md">
+            + New Employee
+        </a>
+    </div>
 
-                    <a asp-action="Editar" asp-route-id="@usuario.Id" class="btn btn-sm btn-warning">Editar</a>
-                    <a asp-action="Excluir" asp-route-id="@usuario.Id" class="btn btn-sm btn-danger"
-                       onclick="return confirm('Tem certeza que deseja excluir este usuário?');">
-                        Excluir
-                    </a>
-                </td>
+    <table class="table table-striped table-hover border">
+        <thead>
+            <tr class="bg-gray-100">
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Position</th>
+                <th>Department</th>
+                <th>Team</th>
+                <th>Country</th>
+                <th>Actions</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var colaborador in Model)
+            {
+                <tr>
+                    <td>@colaborador.FullName</td>
+                    <td>@colaborador.Email</td>
+                    <td>@colaborador.Position</td>
+                    <td>@colaborador.Department</td>
+                    <td>@colaborador.TeamName</td>
+                    <td>@colaborador.Country</td>
+
+                    <td>
+                        <a asp-action="Editar" asp-route-id="@colaborador.Id" class="btn btn-sm btn-warning">Edit</a>
+                        <a asp-action="Excluir" asp-route-id="@colaborador.Id" class="btn btn-sm btn-danger"
+                           onclick="return confirm('Are you sure you want to delete @colaborador.FullName?');">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

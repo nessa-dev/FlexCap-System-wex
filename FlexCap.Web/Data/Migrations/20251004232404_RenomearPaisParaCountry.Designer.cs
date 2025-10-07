@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace FlexCap.Web.Migrations
+namespace FlexCap.Web.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250930105105_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20251004232404_RenomearPaisParaCountry")]
+    partial class RenomearPaisParaCountry
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,51 +25,7 @@ namespace FlexCap.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Cargo")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("FotoUrl")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("NomeCompleto")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Pais")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Setor")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Time")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("Team");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Colaboradores");
-                });
-
-            modelBuilder.Entity("FlexCap.Web.Models.Usuario", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("CountryOfOperation")
+                    b.Property<string>("Country")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -77,7 +33,7 @@ namespace FlexCap.Web.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("EmailAddress")
+                    b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -85,7 +41,11 @@ namespace FlexCap.Web.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PhotoUrl")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -93,12 +53,18 @@ namespace FlexCap.Web.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Team")
+                    b.Property<string>("Status")
+                        .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<string>("TeamName")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("Team");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Usuarios");
+                    b.ToTable("Colaboradores");
                 });
 #pragma warning restore 612, 618
         }

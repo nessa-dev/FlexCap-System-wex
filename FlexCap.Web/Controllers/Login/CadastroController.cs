@@ -1,8 +1,9 @@
-﻿using FlexCap.Web.Data;
+﻿using BCrypt.Net;
+using FlexCap.Web.Data;
 using FlexCap.Web.Models;
 using FlexCap.Web.Models.Account;
 using Microsoft.AspNetCore.Mvc;
-using BCrypt.Net; 
+using Microsoft.EntityFrameworkCore;
 
 namespace FlexCap.Web.Controllers
 {
@@ -21,30 +22,40 @@ namespace FlexCap.Web.Controllers
             return View(new CadastroModel());
         }
 
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Cadastro(CadastroModel model)
         {
             if (ModelState.IsValid)
             {
-                var usuario = new Usuario
+                bool emailExists = _context.Colaboradores
+                                            .Any(c => c.Email == model.EmailAddress);
+
+                if (emailExists)
                 {
-                    FullName = model.FullName!,
-                    EmailAddress = model.EmailAddress!,
-                    Position = model.Position!,
-                    Department = model.Department!,
-                    Team = model.Team,
-                    CountryOfOperation = model.CountryOfOperation!,
-                    Password = BCrypt.Net.BCrypt.HashPassword(model.Password!)
-                };
-
-                _context.Usuarios.Add(usuario);
-                _context.SaveChanges();
-
-                return RedirectToAction("Index", "Login");
+                    ModelState.AddModelError("EmailAddress", "The provided email is already registered.");
+                }
+                else
+                {
+                    var novoColaborador = new Colaborador
+                    {
+                        FullName = model.FullName!,
+                        Email = model.EmailAddress!,
+                        Position = model.Position ?? "", 
+                        Department = model.Department ?? "", 
+                        TeamName = model.Team ?? "", 
+                        Country = model.CountryOfOperation ?? "", 
+                        PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password!)
+                    };
+                    _context.Colaboradores.Add(novoColaborador);
+                    _context.SaveChanges();
+                    return RedirectToAction("Index", "Login");
+                }
             }
-
             return View(model);
         }
+
     }
 }

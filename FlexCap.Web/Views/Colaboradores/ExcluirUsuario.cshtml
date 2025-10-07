@@ -1,37 +1,35 @@
-﻿@model FlexCap.Web.Models.Usuario
+﻿@model FlexCap.Web.Models.Colaborador
 
-<h2 class="text-danger mb-4">Excluir Usuário</h2>
+<script src="https://cdn.tailwindcss.com"></script>
 
-<div class="alert alert-danger shadow-sm">
-    <h4 class="mb-2"><i class="bi bi-exclamation-triangle-fill"></i> Confirmação Necessária</h4>
-    <p>Você realmente deseja excluir o usuário <strong>@Model.FullName</strong>?</p>
-    <p class="mb-0">⚠️ Esta ação é irreversível e o registro será removido do sistema.</p>
-</div>
+<div class="max-w-md mx-auto bg-white p-8 rounded-xl shadow-2xl mt-10 border border-red-200">
+    <h1 class="text-2xl font-extrabold mb-4 text-red-700 border-b-2 pb-2">Delete Confirmation</h1>
 
-<h4 class="mt-4">Detalhes do Usuário</h4>
-<dl class="row border p-3 bg-light rounded shadow-sm">
-    <dt class="col-sm-3">Nome Completo</dt>
-    <dd class="col-sm-9">@Model.FullName</dd>
-
-    <dt class="col-sm-3">E-mail</dt>
-    <dd class="col-sm-9">@Model.EmailAddress</dd>
-
-    <dt class="col-sm-3">Cargo</dt>
-    <dd class="col-sm-9">@Model.Position</dd>
-
-    <dt class="col-sm-3">Departamento</dt>
-    <dd class="col-sm-9">@Model.Department</dd>
-</dl>
-
-<form asp-action="Excluir" method="post" class="mt-4">
-    <input type="hidden" asp-for="Id" />
-
-    <div class="d-flex gap-3">
-        <button type="submit" class="btn btn-danger btn-lg">
-            <i class="bi bi-trash-fill"></i> Excluir Definitivamente
-        </button>
-        <a asp-action="ListarUsuarios" class="btn btn-secondary btn-lg">
-            <i class="bi bi-x-circle-fill"></i> Cancelar
-        </a>
+    <div class="mb-6">
+        <p class="text-gray-700">Are you sure you want to permanently delete the following employee?</p>
+        <p class="text-red-600 font-semibold mt-2">This action cannot be undone.</p>
     </div>
-</form>
+
+    <dl class="grid grid-cols-2 gap-y-3 gap-x-4 p-4 bg-red-50 rounded-lg">
+        <dt class="font-medium text-gray-900">Name:</dt>
+        <dd class="text-gray-800">@Model.FullName</dd>
+
+        <dt class="font-medium text-gray-900">Email:</dt>
+        <dd class="text-gray-800">@Model.Email</dd>
+
+        <dt class="font-medium text-gray-900">Position:</dt>
+        <dd class="text-gray-800">@Model.Position</dd>
+    </dl>
+
+    <form asp-action="Excluir" method="post" class="mt-8 flex justify-end space-x-4">
+        <input type="hidden" asp-for="Id" />
+
+        <button type="submit" class="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-red-700 transition duration-150">
+            Yes, Delete Permanently
+        </button>
+
+        <a asp-action="Listar" class="bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-gray-400 transition duration-150">
+            Cancel
+        </a>
+    </form>
+</div>

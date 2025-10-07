@@ -1,34 +1,48 @@
-﻿@{
+﻿@using System.Security.Claims
+
+@{
     ViewData["Title"] = "Gestão de Colaboradores";
     Layout = "~/Views/Shared/Template.cshtml";
+
+    // Tenta obter o nome do usuário logado (o primeiro nome)
+    // O HomeController já define ViewData["FirstName"] para essa View.
+    var firstName = ViewData["FirstName"] as string ?? "Manager";
 }
 
 @model List<FlexCap.Web.Models.Colaborador>
 
 <div class="py-4" style="max-width: 850px; width: 100%; margin-left: 0.5rem; margin-right: auto; overflow-y: hidden; height: calc(100vh - 5rem);">
-    <h3 class="fw-bold mb-3">Collaborators</h3>
+
+    <h1 class="fw-bold mb-1">Welcome back, @firstName!</h1>
+
+    <h3 class="fw-bold mb-3">Team Collaborators</h3>
     <p class="text-muted mb-3 small">@Model.Count members</p>
 
-    <!-- Lista de Colaboradores -->
     <div class="row g-2">
         @if (Model != null)
         {
+            var loggedInFullName = User.FindFirst(ClaimTypes.Name)?.Value;
+
             @foreach (var colaborador in Model)
             {
                 var statusColorClass = colaborador.Status == "Ativo" ? "text-success" : "text-danger";
                 var dotColorClass = colaborador.Status == "Ativo" ? "bg-success" : "bg-danger";
 
-                var nomeDisplay = colaborador.NomeCompleto;
-                if (colaborador.NomeCompleto == "Carlos Tavares")
+                var nomeDisplay = colaborador.FullName;
+
+                if (colaborador.FullName == loggedInFullName)
                 {
                     nomeDisplay += " (You)";
                 }
+
                 <div class="col-12 mb-2">
                     <div class="card p-2 shadow-sm d-flex flex-row align-items-center">
-                        <img src="@colaborador.FotoUrl" class="rounded-circle me-3" width="40" height="40" alt="Foto do Colaborador">
+                        {{-- CORRIGIDO: FotoUrl -> PhotoUrl --}}
+                        <img src="@colaborador.PhotoUrl" class="rounded-circle me-3" width="40" height="40" alt="Colaborator Photo">
                         <div>
                             <h6 class="mb-0 fw-bold">@nomeDisplay</h6>
-                            <small class="text-muted small">@colaborador.Cargo</small>
+                            {{-- CORRIGIDO: Cargo -> Position --}}
+                            <small class="text-muted small">@colaborador.Position</small>
                         </div>
                         <div class="ms-auto d-flex align-items-center">
                             <span class="@statusColorClass me-2 fw-bold small">@colaborador.Status</span>
