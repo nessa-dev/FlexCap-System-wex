@@ -33,40 +33,44 @@ namespace FlexCap.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            // Verifica se o modelo (campos) é válido
+
             if (ModelState.IsValid)
             {
-                // 1. TENTA BUSCAR O COLABORADOR PELO E-MAIL
+               
+
+
                 var colaborador = await _context.Colaboradores
                     .FirstOrDefaultAsync(c => c.Email == model.Email);
 
-                // --- VERIFICAÇÃO EXCLUSIVA PARA CONTA DE SERVIÇO RH ---
-                // Se o colaborador existir E a senha estiver correta, verifica o e-mail de serviço
+
+
                 if (colaborador != null && BCrypt.Net.BCrypt.Verify(model.Senha, colaborador.PasswordHash))
                 {
-                    // E-MAIL DE SERVIÇO DO RH (SUPER USUÁRIO)
+
                     if (colaborador.Email.Equals("recursoshumanos@flexcap.com", StringComparison.OrdinalIgnoreCase))
                     {
-                        // Garante que o perfil RH seja salvo nas Claims para acesso total
+
                         var claimsRh = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, ToTitleCase(colaborador.FullName)),
                     new Claim(ClaimTypes.Email, colaborador.Email),
                     new Claim("TeamName", colaborador.TeamName),
-                    new Claim(ClaimTypes.Role, "HR Manager") // Posição Elevada
+                    new Claim(ClaimTypes.Role, "HR Manager") 
+
                 };
 
                         var identityRh = new ClaimsIdentity(claimsRh, "login");
                         var principalRh = new ClaimsPrincipal(identityRh);
                         await HttpContext.SignInAsync(principalRh);
 
-                        return RedirectToAction("Rh", "Home"); // REDIRECIONAMENTO IMEDIATO
+                        return RedirectToAction("Rh", "Home"); 
+
                     }
 
 
-                    // --- LOGIN PADRÃO (Se não for a conta de serviço) ---
 
-                    // Formata e define as Claims
+
+
                     string formattedName = ToTitleCase(colaborador.FullName);
 
                     var claims = new List<Claim>
@@ -81,26 +85,28 @@ namespace FlexCap.Web.Controllers
                     var principal = new ClaimsPrincipal(identity);
                     await HttpContext.SignInAsync(principal);
 
-                    // Redirecionamento baseado na Posição
+
                     if (colaborador.Position == "Project Manager")
                     {
                         return RedirectToAction("Manager", "Home");
                     }
                     else if (colaborador.Position == "HR Analyst" || colaborador.Position == "HR Consultant")
                     {
-                        return RedirectToAction("Rh", "Home"); // Redirecionamento RH
+                        return RedirectToAction("Rh", "Home"); 
+
                     }
                     else
                     {
-                        return RedirectToAction("Colaborador", "Home"); // Colaborador Padrão
+                        return RedirectToAction("Colaborador", "Home"); 
+
                     }
                 }
 
-                // --- LOGIN FALHOU ---
+
                 ModelState.AddModelError("", "Invalid email or password.");
             }
 
-            // Retorna à View (exibindo erros)
+
             return View("Index", model);
         }
 
