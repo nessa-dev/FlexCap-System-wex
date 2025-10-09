@@ -30,9 +30,23 @@ namespace FlexCap.Web.Controllers
             if (!_context.Colaboradores.Any())
             {
                 var hashedPassword = BCrypt.Net.BCrypt.HashPassword("Test1234");
+                 string hrPasswordHash = BCrypt.Net.BCrypt.HashPassword("HR2025!");
+
 
                 var colaboradores = new List<Colaborador>
-                {
+             {
+
+            new Colaborador {
+            FullName = "Recursos Humanos Manager",
+            Email = "recursoshumanos@flexcap.com",
+            Position = "HR Manager", 
+            Department = "RH",
+            Status = "Ativo",
+            PhotoUrl = "https://randomuser.me/api/portraits/lego/1.jpg",
+            Country = "Global",
+            TeamName = "RH Operations",
+            PasswordHash = hrPasswordHash 
+            },
             new Colaborador {
             FullName = "Júlia Freitas",
             Email = "julia.freitas@flexcap.com",
@@ -248,7 +262,9 @@ namespace FlexCap.Web.Controllers
         public IActionResult Listar()
         {
             ViewData["Title"] = "All Employees";
-            var colaboradores = _context.Colaboradores.ToList();
+            var colaboradores = _context.Colaboradores
+                .Where(c => c.Email != "recursoshumanos@flexcap.com")
+                .ToList();
             return View("ListarUsuarios", colaboradores);
         }
 

@@ -33,55 +33,96 @@ namespace FlexCap.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
+            // Verifica se o modelo (campos) é válido
             if (ModelState.IsValid)
             {
+                // 1. TENTA BUSCAR O COLABORADOR PELO E-MAIL
                 var colaborador = await _context.Colaboradores
                     .FirstOrDefaultAsync(c => c.Email == model.Email);
 
-                // 1. Verifica se o colaborador existe e a senha está correta
+                // --- VERIFICAÇÃO EXCLUSIVA PARA CONTA DE SERVIÇO RH ---
+                // Se o colaborador existir E a senha estiver correta, verifica o e-mail de serviço
                 if (colaborador != null && BCrypt.Net.BCrypt.Verify(model.Senha, colaborador.PasswordHash))
                 {
-                    // Formata o nome para ter a primeira letra maiúscula (Ex: Vanessa Oliveira)
+                    // E-MAIL DE SERVIÇO DO RH (SUPER USUÁRIO)
+                    if (colaborador.Email.Equals("recursoshumanos@flexcap.com", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Garante que o perfil RH seja salvo nas Claims para acesso total
+                        var claimsRh = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, ToTitleCase(colaborador.FullName)),
+                    new Claim(ClaimTypes.Email, colaborador.Email),
+                    new Claim("TeamName", colaborador.TeamName),
+                    new Claim(ClaimTypes.Role, "HR Manager") // Posição Elevada
+                };
+
+                        var identityRh = new ClaimsIdentity(claimsRh, "login");
+                        var principalRh = new ClaimsPrincipal(identityRh);
+                        await HttpContext.SignInAsync(principalRh);
+
+                        return RedirectToAction("Rh", "Home"); // REDIRECIONAMENTO IMEDIATO
+                    }
+
+
+                    // --- LOGIN PADRÃO (Se não for a conta de serviço) ---
+
+                    // Formata e define as Claims
                     string formattedName = ToTitleCase(colaborador.FullName);
 
-                    // --- SALVANDO AS CLAIMS CORRETAS ---
                     var claims = new List<Claim>
-                    {
-                        // Nome formatado para exibição
-                        new Claim(ClaimTypes.Name, formattedName), 
-                        // Email (CRUCIAL para buscar o colaborador em outras Actions)
-                        new Claim(ClaimTypes.Email, colaborador.Email), 
-                        // Nome do Time (CRUCIAL para a filtragem na Home)
-                        new Claim("TeamName", colaborador.TeamName)
-                    };
-                    // ------------------------------------
+            {
+                new Claim(ClaimTypes.Name, formattedName),
+                new Claim(ClaimTypes.Email, colaborador.Email),
+                new Claim("TeamName", colaborador.TeamName),
+                new Claim(ClaimTypes.Role, colaborador.Position)
+            };
 
                     var identity = new ClaimsIdentity(claims, "login");
                     var principal = new ClaimsPrincipal(identity);
                     await HttpContext.SignInAsync(principal);
 
-                    // Redireciona com base no cargo (se necessário, mas o principal é a Home)
-                    return RedirectToAction("Colaborador", "Home");
+                    // Redirecionamento baseado na Posição
+                    if (colaborador.Position == "Project Manager")
+                    {
+                        return RedirectToAction("Manager", "Home");
+                    }
+                    else if (colaborador.Position == "HR Analyst" || colaborador.Position == "HR Consultant")
+                    {
+                        return RedirectToAction("Rh", "Home"); // Redirecionamento RH
+                    }
+                    else
+                    {
+                        return RedirectToAction("Colaborador", "Home"); // Colaborador Padrão
+                    }
                 }
 
-                // E-mail ou senha inválidos
+                // --- LOGIN FALHOU ---
                 ModelState.AddModelError("", "Invalid email or password.");
             }
 
-            // Se o ModelState for inválido ou o login falhar
+            // Retorna à View (exibindo erros)
             return View("Index", model);
         }
 
-        // Action auxiliar para formatar o nome
-        private string ToTitleCase(string input)
+
+
+
+        private string ToTitleCase(string text)
         {
-            if (string.IsNullOrEmpty(input)) return string.Empty;
+            if (string.IsNullOrEmpty(text))
+            {
+                return string.Empty;
+            }
 
-            // Força a capitalização usando a cultura invariante (mais segura para nomes próprios)
-            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
-            return textInfo.ToTitleCase(input.ToLower());
+            TextInfo ti = CultureInfo.InvariantCulture.TextInfo;
+            string titleCaseText = ti.ToTitleCase(text.ToLower());
+            if (titleCaseText.Length > 0 && char.IsLower(titleCaseText[0]))
+            {
+                return char.ToUpper(titleCaseText[0]) + titleCaseText.Substring(1);
+            }
+
+            return titleCaseText;
         }
-
 
 
 
