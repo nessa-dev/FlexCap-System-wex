@@ -164,10 +164,13 @@ namespace FlexCap.Web.Controllers
 
             return RedirectToAction("Index", "Home");
         }
+
+        // Logout method
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync();
             return RedirectToAction("Index", "Login");
         }
+
     }
 }
