@@ -27,6 +27,7 @@ namespace FlexCap.Web.Controllers
             return View(new CadastroModel());
         }
 
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Cadastro(CadastroModel model)

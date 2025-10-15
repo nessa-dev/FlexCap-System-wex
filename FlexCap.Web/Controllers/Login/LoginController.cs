@@ -1,4 +1,5 @@
-﻿using FlexCap.Web.Data;
+﻿using BCrypt.Net;
+using FlexCap.Web.Data;
 using FlexCap.Web.Models;
 using FlexCap.Web.Models.Login;
 using Microsoft.AspNetCore.Authentication;
@@ -8,7 +9,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Globalization;
-
+using Microsoft.AspNetCore.Authentication.Cookies; 
 
 namespace FlexCap.Web.Controllers
 {
@@ -28,60 +29,51 @@ namespace FlexCap.Web.Controllers
         }
 
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-
             if (ModelState.IsValid)
             {
-               
-
-
                 var colaborador = await _context.Colaboradores
                     .FirstOrDefaultAsync(c => c.Email == model.Email);
 
-
-
                 if (colaborador != null && BCrypt.Net.BCrypt.Verify(model.Senha, colaborador.PasswordHash))
                 {
+                    string userIdString = colaborador.Id.ToString();
 
                     if (colaborador.Email.Equals("recursoshumanos@flexcap.com", StringComparison.OrdinalIgnoreCase))
                     {
-
                         var claimsRh = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, ToTitleCase(colaborador.FullName)),
-                    new Claim(ClaimTypes.Email, colaborador.Email),
-                    new Claim("TeamName", colaborador.TeamName),
-                    new Claim(ClaimTypes.Role, "HR Manager") 
+                        {
+                            new Claim(ClaimTypes.Name, ToTitleCase(colaborador.FullName)),
+                            new Claim(ClaimTypes.Email, colaborador.Email),
+                            new Claim("TeamName", colaborador.TeamName),
+                            new Claim(ClaimTypes.Role, "HR Manager"),
+                            
+                            new Claim(ClaimTypes.NameIdentifier, userIdString)
+                        };
 
-                };
-
-                        var identityRh = new ClaimsIdentity(claimsRh, "login");
+                        var identityRh = new ClaimsIdentity(claimsRh, CookieAuthenticationDefaults.AuthenticationScheme);
                         var principalRh = new ClaimsPrincipal(identityRh);
                         await HttpContext.SignInAsync(principalRh);
 
-                        return RedirectToAction("Rh", "Home"); 
-
+                        return RedirectToAction("Rh", "Home");
                     }
-
-
-
-
 
                     string formattedName = ToTitleCase(colaborador.FullName);
 
                     var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, formattedName),
-                new Claim(ClaimTypes.Email, colaborador.Email),
-                new Claim("TeamName", colaborador.TeamName),
-                new Claim(ClaimTypes.Role, colaborador.Position)
-            };
+                    {
+                        new Claim(ClaimTypes.Name, formattedName),
+                        new Claim(ClaimTypes.Email, colaborador.Email),
+                        new Claim("TeamName", colaborador.TeamName),
+                        new Claim(ClaimTypes.Role, colaborador.Position),
+                        
+                        new Claim(ClaimTypes.NameIdentifier, userIdString)
+                    };
 
-                    var identity = new ClaimsIdentity(claims, "login");
+                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     var principal = new ClaimsPrincipal(identity);
                     await HttpContext.SignInAsync(principal);
 
@@ -92,26 +84,19 @@ namespace FlexCap.Web.Controllers
                     }
                     else if (colaborador.Position == "HR Analyst" || colaborador.Position == "HR Consultant")
                     {
-                        return RedirectToAction("Rh", "Home"); 
-
+                        return RedirectToAction("Rh", "Home");
                     }
                     else
                     {
-                        return RedirectToAction("Colaborador", "Home"); 
-
+                        return RedirectToAction("Colaborador", "Home");
                     }
                 }
-
 
                 ModelState.AddModelError("", "Invalid email or password.");
             }
 
-
             return View("Index", model);
         }
-
-
-
 
         private string ToTitleCase(string text)
         {
@@ -122,6 +107,7 @@ namespace FlexCap.Web.Controllers
 
             TextInfo ti = CultureInfo.InvariantCulture.TextInfo;
             string titleCaseText = ti.ToTitleCase(text.ToLower());
+
             if (titleCaseText.Length > 0 && char.IsLower(titleCaseText[0]))
             {
                 return char.ToUpper(titleCaseText[0]) + titleCaseText.Substring(1);
@@ -129,26 +115,22 @@ namespace FlexCap.Web.Controllers
 
             return titleCaseText;
         }
-
-
-
-
         public async Task<IActionResult> Entrar(string? email)
         {
             if (string.IsNullOrEmpty(email))
             {
                 return RedirectToAction("Index", "Home");
             }
+
             var colaborador = await _context.Colaboradores
                 .FirstOrDefaultAsync(c => c.Email == email);
 
             if (colaborador != null)
             {
                 TempData["UserId"] = colaborador.Id;
-
                 TempData["UserProfile"] = colaborador.Position;
 
-                if (colaborador.Position == "Project Manager") 
+                if (colaborador.Position == "Project Manager")
                 {
                     return RedirectToAction("Manager", "Home");
                 }
@@ -165,12 +147,10 @@ namespace FlexCap.Web.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        // Logout method
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync();
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Login");
         }
-
     }
 }

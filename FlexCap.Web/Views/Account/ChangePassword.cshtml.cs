@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace FlexCap.Web.Views.Home
+namespace FlexCap.Web.Views.Account
 {
-    public class TrocarSenhaModel : PageModel
+    public class ChangePasswordModel : PageModel
     {
         public void OnGet()
         {
