@@ -9,7 +9,7 @@ namespace FlexCap.Web.Models
         public int Id { get; set; }
 
         [Display(Name = "URL da Foto")]
-        public string PhotoUrl { get; set; } = string.Empty;
+        public string PhotoUrl { get; set; } = string.Empty; 
 
         [Display(Name = "Nome Completo")]
         public string FullName { get; set; } = string.Empty;
@@ -34,6 +34,9 @@ namespace FlexCap.Web.Models
         [Column("Team")]
         [Display(Name = "Time")]
         public string TeamName { get; set; } = string.Empty;
+        public string? ResetPasswordToken { get; set; }
+        public DateTime? ResetPasswordTokenExpiry { get; set; }
+
 
     }
 }

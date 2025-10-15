@@ -9,19 +9,28 @@
   <ItemGroup>
     <Compile Remove="Data\Migrations\**" />
     <Compile Remove="Views\Usuarios\**" />
+    <Compile Remove="wwwroot\NewFolder\**" />
     <Content Remove="Data\Migrations\**" />
     <Content Remove="Views\Usuarios\**" />
+    <Content Remove="wwwroot\NewFolder\**" />
     <EmbeddedResource Remove="Data\Migrations\**" />
     <EmbeddedResource Remove="Views\Usuarios\**" />
+    <EmbeddedResource Remove="wwwroot\NewFolder\**" />
     <None Remove="Data\Migrations\**" />
     <None Remove="Views\Usuarios\**" />
+    <None Remove="wwwroot\NewFolder\**" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="Controllers\BaseController.cs" />
     <Compile Remove="Controllers\UsuariosController.cs" />
     <Compile Remove="Models\Usuario.cs" />
+    <Compile Remove="Views\Home\TrocarSenha.cshtml.cs" />
     <Compile Remove="Views\Login\Cadastro.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="Views\Home\TrocarSenha.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,6 +51,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Views\NewFolder\" />
+    <Folder Include="wwwroot\Images\Profiles\" />
   </ItemGroup>
 
 </Project>

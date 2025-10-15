@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http; 
 
 namespace FlexCap.Web.Models.Account
 {
@@ -6,6 +7,8 @@ namespace FlexCap.Web.Models.Account
     {
         [Key]
         public int Id { get; set; }
+        [Required(ErrorMessage = "The Profile Photo field is required.")]
+        public IFormFile ProfilePhotoFile { get; set; }
 
         [Required(ErrorMessage = "The Full Name field is required.")]
         [MinLength(1, ErrorMessage = "The Full Name field is required.")]
