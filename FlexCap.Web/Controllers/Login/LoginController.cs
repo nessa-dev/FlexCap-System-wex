@@ -29,6 +29,15 @@ namespace FlexCap.Web.Controllers
         }
 
 
+
+
+
+
+
+
+
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
@@ -41,54 +50,39 @@ namespace FlexCap.Web.Controllers
                 if (colaborador != null && BCrypt.Net.BCrypt.Verify(model.Senha, colaborador.PasswordHash))
                 {
                     string userIdString = colaborador.Id.ToString();
-
-                    if (colaborador.Email.Equals("recursoshumanos@flexcap.com", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var claimsRh = new List<Claim>
-                        {
-                            new Claim(ClaimTypes.Name, ToTitleCase(colaborador.FullName)),
-                            new Claim(ClaimTypes.Email, colaborador.Email),
-                            new Claim("TeamName", colaborador.TeamName),
-                            new Claim(ClaimTypes.Role, "HR Manager"),
-                            
-                            new Claim(ClaimTypes.NameIdentifier, userIdString)
-                        };
-
-                        var identityRh = new ClaimsIdentity(claimsRh, CookieAuthenticationDefaults.AuthenticationScheme);
-                        var principalRh = new ClaimsPrincipal(identityRh);
-                        await HttpContext.SignInAsync(principalRh);
-
-                        return RedirectToAction("Rh", "Home");
-                    }
-
                     string formattedName = ToTitleCase(colaborador.FullName);
 
+                    // Determina a Role correta para todos os colaboradores, incluindo o "HR Manager"
+                    string role = colaborador.Email.Equals("recursoshumanos@flexcap.com", StringComparison.OrdinalIgnoreCase) ? "HR Manager" : colaborador.Position;
+
                     var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.Name, formattedName),
-                        new Claim(ClaimTypes.Email, colaborador.Email),
-                        new Claim("TeamName", colaborador.TeamName),
-                        new Claim(ClaimTypes.Role, colaborador.Position),
-                        
-                        new Claim(ClaimTypes.NameIdentifier, userIdString)
-                    };
+            {
+                new Claim(ClaimTypes.Name, formattedName),
+                new Claim(ClaimTypes.Email, colaborador.Email),
+                new Claim("TeamName", colaborador.TeamName),
+                new Claim(ClaimTypes.Role, role), // Usando a role definida acima
+                new Claim(ClaimTypes.NameIdentifier, userIdString)
+            };
 
                     var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     var principal = new ClaimsPrincipal(identity);
                     await HttpContext.SignInAsync(principal);
 
-
-                    if (colaborador.Position == "Project Manager")
+                    // Agora, o redirecionamento usa apenas a lógica de Position/Role:
+                    if (role == "HR Manager" || colaborador.Position == "HR Analyst" || colaborador.Position == "HR Consultant")
                     {
-                        return RedirectToAction("Manager", "Home");
+                        // REDIRECIONAMENTO RH (DASHBOARD)
+                        return RedirectToAction("Rh", "Colaboradores");
                     }
-                    else if (colaborador.Position == "HR Analyst" || colaborador.Position == "HR Consultant")
+                    else if (colaborador.Position == "Project Manager")
                     {
-                        return RedirectToAction("Rh", "Home");
+                        // CORREÇÃO: REDIRECIONAMENTO MANAGER (DASHBOARD)
+                        return RedirectToAction("Manager", "Colaboradores");
                     }
                     else
                     {
-                        return RedirectToAction("Colaborador", "Home");
+                        // CORREÇÃO: REDIRECIONAMENTO COLABORADOR GERAL (DASHBOARD)
+                        return RedirectToAction("Colaborador", "Colaboradores");
                     }
                 }
 
@@ -97,6 +91,27 @@ namespace FlexCap.Web.Controllers
 
             return View("Index", model);
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         private string ToTitleCase(string text)
         {
@@ -115,37 +130,25 @@ namespace FlexCap.Web.Controllers
 
             return titleCaseText;
         }
-        public async Task<IActionResult> Entrar(string? email)
-        {
-            if (string.IsNullOrEmpty(email))
-            {
-                return RedirectToAction("Index", "Home");
-            }
 
-            var colaborador = await _context.Colaboradores
-                .FirstOrDefaultAsync(c => c.Email == email);
 
-            if (colaborador != null)
-            {
-                TempData["UserId"] = colaborador.Id;
-                TempData["UserProfile"] = colaborador.Position;
 
-                if (colaborador.Position == "Project Manager")
-                {
-                    return RedirectToAction("Manager", "Home");
-                }
-                else if (colaborador.Position == "HR Analyst" || colaborador.Position == "HR Consultant")
-                {
-                    return RedirectToAction("Rh", "Home");
-                }
-                else
-                {
-                    return RedirectToAction("Colaborador", "Home");
-                }
-            }
 
-            return RedirectToAction("Index", "Home");
-        }
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+
 
         public async Task<IActionResult> Logout()
         {

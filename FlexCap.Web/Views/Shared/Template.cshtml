@@ -16,6 +16,14 @@
         var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
         var isAuthenticated = User?.Identity?.IsAuthenticated == true;
         var currentProfile = ViewData["Profile"]?.ToString() ?? (isAuthenticated ? "Colaborador" : null);
+
+        Func<string, string, string> GetActive = (controller, action) =>
+        {
+            return controller == currentController && action == currentAction ? "active" : "";
+        };
+
+        string homeAction = currentProfile;
+        string homeActive = currentController == "Colaboradores" && homeAction == currentAction ? "active" : "";
     }
 
     <div class="sidebar">
@@ -24,52 +32,57 @@
                 <img src="~/img/logo.png" alt="FlexCap Logo" class="img-fluid">
             </div>
 
-            <a asp-controller="Home" asp-action="@currentProfile" class="menu-item @(currentController == "Home" ? "active" : "")">
+            <a asp-controller="Colaboradores" asp-action="@currentProfile" class="menu-item @homeActive">
                 <span class="material-icons">home</span> Home
             </a>
 
             @if (currentProfile == "Manager")
             {
-                <a asp-controller="Colaboradores" asp-action="Manager" class="menu-item action @(currentController == "Colaboradores" ? "active" : "")">
+                <a asp-controller="Colaboradores" asp-action="Manager" class="menu-item action @GetActive("Colaboradores", "Manager")">
                     <span class="material-icons">people</span> Collaborators
                 </a>
-                <a asp-controller="Sprint" asp-action="Manager" class="menu-item action @(currentController == "Sprint" ? "active" : "")">
+
+                <a asp-controller="Sprint" asp-action="Manager" class="menu-item action @GetActive("Sprint", "Manager")">
                     <span class="material-icons">timeline</span> Sprints & Gantt
                 </a>
-                <a asp-controller="Calendar" asp-action="Manager" class="menu-item action @(currentController == "Calendar" ? "active" : "")">
+                <a asp-controller="Calendar" asp-action="Manager" class="menu-item action @GetActive("Calendar", "Manager")">
                     <span class="material-icons">calendar_today</span> Corporate Calendar
                 </a>
-                <a asp-controller="Requests" asp-action="Manager" class="menu-item action @(currentController == "Requests" ? "active" : "")">
+                <a asp-controller="Requests" asp-action="Manager" class="menu-item action @GetActive("Requests", "Manager")">
                     <span class="material-icons">description</span> Requests
                 </a>
             }
             else if (currentProfile == "Rh")
             {
-                <a asp-controller="Colaboradores" asp-action="Rh" class="menu-item action @(currentController == "Colaboradores" ? "active" : "")">
+                <a asp-controller="Colaboradores" asp-action="Listar"
+                   class="menu-item action @GetActive("Colaboradores", "Listar")">
                     <span class="material-icons">people</span> Collaborators
                 </a>
-                <a asp-controller="Sprint" asp-action="Rh" class="menu-item action @(currentController == "Sprint" ? "active" : "")">
+
+                <a asp-controller="Sprint" asp-action="Rh" class="menu-item action @GetActive("Sprint", "Rh")">
                     <span class="material-icons">timeline</span> Sprints & Gantt
                 </a>
-                <a asp-controller="Calendar" asp-action="Rh" class="menu-item action @(currentController == "Calendar" ? "active" : "")">
+                <a asp-controller="Calendar" asp-action="Rh" class="menu-item action @GetActive("Calendar", "Rh")">
                     <span class="material-icons">calendar_today</span> Corporate Calendar
                 </a>
-                <a asp-controller="Requests" asp-action="Rh" class="menu-item action @(currentController == "Requests" ? "active" : "")">
+                <a asp-controller="Requests" asp-action="Rh" class="menu-item action @GetActive("Requests", "Rh")">
                     <span class="material-icons">description</span> Requests
                 </a>
             }
             else if (currentProfile == "Colaborador")
             {
-                <a asp-controller="Colaboradores" asp-action="Colaborador" class="menu-item action @(currentController == "Colaboradores" ? "active" : "")">
+                <a asp-controller="Colaboradores" asp-action="ListarEquipe"
+                   class="menu-item action @GetActive("Colaboradores", "ListarEquipe")">
                     <span class="material-icons">people</span> Collaborators
                 </a>
-                <a asp-controller="Sprint" asp-action="Colaborador" class="menu-item action @(currentController == "Sprint" ? "active" : "")">
+
+                <a asp-controller="Sprint" asp-action="Colaborador" class="menu-item action @GetActive("Sprint", "Colaborador")">
                     <span class="material-icons">timeline</span> Sprints & Gantt
                 </a>
-                <a asp-controller="Calendar" asp-action="Colaborador" class="menu-item action @(currentController == "Calendar" ? "active" : "")">
+                <a asp-controller="Calendar" asp-action="Colaborador" class="menu-item action @GetActive("Calendar", "Colaborador")">
                     <span class="material-icons">calendar_today</span> Corporate Calendar
                 </a>
-                <a asp-controller="Requests" asp-action="Colaborador" class="menu-item action @(currentController == "Requests" ? "active" : "")">
+                <a asp-controller="Requests" asp-action="Colaborador" class="menu-item action @GetActive("Requests", "Colaborador")">
                     <span class="material-icons">description</span> Requests
                 </a>
             }
@@ -85,7 +98,7 @@
             </a>
         </div>
     </div>
-   
+
     <div class="flex-grow-1 p-4 bg-light h-100 overflow-y-auto">
         @RenderBody()
     </div>

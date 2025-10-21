@@ -119,17 +119,8 @@ namespace FlexCap.Web.Controllers
             return View(new List<Colaborador>());
         }
 
-        [Authorize(Roles = "HR Analyst, HR Consultant, HR Manager")]
-        public IActionResult Rh()
-        {
-            ViewData["Profile"] = "Rh";
 
-            var colaboradores = _context.Colaboradores.ToList();
+        
 
-            ViewData["TotalColaboradores"] = colaboradores.Count;
-            ViewData["TotalSetores"] = colaboradores.Select(c => c.Department).Distinct().Count();
-
-            return View(colaboradores);
-        }
     }
 }

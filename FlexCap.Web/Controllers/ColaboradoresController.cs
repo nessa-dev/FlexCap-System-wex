@@ -1,10 +1,12 @@
 ﻿using FlexCap.Web.Data;
 using FlexCap.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 
 namespace FlexCap.Web.Controllers
 {
@@ -27,7 +29,8 @@ namespace FlexCap.Web.Controllers
         // --- MÉTODO SEED ---
         public IActionResult Seed()
         {
-            if (!_context.Colaboradores.Any())
+            _context.Database.EnsureDeleted();
+            _context.Database.EnsureCreated();
             {
                 var hashedPassword = BCrypt.Net.BCrypt.HashPassword("Test1234");
                  string hrPasswordHash = BCrypt.Net.BCrypt.HashPassword("HR2025!");
@@ -37,15 +40,15 @@ namespace FlexCap.Web.Controllers
              {
 
             new Colaborador {
-            FullName = "Recursos Humanos Manager",
-            Email = "recursoshumanos@flexcap.com",
-            Position = "HR Manager", 
-            Department = "RH",
-            Status = "Ativo",
-            PhotoUrl = "https://randomuser.me/api/portraits/lego/1.jpg",
-            Country = "Global",
-            TeamName = "RH Operations",
-            PasswordHash = hrPasswordHash 
+                FullName = "Recursos Humanos Manager",
+                Email = "recursoshumanos@flexcap.com",
+                Position = "HR Manager",
+                Department = "RH",
+                Status = "Ativo",
+                PhotoUrl = string.Empty,
+                Country = string.Empty,
+                TeamName = "RH Operations",
+                PasswordHash = hrPasswordHash
             },
             new Colaborador {
             FullName = "Júlia Freitas",
@@ -256,17 +259,43 @@ namespace FlexCap.Web.Controllers
         }
 
 
-
+        //HR2025!
 
         // Listar Colaboradores 
-        public IActionResult Listar()
+        [Authorize(Roles = "HR Manager, HR Analyst, HR Consultant")]
+        public IActionResult Rh()
         {
-            ViewData["Title"] = "All Employees";
+            ViewData["Title"] = "Gestão de Colaboradores (RH)";
+            ViewData["Profile"] = "Rh";
             var colaboradores = _context.Colaboradores
                 .Where(c => c.Email != "recursoshumanos@flexcap.com")
                 .ToList();
+            ViewData["TotalColaboradores"] = colaboradores.Count;
+            ViewData["TotalSetores"] = colaboradores.Select(c => c.Department).Distinct().Count();
+            return View("~/Views/Home/Rh.cshtml", colaboradores);
+        }
+
+
+        public IActionResult Listar()
+        {
+            ViewData["Title"] = "All Employees";
+            ViewData["Profile"] = "Rh"; 
+
+            var colaboradores = _context.Colaboradores
+                .Where(c => c.Email != "recursoshumanos@flexcap.com") 
+                .ToList();
+
+            return View("Rh", colaboradores);
+        }
+
+        // CRUD COMPLETO 
+        public IActionResult CrudCompleto()
+        {
+            ViewData["Title"] = "Administração Completa (CRUD)";
+            var colaboradores = _context.Colaboradores.ToList();
             return View("ListarUsuarios", colaboradores);
         }
+
 
         // Editar Colaborador (GET) 
         public IActionResult Editar(int id)
@@ -331,37 +360,60 @@ namespace FlexCap.Web.Controllers
 
 
 
-
+        //Test1234
 
         public IActionResult Colaborador()
         {
-            ViewData["Title"] = "Colaboradores da Equipe";
-            ViewData["Profile"] = "Colaborador";
-
-            string emailDoUsuarioLogado = "pedro.souza@flexcap.com";
-
-            var colaboradorLogado = _context.Colaboradores
-                                            .FirstOrDefault(c => c.Email == emailDoUsuarioLogado);
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var colaboradorLogado = _context.Colaboradores.FirstOrDefault(c => c.Email == userEmail);
+            var colaboradoresDoTime = new List<Colaborador>(); 
 
             if (colaboradorLogado != null)
             {
-              
-                ViewData["NomeDoUsuario"] = colaboradorLogado.FullName.Split(' ')[0]; 
+                ViewData["FirstName"] = colaboradorLogado.FullName?.Split(' ')[0] ?? "Colaborador";
+                ViewData["UserTeam"] = colaboradorLogado.TeamName ?? "Sem Time";
+                ViewData["ActiveMembers"] = colaboradorLogado.TeamName != null
+                                            ? _context.Colaboradores.Count(c => c.TeamName == colaboradorLogado.TeamName && c.Status == "Ativo")
+                                            : 1;
 
-                var timeDoUsuario = colaboradorLogado.TeamName; 
-                var colaboradoresDoTime = _context.Colaboradores
-                                                .Where(c => c.TeamName == timeDoUsuario) 
-                                                .ToList();
-                return View(colaboradoresDoTime);
+                colaboradoresDoTime = _context.Colaboradores
+                                            .Where(c => c.TeamName == colaboradorLogado.TeamName)
+                                            .ToList();
+
+                return View("~/Views/Home/colaborador.cshtml", colaboradoresDoTime);
             }
 
-            return View(new List<Colaborador>());
+            return RedirectToAction("Logout", "Login");
         }
 
 
 
 
+        public IActionResult ListarEquipe()
+        {
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var colaboradorLogado = _context.Colaboradores.FirstOrDefault(c => c.Email == userEmail);
+            var colaboradoresDoTime = new List<Colaborador>();
+            string perfil = "Colaborador"; 
 
+            if (colaboradorLogado != null)
+            {
+                colaboradoresDoTime = _context.Colaboradores
+                    .Where(c => c.TeamName == colaboradorLogado.TeamName)
+                    .ToList();
+
+                if (colaboradorLogado.Position == "Project Manager")
+                {
+                    perfil = "Manager";
+                }
+            }
+
+            ViewData["Title"] = "Membros da Equipe";
+            ViewData["Profile"] = perfil;
+
+       
+            return View("TimeDetalhes", colaboradoresDoTime);
+        }
 
 
 
@@ -392,12 +444,6 @@ namespace FlexCap.Web.Controllers
             return View(new List<Colaborador>());
         }
 
-        public IActionResult Rh()
-        {
-            ViewData["Title"] = "Gestão de Colaboradores (RH)";
-            ViewData["Profile"] = "Rh";
-            var colaboradores = _context.Colaboradores.ToList();
-            return View(colaboradores);
-        }
+        
     }
 }
