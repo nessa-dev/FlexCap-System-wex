@@ -3,9 +3,13 @@ using FlexCap.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.CodeAnalysis.Elfie.Serialization;
+using Microsoft.CodeAnalysis.Rename;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Intrinsics.X86;
 using System.Security.Claims;
 
 namespace FlexCap.Web.Controllers
@@ -414,6 +418,52 @@ namespace FlexCap.Web.Controllers
        
             return View("TimeDetalhes", colaboradoresDoTime);
         }
+
+
+
+      
+
+        [Authorize(Roles = "HR Manager, HR Analyst, HR Consultant")]
+        public IActionResult BuscarColaboradores(string nomeBusca, string statusBusca, string countryBusca, string sectorBusca, string teamBusca)
+        {
+            ViewData["Title"] = "Gestão de Colaboradores (RH)";
+            ViewData["Profile"] = "Rh";
+
+            var colaboradores = _context.Colaboradores
+                .Where(c => c.Email != "recursoshumanos@flexcap.com")
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(nomeBusca))
+            {
+                colaboradores = colaboradores.Where(c => c.FullName != null && c.FullName.Contains(nomeBusca));
+            }
+            if (!string.IsNullOrEmpty(statusBusca) && statusBusca != "All")
+            {
+                colaboradores = colaboradores.Where(c => c.Status == statusBusca);
+            }
+            if (!string.IsNullOrEmpty(countryBusca) && countryBusca != "Select country")
+            {
+                colaboradores = colaboradores.Where(c => c.Country == countryBusca);
+            }
+            if (!string.IsNullOrEmpty(sectorBusca) && sectorBusca != "Select Sector")
+            {
+                colaboradores = colaboradores.Where(c => c.Department == sectorBusca);
+            }
+            if (!string.IsNullOrEmpty(teamBusca) && teamBusca != "Select Team")
+            {
+                colaboradores = colaboradores.Where(c => c.TeamName == teamBusca);
+            }
+
+            ViewData["NomeBusca"] = nomeBusca;
+            ViewData["StatusBusca"] = statusBusca;
+            ViewData["CountryBusca"] = countryBusca;
+            ViewData["SectorBusca"] = sectorBusca;
+            ViewData["TeamBusca"] = teamBusca;
+
+            return View("Rh", colaboradores.ToList());
+        }
+
+
 
 
 

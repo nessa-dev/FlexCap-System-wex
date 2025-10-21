@@ -4,77 +4,90 @@
 @{
     ViewData["Title"] = "Gestão de Colaboradores (RH)";
     Layout = "~/Views/Shared/Template.cshtml";
+
+    var nomeBusca = ViewData["NomeBusca"] as string;
+    var statusBusca = ViewData["StatusBusca"] as string;
+    var countryBusca = ViewData["CountryBusca"] as string;
+    var sectorBusca = ViewData["SectorBusca"] as string;
+    var teamBusca = ViewData["TeamBusca"] as string;
 }
 
-
-<div class="py-4" style="max-width: 850px; width: 100%; margin-left: 0.5rem; margin-right: auto; overflow-y: hidden; height: calc(100vh - 5rem);">
+<div class="py-4 w-100">
 
     <h3 class="fw-bold mb-3">Colaboradores</h3>
 
-    <div class="row g-2 mb-4 d-flex align-items-end">
+    <form asp-controller="Colaboradores" asp-action="BuscarColaboradores" method="get">
+        <div class="row g-2 mb-4 d-flex align-items-end">
 
-        <!-- Filtro: Name -->
-        <div class="col-md-2">
-            <label for="search-name" class="form-label small mb-0">Name</label>
-            <input type="text" id="search-name" class="form-control form-control-sm" placeholder="Search name">
-        </div>
+            <div class="col-md-2">
+                <label for="search-name" class="form-label small mb-0">Name</label>
+                <input type="text" id="search-name" name="nomeBusca" value="@nomeBusca" class="form-control form-control-sm" placeholder="Search name">
+            </div>
 
-        <!-- Filtro: Status -->
-        <div class="col-md-2">
-            <label for="status" class="form-label small mb-0">Status</label>
-            <select id="status" class="form-select form-select-sm">
-                <option>Active</option>
-                <option>Inactive</option>
-            </select>
-        </div>
+            <div class="col-md-2">
+                <label for="status" class="form-label small mb-0">Status</label>
+                <select id="status" name="statusBusca" class="form-select form-select-sm">
+                    <option value="" selected="@(string.IsNullOrEmpty(statusBusca))">All</option>
+                    <option value="Ativo" selected="@("Ativo" == statusBusca)">Active</option>
+                    <option value="Inativo" selected="@("Inativo" == statusBusca)">Inactive</option>
+                </select>
+            </div>
 
-        <!-- Filtro: Country -->
-        <div class="col-md-2">
-            <label for="country" class="form-label small mb-0">Country</label>
-            <select id="country" class="form-select form-select-sm">
-                <option>Select country</option>
-                <option>Brazil</option>
-                <option>United States</option>
-                <option>Japan</option>
-                <option>Italy</option>
-                <option>Canada</option>
-            </select>
-        </div>
+            <div class="col-md-2">
+                <label for="country" class="form-label small mb-0">Country</label>
+                <select id="country" name="countryBusca" class="form-select form-select-sm">
+                    <option value="" selected="@(string.IsNullOrEmpty(countryBusca))">Select country</option>
+                    <option value="Brazil" selected="@("Brazil" == countryBusca)">Brazil</option>
+                    <option value="United States" selected="@("United States" == countryBusca)">United States</option>
+                    <option value="Japan" selected="@("Japan" == countryBusca)">Japan</option>
+                    <option value="Italy" selected="@("Italy" == countryBusca)">Italy</option>
+                    <option value="Canada" selected="@("Canada" == countryBusca)">Canada</option>
+                </select>
+            </div>
 
-        <!-- Filtro: Sector -->
-        <div class="col-md-2">
-            <label for="sector" class="form-label small mb-0">Sector</label>
-            <select id="sector" class="form-select form-select-sm">
-                <option>Select Sector</option>
-                <option>Benefits</option>
-                <option>Mobility</option>
-                <option>Corporate Payments</option>
-            </select>
-        </div>
+            <div class="col-md-2">
+                <label for="sector" class="form-label small mb-0">Sector</label>
+                <select id="sector" name="sectorBusca" class="form-select form-select-sm">
+                    <option value="" selected="@(string.IsNullOrEmpty(sectorBusca))">Select Sector</option>
+                    <option value="Benefits" selected="@("Benefits" == sectorBusca)">Benefits</option>
+                    <option value="Mobility" selected="@("Mobility" == sectorBusca)">Mobility</option>
+                    <option value="Corporate Payments" selected="@("Corporate Payments" == sectorBusca)">Corporate Payments</option>
+                </select>
+            </div>
 
-        <!-- Filtro: Team -->
-        <div class="col-md-2">
-            <label for="team" class="form-label small mb-0">Team</label>
-            <select id="team" class="form-select form-select-sm">
-                <option>Select Team</option>
-                <option>Titans</option>
-                <option>Code Warriors</option>
-                <option>Bug Busters</option>
-            </select>
-        </div>
+            <div class="col-md-2">
+                <label for="team" class="form-label small mb-0">Team</label>
+                <select id="team" name="teamBusca" class="form-select form-select-sm">
+                    <option value="" selected="@(string.IsNullOrEmpty(teamBusca))">Select Team</option>
+                    <option value="Titans" selected="@("Titans" == teamBusca)">Titans</option>
+                    <option value="Code Warriors" selected="@("Code Warriors" == teamBusca)">Code Warriors</option>
+                    <option value="Bug Busters" selected="@("Bug Busters" == teamBusca)">Bug Busters</option>
+                    <option value="Pixel Pioneers" selected="@("Pixel Pioneers" == teamBusca)">Pixel Pioneers</option>
+                    <option value="Cloud Crusaders" selected="@("Cloud Crusaders" == teamBusca)">Cloud Crusaders</option>
+                    <option value="Dev Dynamos" selected="@("Dev Dynamos" == teamBusca)">Dev Dynamos</option>
+                </select>
+            </div>
 
-        <!-- Botão de Busca -->
-        <div class="col-auto">
-            <button class="btn btn-dark btn-sm" style="margin-top: 20px;">
-                <span class="material-icons" style="font-size: 18px;">search</span>
-            </button>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-dark btn-sm" style="margin-top: 20px;">
+                    <span class="material-icons" style="font-size: 18px;">search</span>
+                </button>
+            </div>
         </div>
+    </form>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <p class="text-muted mb-0">@Model.Count colaboradores encontrados</p>
+
+        <a asp-controller="Colaboradores" asp-action="Register" class="btn btn-custom">
+            + Register New Employee
+        </a>
     </div>
 
-    <div class="table-scroll-container">
+    <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
         <table class="table align-middle table-sm">
-            <thead class="table-light sticky-header">
-                <tr>
+            <thead class="table-light">
+                <tr class="sticky-top">
                     <th>Photo</th>
                     <th>Name</th>
                     <th>Position</th>
@@ -85,8 +98,6 @@
                 </tr>
             </thead>
             <tbody>
-
-
                 @if (Model != null)
                 {
                     @foreach (var colaborador in Model)
