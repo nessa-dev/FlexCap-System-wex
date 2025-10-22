@@ -364,8 +364,6 @@ namespace FlexCap.Web.Controllers
 
 
 
-        //Test1234
-
         public IActionResult Colaborador()
         {
             var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
