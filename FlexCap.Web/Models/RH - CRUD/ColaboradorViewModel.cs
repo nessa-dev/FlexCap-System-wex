@@ -1,5 +1,6 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Http; // Adicione este using para o IFormFile
 
 namespace FlexCap.Web.Models
 {
@@ -21,8 +22,11 @@ namespace FlexCap.Web.Models
         public string? TeamName { get; set; }
         public string? Country { get; set; }
         public string? Status { get; set; }
+
         public IFormFile? PhotoFile { get; set; }
         public string? PhotoUrl { get; set; }
-        public bool IsManager { get; set; }
+        [NotMapped]
+        public bool IsManager => Position == "Project Manager";
+
     }
 }

@@ -1,6 +1,7 @@
 ﻿@using FlexCap.Web.Models
 @model List<FlexCap.Web.Models.Colaborador>
 
+
 @{
     ViewData["Title"] = "Gestão de Colaboradores (RH)";
     Layout = "~/Views/Shared/Template.cshtml";
@@ -12,6 +13,38 @@
     var teamBusca = ViewData["TeamBusca"] as string;
 }
 
+@if (TempData["CadastroSucesso"] != null && (bool)TempData["CadastroSucesso"]!)
+{
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="successModalLabel">✅ Registration Successful!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @* Uses data saved in TempData *@
+                    <p>The profile for the new employee **@TempData["NovoColaboradorNome"]** has been created. Use the credentials below for initial access:</p>
+
+                    <div class="p-3 bg-light border rounded">
+                        <h6 class="text-muted small mb-1">Access Email:</h6>
+                        <p class="fw-bold" id="modal-email">@TempData["NovoColaboradorEmail"]</p>
+
+                        <h6 class="text-muted small mb-1">Temporary Password:</h6>
+                        <p class="fw-bold text-danger" id="modal-senha">@TempData["NovoColaboradorSenha"]</p>
+
+                        <small class="text-muted d-block mt-2">We recommend the employee changes this password upon first login.</small>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" id="copyCredentialsBtn" class="btn btn-primary">Copy Credentials</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 <div class="py-4 w-100">
 
     <h3 class="fw-bold mb-3">Colaboradores</h3>
@@ -103,7 +136,21 @@
                     @foreach (var colaborador in Model)
                     {
                         <tr>
-                            <td><img src="@colaborador.PhotoUrl" class="rounded-circle" width="30" height="30"></td>
+                            <td>
+                                <div class="photo-container">
+                                    <img src="@colaborador.PhotoUrl"
+                                         class="rounded-circle"
+                                         width="30" height="30"
+                                         alt="Foto do Colaborador">
+
+                                    @if (colaborador.IsManager)
+                                    {
+                                        <span class="manager-crown">
+                                            &#x1F451;
+                                        </span>
+                                    }
+                                </div>
+                            </td>
                             <td><strong>@colaborador.FullName</strong></td>
                             <td>@colaborador.Position</td>
                             <td>@colaborador.Country</td>
@@ -115,5 +162,51 @@
                 }
             </tbody>
         </table>
+
+        @section Scripts {
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Checks if the modal was rendered (indicating the registration was done successfully)
+                    const modalElement = document.getElementById('successModal');
+
+                    if (modalElement) {
+                        // 1. Display the modal
+                        // Ensure Bootstrap JS is loaded
+                        const successModal = new bootstrap.Modal(modalElement);
+                        successModal.show();
+
+                        // 2. Logic for the 'Copy Credentials' button
+                        const copyBtn = document.getElementById('copyCredentialsBtn');
+                        if (copyBtn) {
+                            copyBtn.addEventListener('click', function() {
+                                const email = document.getElementById('modal-email').textContent.trim();
+                                const senha = document.getElementById('modal-senha').textContent.trim();
+
+                                // Format the text for the clipboard
+                                const textToCopy = `FlexCap Access:\nEmail: ${email}\nPassword: ${senha}`;
+
+                                navigator.clipboard.writeText(textToCopy).then(() => {
+                                    copyBtn.textContent = 'Copied!';
+                                    copyBtn.classList.remove('btn-primary'); // Remove original color
+                                    copyBtn.classList.add('btn-success'); // Change to success color
+
+                                    setTimeout(() => {
+                                        copyBtn.textContent = 'Copy Credentials';
+                                        copyBtn.classList.remove('btn-success');
+                                        copyBtn.classList.add('btn-primary'); // Revert to primary color
+                                    }, 2000);
+                                }).catch(err => {
+                                    console.error('Failed to copy:', err);
+                                    alert('Failed to copy. Please try copying manually.');
+                                });
+                            });
+                        }
+                    }
+                });
+            </script>
+            @{
+                await Html.RenderPartialAsync("_ValidationScriptsPartial");
+            }
+        }
     </div>
 </div>

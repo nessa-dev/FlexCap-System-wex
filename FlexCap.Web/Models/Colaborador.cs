@@ -37,6 +37,9 @@ namespace FlexCap.Web.Models
         public string? ResetPasswordToken { get; set; }
         public DateTime? ResetPasswordTokenExpiry { get; set; }
 
+        [NotMapped]
+        public bool IsManager => Position == "Project Manager";
+
 
     }
 }
