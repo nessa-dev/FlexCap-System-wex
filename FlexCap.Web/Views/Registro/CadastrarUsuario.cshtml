@@ -7,12 +7,10 @@
     var defaultPhotoUrl = "https://placehold.co/100x100/F5F5F5/B0B0B0?text=Photo";
     var currentStatus = Model.Status ?? "Ativo";
 
-    // Corrigido: Variável local para evitar erro de tipo no Razor
     var inactivityReasonsList = ViewBag.InactivityReasons as SelectList;
 }
 
 <style>
-    /* Estilos de compactação */
     .form-control, .form-select {
         margin-bottom: 0 !important;
         height: 1.8rem !important;
@@ -27,6 +25,10 @@
 
     .compact-row {
         margin-bottom: 0.5rem !important;
+    }
+    /* Estilo para a mensagem de erro (opcional, mas recomendado para o Bootstrap) */
+    .field-validation-error {
+        font-size: 0.75rem;
     }
 </style>
 
@@ -52,23 +54,53 @@
 
                     <input type="file" id="photoFile" name="PhotoFile" accept="image/*" class="form-control form-control-sm mb-2" />
 
-                    <div class="form-check d-flex justify-content-center align-items-center gap-1">
-                        <input class="form-check-input" type="checkbox" id="isManagerCheckbox" name="IsManager" value="true" checked="@Model.IsManager" style="margin-top: 0.1rem;">
-                        <label class="form-check-label small fw-bold" for="isManagerCheckbox">Manager</label>
-                    </div>
                 </div>
 
                 <div class="col-md-9">
                     <div class="row g-2">
 
-                        <div class="col-md-6 compact-row"><label class="form-label small">Full Name</label><input asp-for="FullName" class="form-control" /></div>
-                        <div class="col-md-6 compact-row"><label class="form-label small">Email</label><input asp-for="Email" class="form-control" /></div>
-                        <div class="col-md-6 compact-row"><label class="form-label small">Password</label><input asp-for="Senha" type="password" class="form-control" /></div>
-                        <div class="col-md-6 compact-row"><label class="form-label small">Position</label><select asp-for="Position" asp-items="ViewBag.Positions" class="form-select"></select></div>
+                        <div class="col-md-6 compact-row">
+                            <label class="form-label small">Full Name</label>
+                            <input asp-for="FullName" class="form-control" />
+                            <span asp-validation-for="FullName" class="text-danger small"></span>
+                        </div>
 
-                        <div class="col-md-4 compact-row"><label class="form-label small">Department</label><select asp-for="Department" asp-items="ViewBag.Departments" class="form-select"></select></div>
-                        <div class="col-md-4 compact-row"><label class="form-label small">Team</label><select asp-for="TeamName" asp-items="ViewBag.Teams" class="form-select"></select></div>
-                        <div class="col-md-4 compact-row"><label class="form-label small">Country</label><select asp-for="Country" asp-items="ViewBag.Countries" class="form-select"></select></div>
+                        <div class="col-md-6 compact-row">
+                            <label class="form-label small">Email</label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6 compact-row">
+                            <label class="form-label small">Password</label>
+                            <input asp-for="Senha" type="password" class="form-control" />
+                            <span asp-validation-for="Senha" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6 compact-row">
+                            <label class="form-label small">Position</label>
+                            <select asp-for="Position" asp-items="ViewBag.Positions" class="form-select"></select>
+                            <span asp-validation-for="Position" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4 compact-row">
+                            <label class="form-label small">Department</label>
+                            <select asp-for="Department" asp-items="ViewBag.Departments" class="form-select"></select>
+                            <span asp-validation-for="Department" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4 compact-row">
+                            <label class="form-label small">Team</label>
+                            <select asp-for="TeamName" asp-items="ViewBag.Teams" class="form-select"></select>
+                            <span asp-validation-for="TeamName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4 compact-row">
+                            <label class="form-label small">Country</label>
+                            <select asp-for="Country" asp-items="ViewBag.Countries" class="form-select"></select>
+                            <span asp-validation-for="Country" class="text-danger small"></span>
+                        </div>
+
 
                         <div class="col-md-12 mt-2 pt-1">
                             <label class="form-label d-block small mb-1">Status</label>
@@ -80,47 +112,51 @@
                                 <input class="form-check-input" type="radio" name="Status" id="status-inativo" value="Inativo" checked="@("Inativo".Equals(currentStatus))">
                                 <label class="form-check-label small" for="status-inativo">Inativo</label>
                             </div>
+                            <span asp-validation-for="Status" class="text-danger small d-block"></span>
                         </div>
 
                     </div>
 
-                </div> <div id="inactivity-fields-group" class="col-md-12" style="display: none;">
-                    <hr class="my-2" />
-                    <div class="row g-2">
-                        <div class="col-md-4">
-                            <label class="form-label small">Reason for Inactivity</label>
-                            <select class="form-select form-select-sm" name="ReasonForInactivity" id="reasonForInactivity" asp-items="ViewBag.InactivityReasons">
-                                <option value="">Select Reason</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small">Start Date</label>
-                            <input type="date" class="form-control form-control-sm" name="StartDate" />
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small">End Date</label>
-                            <input type="date" class="form-control form-control-sm" name="EndDate" />
-                        </div>
+                </div>
+            </div>
+
+            <div id="inactivity-fields-group" class="col-md-12" style="display: none;">
+                <hr class="my-2" />
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <label class="form-label small">Reason for Inactivity</label>
+                        <select class="form-select form-select-sm" name="ReasonForInactivity" id="reasonForInactivity" asp-items="ViewBag.InactivityReasons">
+                            <option value="">Select Reason</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small">Start Date</label>
+                        <input type="date" class="form-control form-control-sm" name="StartDate" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small">End Date</label>
+                        <input type="date" class="form-control form-control-sm" name="EndDate" />
                     </div>
                 </div>
-
-                @Html.HiddenFor(m => m.Status)
-
             </div>
+
+            @Html.HiddenFor(m => m.Status)
+
 
             <div class="mt-4 d-flex justify-content-end gap-2">
                 <a asp-controller="Colaboradores" asp-action="Listar" class="btn btn-secondary px-4">Cancel</a>
-                <button type="submit" class="btn btn-primary px-4">Save</button>
+                <button type="submit" class="btn btn-custom px-4">Save</button>
             </div>
 
         </form>
     </div>
 </div>
 
+
 @section Scripts {
     <script>
-                document.addEventListener('DOMContentLoaded', function () {
-            const photoFileInput = document.getElementById('photoFile'); 
+        document.addEventListener('DOMContentLoaded', function () {
+            const photoFileInput = document.getElementById('photoFile');
             const preview = document.getElementById('photo-preview');
             const defaultPlaceholder = '@defaultPhotoUrl';
 
@@ -129,9 +165,9 @@
                 if (file) {
                     const reader = new FileReader();
                     reader.onload = (ev) => {
-                        preview.src = ev.target.result; 
+                        preview.src = ev.target.result;
                     };
-                    reader.readAsDataURL(file); 
+                    reader.readAsDataURL(file);
                 } else {
                     preview.src = defaultPlaceholder;
                 }
@@ -154,3 +190,7 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
+
+
+
+

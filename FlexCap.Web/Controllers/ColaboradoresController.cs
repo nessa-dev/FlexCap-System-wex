@@ -264,7 +264,9 @@ namespace FlexCap.Web.Controllers
         }
 
 
-        //HR2025!
+       
+
+
 
         // Listar Colaboradores 
         [Authorize(Roles = "HR Manager, HR Analyst, HR Consultant")]

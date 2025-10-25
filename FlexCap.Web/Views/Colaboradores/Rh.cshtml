@@ -23,7 +23,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    @* Uses data saved in TempData *@
                     <p>The profile for the new employee **@TempData["NovoColaboradorNome"]** has been created. Use the credentials below for initial access:</p>
 
                     <div class="p-3 bg-light border rounded">
@@ -112,7 +111,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <p class="text-muted mb-0">@Model.Count colaboradores encontrados</p>
 
-        <a asp-controller="Registro" asp-action="NovoColaborador" class="btn btn-primary">
+        <a asp-controller="Registro" asp-action="NovoColaborador" class="btn btn-custom">
             + Register New Employee
         </a>
     </div>
@@ -166,34 +165,29 @@
         @section Scripts {
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
-                    // Checks if the modal was rendered (indicating the registration was done successfully)
                     const modalElement = document.getElementById('successModal');
 
                     if (modalElement) {
-                        // 1. Display the modal
-                        // Ensure Bootstrap JS is loaded
                         const successModal = new bootstrap.Modal(modalElement);
                         successModal.show();
 
-                        // 2. Logic for the 'Copy Credentials' button
                         const copyBtn = document.getElementById('copyCredentialsBtn');
                         if (copyBtn) {
                             copyBtn.addEventListener('click', function() {
                                 const email = document.getElementById('modal-email').textContent.trim();
                                 const senha = document.getElementById('modal-senha').textContent.trim();
 
-                                // Format the text for the clipboard
                                 const textToCopy = `FlexCap Access:\nEmail: ${email}\nPassword: ${senha}`;
 
                                 navigator.clipboard.writeText(textToCopy).then(() => {
                                     copyBtn.textContent = 'Copied!';
-                                    copyBtn.classList.remove('btn-primary'); // Remove original color
-                                    copyBtn.classList.add('btn-success'); // Change to success color
+                                    copyBtn.classList.remove('btn-primary'); 
+                                    copyBtn.classList.add('btn-success'); 
 
                                     setTimeout(() => {
                                         copyBtn.textContent = 'Copy Credentials';
                                         copyBtn.classList.remove('btn-success');
-                                        copyBtn.classList.add('btn-primary'); // Revert to primary color
+                                        copyBtn.classList.add('btn-primary'); 
                                     }, 2000);
                                 }).catch(err => {
                                     console.error('Failed to copy:', err);

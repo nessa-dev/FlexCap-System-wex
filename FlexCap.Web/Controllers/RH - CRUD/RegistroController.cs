@@ -98,64 +98,91 @@ namespace FlexCap.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> NovoColaborador(ColaboradorViewModel model)
         {
+            
+            if (model.Email != null && await _context.Colaboradores.AnyAsync(c => c.Email == model.Email))
+            {
+                ModelState.AddModelError("Email", "This email is already registered.");
+            }
+
             if (model.Senha == null)
             {
                 ModelState.AddModelError("Senha", "A senha é obrigatória.");
             }
-
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                string senhaOriginal = model.Senha!;
-
-                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(senhaOriginal);
-                string finalPosition = model.IsManager ? "Project Manager" : model.Position!;
-
-                string photoUrl = "https://randomuser.me/api/portraits/lego/1.jpg";
-                if (model.PhotoFile != null && model.PhotoFile.Length > 0)
-                {
-                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                    Directory.CreateDirectory(uploadsFolder);
-                    string fileName = Guid.NewGuid() + Path.GetExtension(model.PhotoFile.FileName);
-                    string filePath = Path.Combine(uploadsFolder, fileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await model.PhotoFile.CopyToAsync(stream);
-                    }
-                    photoUrl = "/uploads/" + fileName;
-                }
-                else if (!string.IsNullOrEmpty(model.PhotoUrl))
-                {
-                    photoUrl = model.PhotoUrl;
-                }
-
-                var novoColaborador = new Colaborador
-                {
-                    FullName = model.FullName!,
-                    Email = model.Email!,
-                    PasswordHash = hashedPassword, 
-                    Position = finalPosition,
-                    Department = model.Department,
-                    TeamName = model.TeamName,
-                    Country = model.Country,
-                    PhotoUrl = photoUrl,
-                    Status = model.Status ?? "Ativo"
-                };
-
-                _context.Colaboradores.Add(novoColaborador);
-                await _context.SaveChangesAsync();
-
-                TempData["CadastroSucesso"] = true;
-                TempData["NovoColaboradorNome"] = model.FullName;
-                TempData["NovoColaboradorEmail"] = model.Email;
-                TempData["NovoColaboradorSenha"] = senhaOriginal; 
-
-                return RedirectToAction("Listar", "Colaboradores");
+                PopulateViewBags();
+                return View("CadastrarUsuario", model);
             }
 
-            PopulateViewBags();
-            return View("CadastrarUsuario", model);
+            string senhaOriginal = model.Senha!;
+
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(senhaOriginal);
+            string finalPosition = model.IsManager ? "Project Manager" : model.Position!;
+
+            string photoUrl = "https://randomuser.me/api/portraits/lego/1.jpg";
+
+            if (model.PhotoFile != null && model.PhotoFile.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                Directory.CreateDirectory(uploadsFolder);
+                string fileName = Guid.NewGuid() + Path.GetExtension(model.PhotoFile.FileName);
+                string filePath = Path.Combine(uploadsFolder, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.PhotoFile.CopyToAsync(stream);
+                }
+                photoUrl = "/uploads/" + fileName;
+            }
+            else if (!string.IsNullOrEmpty(model.PhotoUrl))
+            {
+                photoUrl = model.PhotoUrl;
+            }
+
+            var novoColaborador = new Colaborador
+            {
+                FullName = model.FullName!,
+                Email = model.Email!,
+                PasswordHash = hashedPassword,
+                Position = finalPosition,
+                Department = model.Department,
+                TeamName = model.TeamName,
+                Country = model.Country,
+                PhotoUrl = photoUrl,
+                Status = model.Status ?? "Ativo"
+            };
+
+            _context.Colaboradores.Add(novoColaborador);
+            await _context.SaveChangesAsync();
+
+            TempData["CadastroSucesso"] = true;
+            TempData["NovoColaboradorNome"] = model.FullName;
+            TempData["NovoColaboradorEmail"] = model.Email;
+            TempData["NovoColaboradorSenha"] = senhaOriginal;
+
+            return RedirectToAction("Listar", "Colaboradores");
         }
 
+
+
+
+
+
+
+        [AcceptVerbs("GET", "POST")]
+        public async Task<IActionResult> CheckEmailAvailability(string email)
+        {
+            // Verifica se existe algum colaborador com este e-mail (case-insensitive)
+            bool emailExists = await _context.Colaboradores.AnyAsync(c => c.Email == email);
+
+            if (emailExists)
+            {
+                // Se o e-mail JÁ EXISTE, retorna FALSE (invalida o campo)
+                return Json(false);
+            }
+
+            // Se o e-mail NÃO EXISTE, retorna TRUE (válido para cadastro)
+            return Json(true);
+        }
 
 
 
