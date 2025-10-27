@@ -1,11 +1,15 @@
-﻿@{
+﻿@model List<FlexCap.Web.Models.Colaborador>
+
+@{
     ViewData["Title"] = "Colaboradores da Equipe";
     Layout = "~/Views/Shared/Template.cshtml";
+
+    // 🚩 VARIÁVEL OBRIGATÓRIA: Deve ser passada pela Action C#
+    string loggedInUserName = ViewData["LoggedInUserName"] as string ?? "";
 }
 
-@model List<FlexCap.Web.Models.Colaborador>
+<div class="py-4 w-100">
 
-<div class="py-4" style="max-width: 850px; width: 100%; margin-left: 0.5rem; margin-right: auto; overflow-y: hidden; height: calc(100vh - 5rem);">
     <h3 class="fw-bold mb-3">Collaborators</h3>
     <p class="text-muted mb-4">@Model.Count members</p>
 
@@ -14,25 +18,46 @@
         {
             @foreach (var colaborador in Model)
             {
-                var statusColorClass = colaborador.Status == "Ativo" ? "text-success" : "text-danger";
-                var dotColorClass = colaborador.Status == "Ativo" ? "bg-success" : "bg-danger";
-                var nomeDisplay = colaborador.FullName;
-                if (colaborador.FullName == "Carlos Tavares")
+                string statusValue = colaborador.Status ?? "N/A";
+                string statusDisplay = statusValue == "Ativo" ? "Active" : "Inactive";
+
+                var statusColorClass = statusValue == "Ativo" ? "text-success" : "text-danger";
+                var dotColorClass = statusValue == "Ativo" ? "bg-success" : "bg-danger";
+
+                string nomeDisplay = colaborador.FullName;
+
+               
+                bool isCurrentUser = colaborador.FullName?.Trim() == loggedInUserName?.Trim();
+
+                if (isCurrentUser)
                 {
                     nomeDisplay += " (You)";
                 }
 
                 <div class="col-12 mb-2">
-                    <div class="card p-2 shadow-sm d-flex flex-row align-items-center">
-                        <img src="@colaborador.PhotoUrl" class="rounded-circle me-3" width="40" height="40" alt="Foto do Colaborador">
+                    <div class="card p-2 shadow-sm d-flex flex-row align-items-center" style="max-width: 500px;">
+
+                        <div class="position-relative me-3">
+                            <img src="@colaborador.PhotoUrl" class="rounded-circle" width="40" height="40" alt="Foto do Colaborador">
+
+                            @if (colaborador.Position?.Trim() == "Project Manager")
+                            {
+                                <span class="manager-crown position-absolute top-0 end-0" style="font-size: 16px;">
+                                    &#x1F451;
+                                </span>
+                            }
+                        </div>
+
                         <div>
                             <h6 class="mb-0 fw-bold">@nomeDisplay</h6>
                             <small class="text-muted">@colaborador.Position</small>
                         </div>
+
                         <div class="ms-auto d-flex align-items-center">
-                            <span class="@statusColorClass me-2 fw-bold small">@colaborador.Status</span>
+                            <span class="@statusColorClass me-2 fw-bold small">@statusDisplay</span>
                             <span class="dot @dotColorClass"></span>
                         </div>
+
                     </div>
                 </div>
             }

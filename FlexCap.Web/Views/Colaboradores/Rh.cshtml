@@ -1,7 +1,6 @@
 ﻿@using FlexCap.Web.Models
 @model List<FlexCap.Web.Models.Colaborador>
 
-
 @{
     ViewData["Title"] = "Gestão de Colaboradores (RH)";
     Layout = "~/Views/Shared/Template.cshtml";
@@ -44,13 +43,13 @@
         </div>
     </div>
 }
+
 <div class="py-4 w-100">
 
     <h3 class="fw-bold mb-3">Colaboradores</h3>
 
     <form asp-controller="Colaboradores" asp-action="BuscarColaboradores" method="get">
         <div class="row g-2 mb-4 d-flex align-items-end">
-
             <div class="col-md-2">
                 <label for="search-name" class="form-label small mb-0">Name</label>
                 <input type="text" id="search-name" name="nomeBusca" value="@nomeBusca" class="form-control form-control-sm" placeholder="Search name">
@@ -116,91 +115,148 @@
         </a>
     </div>
 
-    <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
-        <table class="table align-middle table-sm">
-            <thead class="table-light">
-                <tr class="sticky-top">
-                    <th>Photo</th>
-                    <th>Name</th>
-                    <th>Position</th>
-                    <th>Country</th>
-                    <th>Current Status</th>
-                    <th>Sector</th>
-                    <th>Team</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model != null)
-                {
-                    @foreach (var colaborador in Model)
-                    {
-                        <tr>
-                            <td>
-                                <div class="photo-container">
-                                    <img src="@colaborador.PhotoUrl"
-                                         class="rounded-circle"
-                                         width="30" height="30"
-                                         alt="Foto do Colaborador">
+    <div class="d-flex w-100 align-items-start">
 
-                                    @if (colaborador.IsManager)
-                                    {
-                                        <span class="manager-crown">
-                                            &#x1F451;
-                                        </span>
-                                    }
-                                </div>
-                            </td>
-                            <td><strong>@colaborador.FullName</strong></td>
-                            <td>@colaborador.Position</td>
-                            <td>@colaborador.Country</td>
-                            <td>@colaborador.Status</td>
-                            <td>@colaborador.Department</td>
-                            <td>@colaborador.TeamName</td>
+        <div class="me-4" style="flex-grow: 1; max-width: 75%;">
+
+            <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
+                <table class="table align-middle table-sm">
+                    <thead class="table-light">
+                        <tr class="sticky-top">
+                            <th>Photo</th>
+                            <th>Name</th>
+                            <th>Position</th>
+                            <th>Country</th>
+                            <th>Current Status</th>
+                            <th>Sector</th>
+                            <th>Team</th>
                         </tr>
-                    }
-                }
-            </tbody>
-        </table>
+                    </thead>
+                    <tbody>
+                        @if (Model != null)
+                        {
+                            @foreach (var colaborador in Model)
+                            {
+                                <tr class="colaborador-row" data-id="@colaborador.Id" style="cursor: pointer;">
+                                    <td>
+                                        <div class="photo-container">
+                                            <img src="@colaborador.PhotoUrl"
+                                                 class="rounded-circle"
+                                                 width="30" height="30"
+                                                 alt="Foto do Colaborador">
 
-        @section Scripts {
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    const modalElement = document.getElementById('successModal');
-
-                    if (modalElement) {
-                        const successModal = new bootstrap.Modal(modalElement);
-                        successModal.show();
-
-                        const copyBtn = document.getElementById('copyCredentialsBtn');
-                        if (copyBtn) {
-                            copyBtn.addEventListener('click', function() {
-                                const email = document.getElementById('modal-email').textContent.trim();
-                                const senha = document.getElementById('modal-senha').textContent.trim();
-
-                                const textToCopy = `FlexCap Access:\nEmail: ${email}\nPassword: ${senha}`;
-
-                                navigator.clipboard.writeText(textToCopy).then(() => {
-                                    copyBtn.textContent = 'Copied!';
-                                    copyBtn.classList.remove('btn-primary'); 
-                                    copyBtn.classList.add('btn-success'); 
-
-                                    setTimeout(() => {
-                                        copyBtn.textContent = 'Copy Credentials';
-                                        copyBtn.classList.remove('btn-success');
-                                        copyBtn.classList.add('btn-primary'); 
-                                    }, 2000);
-                                }).catch(err => {
-                                    console.error('Failed to copy:', err);
-                                    alert('Failed to copy. Please try copying manually.');
-                                });
-                            });
+                                            @if (colaborador.IsManager)
+                                            {
+                                                <span class="manager-crown">
+                                                    &#x1F451;
+                                                </span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td><strong>@colaborador.FullName</strong></td>
+                                    <td>@colaborador.Position</td>
+                                    <td>@colaborador.Country</td>
+                                    <td>@colaborador.Status</td>
+                                    <td>@colaborador.Department</td>
+                                    <td>@colaborador.TeamName</td>
+                                </tr>
+                            }
                         }
-                    }
-                });
-            </script>
-            @{
-                await Html.RenderPartialAsync("_ValidationScriptsPartial");
-            }
-        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="details-panel-container" class="p-3 border rounded shadow-sm"
+             style="width: 25%; 
+            min-width: 250px; 
+            max-height: 480px; 
+            overflow-y: auto;
+            display: none;
+            background-color: white;">
+
+            <div id="details-content">
+                <p class="text-muted">Selecione um colaborador para ver os detalhes.</p>
+            </div>
+        </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+                function closeDetails() {
+            const detailsContainer = document.getElementById('details-panel-container');
+            const rows = document.querySelectorAll('.colaborador-row');
+
+            detailsContainer.style.display = 'none';
+
+            rows.forEach(r => r.classList.remove('table-primary'));
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            const modalElement = document.getElementById('successModal');
+            if (modalElement) {
+                const successModal = new bootstrap.Modal(modalElement);
+                successModal.show();
+
+                const copyBtn = document.getElementById('copyCredentialsBtn');
+                if (copyBtn) {
+                    copyBtn.addEventListener('click', function() {
+                        const email = document.getElementById('modal-email').textContent.trim();
+                        const senha = document.getElementById('modal-senha').textContent.trim();
+                        const textToCopy = `FlexCap Access:\nEmail: ${email}\nPassword: ${senha}`;
+
+                        navigator.clipboard.writeText(textToCopy).then(() => {
+                            copyBtn.textContent = 'Copied!';
+                            copyBtn.classList.remove('btn-primary');
+                            copyBtn.classList.add('btn-success');
+
+                            setTimeout(() => {
+                                copyBtn.textContent = 'Copy Credentials';
+                                copyBtn.classList.remove('btn-success');
+                                copyBtn.classList.add('btn-primary');
+                            }, 2000);
+                        }).catch(err => {
+                            console.error('Failed to copy:', err);
+                            alert('Failed to copy. Please try copying manually.');
+                        });
+                    });
+                }
+            }
+
+            // LÓGICA AJAX PARA PAINEL LATERAL
+            const rows = document.querySelectorAll('.colaborador-row');
+            const detailsContainer = document.getElementById('details-panel-container');
+            const detailsContent = document.getElementById('details-content');
+
+            rows.forEach(row => {
+                row.addEventListener('click', function() {
+                    const colaboradorId = this.getAttribute('data-id');
+
+                    rows.forEach(r => r.classList.remove('table-primary'));
+                    this.classList.add('table-primary');
+
+                    detailsContainer.style.display = 'block';
+                    detailsContent.innerHTML = '<p class="text-center text-muted">Carregando detalhes...</p>';
+
+                    fetch(`/Registro/GetColaboradorDetails/${colaboradorId}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Erro ao carregar os detalhes do colaborador. (Status: ' + response.status + ')');
+                            }
+                            return response.text(); 
+                        })
+                        .then(html => {
+                            detailsContent.innerHTML = html;
+                        })
+                        .catch(error => {
+                            detailsContent.innerHTML = `<p class="text-danger">Erro: ${error.message}</p>`;
+                            console.error('AJAX Error:', error);
+                        });
+                });
+            });
+        });
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

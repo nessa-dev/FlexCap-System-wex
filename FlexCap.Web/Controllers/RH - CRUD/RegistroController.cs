@@ -1,16 +1,16 @@
-﻿// FlexCap.Web.Controllers/RegistroController.cs
-
+﻿
 using BCrypt.Net;
 using FlexCap.Web.Data;
-using FlexCap.Web.Models; 
+using FlexCap.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore; 
-using System.Collections.Generic; 
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using System; 
+using System;
 using System.IO;
+using Microsoft.Extensions.Logging; 
 
 namespace FlexCap.Web.Controllers
 {
@@ -19,11 +19,10 @@ namespace FlexCap.Web.Controllers
     {
         private readonly AppDbContext _context;
 
-        public RegistroController(AppDbContext context)
+        public RegistroController(AppDbContext context /*, ILogger<RegistroController> logger */)
         {
             _context = context;
         }
-
 
 
 
@@ -50,7 +49,8 @@ namespace FlexCap.Web.Controllers
                 TeamName = model.TeamName,
                 Country = model.Country,
                 PhotoUrl = photoUrl,
-                Status = "Ativo"
+                Status = "Ativo",
+                
             };
         }
 
@@ -62,43 +62,42 @@ namespace FlexCap.Web.Controllers
             ViewBag.Positions = new SelectList(new[] { "Dev Sênior", "Dev Pleno", "QA Sênior", "Project Manager", "HR Analyst", "Intern", "Designer UX/UI", "Sales Analyst", "Administrative Assistant", "QA Tester", "Marketing Manager", "HR Consultant", "Dev Back-end", "UX Strategist", "Cloud Engineer", "Full Stack Dev" });
 
             ViewBag.InactivityReasons = new SelectList(new[] {
-        "Medical Leave",
-        "Personal License",
-        "Vacation",
-        "Day Off",
-        "Maternity Leave",
-        "Suspension",
-        "Other"
-    });
+                "Medical Leave",
+                "Personal License",
+                "Vacation",
+                "Day Off",
+                "Maternity Leave",
+                "Suspension",
+                "Other"
+            });
         }
 
 
-
-
-        // --- (GET - Exibir Formulário) ---
         [HttpGet]
         public IActionResult NovoColaborador()
         {
             ViewData["Title"] = "Cadastrar Novo Colaborador";
             ViewData["Profile"] = "Rh";
             PopulateViewBags();
-
-            ViewBag.Departments = new SelectList(new[] { "Benefits", "Mobility", "Corporate Payments", "RH" });
-            ViewBag.Teams = new SelectList(new[] { "Titans", "Code Warriors", "Bug Busters", "Pixel Pioneers", "Cloud Crusaders", "Dev Dynamos", "RH Operations" });
-            ViewBag.Countries = new SelectList(new[] { "Brazil", "United States", "Italy", "Japan", "Canada" });
-            ViewBag.Positions = new SelectList(new[] { "Dev Sênior", "Dev Pleno", "QA Sênior", "Project Manager", "HR Analyst", "Intern", "Designer UX/UI", "Sales Analyst", "Administrative Assistant", "QA Tester", "Marketing Manager", "HR Consultant", "Dev Back-end", "UX Strategist", "Cloud Engineer", "Full Stack Dev" });
-
             return View("CadastrarUsuario", new ColaboradorViewModel() { Status = "Ativo" });
         }
 
 
 
-        // --- (POST - Salvar Dados) ---
+
+
+
+
+
+
+
+
+
+        // POST: Salvar Novo Colaborador 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> NovoColaborador(ColaboradorViewModel model)
         {
-            
             if (model.Email != null && await _context.Colaboradores.AnyAsync(c => c.Email == model.Email))
             {
                 ModelState.AddModelError("Email", "This email is already registered.");
@@ -108,6 +107,7 @@ namespace FlexCap.Web.Controllers
             {
                 ModelState.AddModelError("Senha", "A senha é obrigatória.");
             }
+
             if (!ModelState.IsValid)
             {
                 PopulateViewBags();
@@ -115,7 +115,6 @@ namespace FlexCap.Web.Controllers
             }
 
             string senhaOriginal = model.Senha!;
-
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(senhaOriginal);
             string finalPosition = model.IsManager ? "Project Manager" : model.Position!;
 
@@ -127,6 +126,7 @@ namespace FlexCap.Web.Controllers
                 Directory.CreateDirectory(uploadsFolder);
                 string fileName = Guid.NewGuid() + Path.GetExtension(model.PhotoFile.FileName);
                 string filePath = Path.Combine(uploadsFolder, fileName);
+
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await model.PhotoFile.CopyToAsync(stream);
@@ -147,12 +147,14 @@ namespace FlexCap.Web.Controllers
                 Department = model.Department,
                 TeamName = model.TeamName,
                 Country = model.Country,
-                PhotoUrl = photoUrl,
-                Status = model.Status ?? "Ativo"
+                PhotoUrl = photoUrl, 
+                Status = model.Status ?? "Ativo",
+                InactivityReason = null,
+                EndDate = null
             };
 
             _context.Colaboradores.Add(novoColaborador);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(); 
 
             TempData["CadastroSucesso"] = true;
             TempData["NovoColaboradorNome"] = model.FullName;
@@ -163,6 +165,159 @@ namespace FlexCap.Web.Controllers
         }
 
 
+      
+
+
+
+
+
+
+
+
+
+        [HttpGet]
+        [Authorize(Roles = "HR Manager, HR Analyst, HR Consultant")]
+        public async Task<IActionResult> Editar(int id)
+        {
+            var colaborador = await _context.Colaboradores.FindAsync(id);
+
+            if (colaborador == null)
+            {
+                return NotFound();
+            }
+
+            var model = new ColaboradorViewModel
+            {
+                Id = colaborador.Id,
+                FullName = colaborador.FullName,
+                Email = colaborador.Email,
+                Position = colaborador.Position,
+                Department = colaborador.Department,
+                TeamName = colaborador.TeamName,
+                Country = colaborador.Country,
+                Status = colaborador.Status,
+                PhotoUrl = colaborador.PhotoUrl,
+                InactivityReason = colaborador.InactivityReason,
+                
+                EndDate = colaborador.EndDate
+            };
+
+            PopulateViewBags();
+            ViewData["Title"] = "Edit Employee: " + colaborador.FullName;
+
+            return View(model);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        [HttpPost]
+        [Authorize(Roles = "HR Manager, HR Analyst, HR Consultant")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SalvarEdicao(ColaboradorViewModel model)
+        {
+            if (model.Email != null && await _context.Colaboradores.AnyAsync(c => c.Email == model.Email && c.Id != model.Id))
+            {
+                ModelState.AddModelError("Email", "This email is already registered to another employee.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                PopulateViewBags();
+                return View("Editar", model);
+            }
+
+            var colaboradorAntigo = await _context.Colaboradores.AsNoTracking().FirstOrDefaultAsync(c => c.Id == model.Id);
+
+            if (colaboradorAntigo == null)
+            {
+                return NotFound();
+            }
+
+           
+            string novoPhotoUrl = colaboradorAntigo.PhotoUrl;
+
+            if (model.PhotoFile != null && model.PhotoFile.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                Directory.CreateDirectory(uploadsFolder);
+                string fileName = Guid.NewGuid() + Path.GetExtension(model.PhotoFile.FileName);
+                string filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.PhotoFile.CopyToAsync(stream);
+                }
+                novoPhotoUrl = "/uploads/" + fileName;
+            }
+            else if (string.IsNullOrEmpty(novoPhotoUrl))
+            {
+                novoPhotoUrl = "https://randomuser.me/api/portraits/lego/1.jpg";
+            }
+
+            string hashDaSenhaParaSalvar = string.IsNullOrEmpty(model.Senha)
+                ? colaboradorAntigo.PasswordHash
+                : BCrypt.Net.BCrypt.HashPassword(model.Senha);
+
+        
+
+            var colaboradorParaSalvar = new Colaborador
+            {
+                Id = model.Id, 
+
+                PhotoUrl = novoPhotoUrl,
+                PasswordHash = hashDaSenhaParaSalvar, 
+
+                FullName = model.FullName!,
+                Email = model.Email!,
+                Position = model.Position!,
+                Department = model.Department!,
+                TeamName = model.TeamName!,
+                Country = model.Country!,
+                Status = model.Status!,
+
+                InactivityReason = model.InactivityReason,
+                EndDate = model.EndDate,
+
+                ResetPasswordToken = colaboradorAntigo.ResetPasswordToken,
+                ResetPasswordTokenExpiry = colaboradorAntigo.ResetPasswordTokenExpiry
+            };
+
+            _context.Colaboradores.Update(colaboradorParaSalvar);
+            await _context.SaveChangesAsync();
+
+            TempData["EdicaoSucesso"] = $"Employee {colaboradorParaSalvar.FullName} updated successfully!";
+
+            return RedirectToAction("Listar", "Colaboradores");
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -171,35 +326,62 @@ namespace FlexCap.Web.Controllers
         [AcceptVerbs("GET", "POST")]
         public async Task<IActionResult> CheckEmailAvailability(string email)
         {
-            // Verifica se existe algum colaborador com este e-mail (case-insensitive)
             bool emailExists = await _context.Colaboradores.AnyAsync(c => c.Email == email);
 
             if (emailExists)
             {
-                // Se o e-mail JÁ EXISTE, retorna FALSE (invalida o campo)
                 return Json(false);
             }
 
-            // Se o e-mail NÃO EXISTE, retorna TRUE (válido para cadastro)
             return Json(true);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetColaboradorDetails(int id)
+        {
+            var colaborador = await _context.Colaboradores
+                                            .AsNoTracking()
+                                            .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (colaborador == null)
+            {
+                return Content("<p class='text-danger'>Colaborador não encontrado.</p>");
+            }
+
+            return PartialView("ColaboradorDetailsPartial", colaborador);
         }
 
 
 
-        // --- MÉTODOS PARA A NOVA TABELA (TabelaTeste) ---
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // Métodos TabelaTeste (Mantidos)
         [Authorize(Roles = "HR Manager, HR Analyst, HR Consultant")]
         [HttpGet]
         public async Task<IActionResult> ListarDados()
         {
             ViewData["Title"] = "Listagem de Dados de Teste";
             ViewData["Profile"] = "Rh";
-
             var dados = await _context.DadosDeTeste.ToListAsync();
-
             return View(dados);
         }
-
 
         [Authorize(Roles = "HR Manager, HR Analyst, HR Consultant")]
         [HttpGet]
@@ -207,9 +389,8 @@ namespace FlexCap.Web.Controllers
         {
             ViewData["Title"] = "Criar Novo Dado de Teste";
             ViewData["Profile"] = "Rh";
-            return View(); 
+            return View();
         }
-
 
         [Authorize(Roles = "HR Manager, HR Analyst, HR Consultant")]
         [HttpPost]
@@ -218,16 +399,43 @@ namespace FlexCap.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                dado.DataCriacao = DateTime.Now; 
+                dado.DataCriacao = DateTime.Now;
                 _context.DadosDeTeste.Add(dado);
                 await _context.SaveChangesAsync();
-
                 return RedirectToAction(nameof(ListarDados));
             }
-
             return View(dado);
         }
 
 
+
+
+
+
+
+
+
+
+
+
+
+        // Excluir
+        [HttpPost, ActionName("Excluir")]
+        [Authorize(Roles = "HR Manager, HR Analyst, HR Consultant")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ExcluirConfirmado(int id)
+        {
+            var colaborador = await _context.Colaboradores.FindAsync(id);
+
+            if (colaborador != null)
+            {
+                _context.Colaboradores.Remove(colaborador);
+                await _context.SaveChangesAsync();
+
+                TempData["ExclusaoSucesso"] = $"Employee {colaborador.FullName} deleted successfully.";
+            }
+
+            return RedirectToAction("Listar", "Colaboradores");
+        }
     }
 }

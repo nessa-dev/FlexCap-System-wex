@@ -393,36 +393,50 @@ namespace FlexCap.Web.Controllers
 
 
 
+        //Test1234
 
-        public IActionResult ListarEquipe()
+        [HttpGet]
+        public async Task<IActionResult> ListarEquipe()
         {
-            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var colaboradorLogado = _context.Colaboradores.FirstOrDefault(c => c.Email == userEmail);
-            var colaboradoresDoTime = new List<Colaborador>();
-            string perfil = "Colaborador"; 
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
 
-            if (colaboradorLogado != null)
+            if (string.IsNullOrEmpty(userEmail))
             {
-                colaboradoresDoTime = _context.Colaboradores
-                    .Where(c => c.TeamName == colaboradorLogado.TeamName)
-                    .ToList();
-
-                if (colaboradorLogado.Position == "Project Manager")
-                {
-                    perfil = "Manager";
-                }
+                return RedirectToAction("Index", "Login");
             }
 
-            ViewData["Title"] = "Membros da Equipe";
+            var colaboradorLogado = await _context.Colaboradores
+                                                    .AsNoTracking()
+                                                    .FirstOrDefaultAsync(c => c.Email == userEmail);
+
+            if (colaboradorLogado == null)
+            {
+                return NotFound("Perfil do colaborador logado não encontrado.");
+            }
+
+            var equipeDoUsuario = colaboradorLogado.TeamName;
+            string perfil = colaboradorLogado.Position == "Project Manager" ? "Manager" : "Colaborador";
+
+            var colaboradoresDoTime = await _context.Colaboradores
+                .AsNoTracking()
+                .Where(c => c.TeamName == equipeDoUsuario)
+
+                .OrderByDescending(c => c.FullName == colaboradorLogado.FullName) 
+                .ThenByDescending(c => c.Position == "Project Manager")         
+                .ThenBy(c => c.FullName)                                        
+                .ToListAsync();
+
+            ViewData["Title"] = $"Membros da Equipe: {equipeDoUsuario}";
             ViewData["Profile"] = perfil;
 
-       
+            ViewData["LoggedInUserName"] = colaboradorLogado.FullName?.Trim();
+
             return View("TimeDetalhes", colaboradoresDoTime);
         }
 
 
 
-      
+
 
         [Authorize(Roles = "HR Manager, HR Analyst, HR Consultant")]
         public IActionResult BuscarColaboradores(string nomeBusca, string statusBusca, string countryBusca, string sectorBusca, string teamBusca)

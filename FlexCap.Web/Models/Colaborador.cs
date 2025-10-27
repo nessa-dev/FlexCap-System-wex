@@ -12,7 +12,6 @@ namespace FlexCap.Web.Models
         [Display(Name = "URL da Foto")]
         public string PhotoUrl { get; set; } = string.Empty;
 
-        // OBRIGATÓRIO
         [Required(ErrorMessage = "Full Name is required.")]
         [Display(Name = "Full Name")]
         public string FullName { get; set; } = string.Empty;
@@ -45,6 +44,18 @@ namespace FlexCap.Web.Models
         [Column("Team")]
         [Display(Name = "Time")]
         public string TeamName { get; set; } = string.Empty;
+
+      
+        [Display(Name = "Inactivity Reason")]
+        public string? InactivityReason { get; set; } 
+
+        [DataType(DataType.Date)]
+        [Display(Name = "End Date")]
+        public DateTime? EndDate { get; set; }
+
+        [DataType(DataType.Date)]
+        [Display(Name = "Inactivity Start Date")]
+        public DateTime? StartDate { get; set; }
 
         public string? ResetPasswordToken { get; set; }
         public DateTime? ResetPasswordTokenExpiry { get; set; }

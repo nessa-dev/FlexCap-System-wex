@@ -1,0 +1,94 @@
+﻿@model FlexCap.Web.Models.Colaborador
+@using System.Globalization;
+@using Microsoft.AspNetCore.Mvc.Rendering;
+
+<div class="card border-0">
+    <div class="card-body p-0">
+
+        <div class="d-flex justify-content-end mb-2">
+            <button type="button" class="btn-close" aria-label="Close" onclick="closeDetails()"></button>
+        </div>
+
+        <div class="text-center mb-3">
+            <img src="@(Model?.PhotoUrl ?? "/images/default-user.png")"
+                 class="rounded-circle border mb-2" width="80" height="80" alt="Employee Photo">
+
+            <h5 class="fw-bold mb-0">@(Model?.FullName ?? "N/A")</h5>
+            <p class="text-muted small">@(Model?.Position ?? "N/A")</p>
+        </div>
+
+        <hr class="my-2" />
+
+        <dl class="row small">
+
+            <dt class="col-5">Position:</dt>
+            <dd class="col-7">@(Model?.Position ?? "N/A")</dd>
+
+            <dt class="col-5">Department:</dt>
+            <dd class="col-7">@(Model?.Department ?? "N/A")</dd>
+
+            <dt class="col-5">Country:</dt>
+            <dd class="col-7">@(Model?.Country ?? "N/A")</dd>
+
+            <hr class="my-2" />
+
+            <dt class="col-5">Email:</dt>
+            <dd class="col-7 text-truncate">@(Model?.Email ?? "N/A")</dd>
+
+            <dt class="col-5">Team:</dt>
+            <dd class="col-7">@(Model?.TeamName ?? "N/A")</dd>
+
+            <hr class="my-2" />
+
+            @{
+                string statusValue = Model?.Status ?? "N/A";
+                string statusText = (statusValue == "Ativo" ? "Active" : (statusValue == "Inativo" ? "Inactive" : "N/A"));
+            }
+            <dt class="col-5">Status:</dt>
+            <dd class="col-7 fw-bold @(statusValue == "Inativo" ? "text-danger" : "text-success")">@statusText</dd>
+
+            @if (statusValue == "Inativo")
+            {
+                <dt class="col-12 mt-2 fw-bold text-danger">Inactivity Details:</dt>
+
+                <dt class="col-5">Reason:</dt>
+                <dd class="col-7">
+                    @(Model.InactivityReason ?? "Not Specified")
+                </dd>
+
+                @if (Model.StartDate.HasValue)
+                {
+                    <dt class="col-5">Start Date:</dt>
+                    <dd class="col-7">
+                        @Model.StartDate.Value.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture)
+                    </dd>
+                }
+
+                @if (Model.EndDate.HasValue)
+                {
+                    <dt class="col-5">Est. Return:</dt>
+                    <dd class="col-7 fw-bold">
+                        @Model.EndDate.Value.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture)
+                    </dd>
+                }
+                else
+                {
+                    <dt class="col-12 small">Est. Return date not provided.</dt>
+                }
+            }
+        </dl>
+
+        <div class="mt-4 d-flex justify-content-between gap-2">
+            <a asp-controller="Registro" asp-action="Editar" asp-route-id="@(Model?.Id)" class="btn btn-sm btn-custom flex-fill">
+                <span class="material-icons small me-1">edit</span> 
+            </a>
+
+            <form asp-controller="Registro" asp-action="Excluir" asp-route-id="@(Model?.Id)" method="post" onsubmit="return confirm('Are you sure you want to delete @(Model?.FullName)?');">
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <span class="material-icons small">delete</span> 
+                </button>
+                @Html.AntiForgeryToken()
+            </form>
+        </div>
+    </div>
+</div>

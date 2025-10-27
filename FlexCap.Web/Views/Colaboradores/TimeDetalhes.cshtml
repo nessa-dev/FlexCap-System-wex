@@ -3,6 +3,8 @@
 @{
     ViewData["Title"] = "Colaboradores da Equipe";
     Layout = "~/Views/Shared/Template.cshtml";
+
+    string loggedInUserName = ViewData["LoggedInUserName"] as string ?? "";
 }
 
 <div class="py-4 w-100">
@@ -15,30 +17,54 @@
         {
             @foreach (var colaborador in Model)
             {
-                var statusColorClass = colaborador.Status == "Ativo" ? "text-success" : "text-danger";
-                var dotColorClass = colaborador.Status == "Ativo" ? "bg-success" : "bg-danger";
-                var nomeDisplay = colaborador.FullName;
+                string statusValue = colaborador.Status ?? "Ativo";
+                string statusDisplay = statusValue == "Ativo" ? "Active" : "Inactive";
 
-                if (colaborador.FullName == "Carlos Tavares")
+                var statusColorClass = statusValue == "Ativo" ? "text-success" : "text-danger";
+                var dotColorClass = statusValue == "Ativo" ? "bg-success" : "bg-danger";
+
+                string nomeDisplay = colaborador.FullName;
+
+                bool isCurrentUser = colaborador.FullName?.Trim() == loggedInUserName?.Trim();
+
+                if (isCurrentUser)
                 {
                     nomeDisplay += " (You)";
                 }
 
+
                 <div class="col-12 mb-2">
                     <div class="card p-2 shadow-sm d-flex flex-row align-items-center" style="max-width: 500px;">
-                        <img src="@colaborador.PhotoUrl" class="rounded-circle me-3" width="40" height="40" alt="Foto do Colaborador">
+
+                        <div class="me-3">
+                            <img src="@colaborador.PhotoUrl" class="rounded-circle" width="40" height="40" alt="Foto do Colaborador">
+                        </div>
+
                         <div>
-                            <h6 class="mb-0 fw-bold">@nomeDisplay</h6>
+                            <h6 class="mb-0 fw-bold">
+                                @nomeDisplay
+
+                                @if (colaborador.Position?.Trim() == "Project Manager")
+                                {
+                                    <span class="manager-crown ms-1" style="font-size: 16px;">
+                                        &#x1F451;
+                                    </span>
+                                }
+                            </h6>
                             <small class="text-muted">@colaborador.Position</small>
                         </div>
+
                         <div class="ms-auto d-flex align-items-center">
-                            <span class="@statusColorClass me-2 fw-bold small">@colaborador.Status</span>
+                            <span class="@statusColorClass me-2 fw-bold small">@statusDisplay</span>
                             <span class="dot @dotColorClass"></span>
                         </div>
+
                     </div>
                 </div>
             }
+
+
+
         }
     </div>
-
-</div> 
+</div>

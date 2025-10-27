@@ -1,7 +1,7 @@
 ﻿@model FlexCap.Web.Models.ColaboradorViewModel
 
 @{
-    ViewData["Title"] = "Register New Employee";
+    ViewData["Title"] = "Edit Employee";
     Layout = "~/Views/Shared/Template.cshtml";
 
     var defaultPhotoUrl = "https://placehold.co/100x100/F5F5F5/B0B0B0?text=Photo";
@@ -26,6 +26,7 @@
     .compact-row {
         margin-bottom: 0.5rem !important;
     }
+
     .field-validation-error {
         font-size: 0.75rem;
     }
@@ -37,10 +38,11 @@
         <span class="material-icons" style="font-size: 16px;">arrow_back</span> Back to List
     </a>
 
-    <h3 class="fw-bold mb-3">@ViewData["Title"]</h3>
-
+    <h3 class="fw-bold mb-3">Edit Employee: @Model.FullName</h3>
     <div class="p-3 border rounded shadow-sm">
-        <form asp-controller="Registro" asp-action="NovoColaborador" method="post" enctype="multipart/form-data">
+        <form asp-controller="Registro" asp-action="SalvarEdicao" method="post" enctype="multipart/form-data">
+
+            @Html.HiddenFor(m => m.Id)
 
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -53,6 +55,7 @@
 
                     <input type="file" id="photoFile" name="PhotoFile" accept="image/*" class="form-control form-control-sm mb-2" />
 
+                    @Html.HiddenFor(m => m.PhotoUrl)
                 </div>
 
                 <div class="col-md-9">
@@ -72,7 +75,7 @@
 
                         <div class="col-md-6 compact-row">
                             <label class="form-label small">Password</label>
-                            <input asp-for="Senha" type="password" class="form-control" />
+                            <input asp-for="Senha" type="password" class="form-control" placeholder="Leave blank to keep current password" />
                             <span asp-validation-for="Senha" class="text-danger small"></span>
                         </div>
 
@@ -124,17 +127,22 @@
                 <div class="row g-2">
                     <div class="col-md-4">
                         <label class="form-label small">Reason for Inactivity</label>
-                        <select class="form-select form-select-sm" name="ReasonForInactivity" id="reasonForInactivity" asp-items="ViewBag.InactivityReasons">
+                        <select asp-for="InactivityReason" asp-items="ViewBag.InactivityReasons" class="form-select form-select-sm">
                             <option value="">Select Reason</option>
                         </select>
+                        <span asp-validation-for="InactivityReason" class="text-danger small"></span>
                     </div>
+
                     <div class="col-md-4">
                         <label class="form-label small">Start Date</label>
-                        <input type="date" class="form-control form-control-sm" name="StartDate" />
+                        <input asp-for="StartDate" type="date" class="form-control form-control-sm" />
+                        <span asp-validation-for="StartDate" class="text-danger small"></span>
                     </div>
+
                     <div class="col-md-4">
                         <label class="form-label small">End Date</label>
-                        <input type="date" class="form-control form-control-sm" name="EndDate" />
+                        <input asp-for="EndDate" type="date" class="form-control form-control-sm" />
+                        <span asp-validation-for="EndDate" class="text-danger small"></span>
                     </div>
                 </div>
             </div>
@@ -150,7 +158,6 @@
         </form>
     </div>
 </div>
-
 
 @section Scripts {
     <script>
