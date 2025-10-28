@@ -70,6 +70,11 @@ namespace FlexCap.Web.Controllers
                 "Suspension",
                 "Other"
             });
+
+            ViewBag.StatusOptions = new SelectList(new[] {
+            new SelectListItem { Value = "Active", Text = "Active" },
+            new SelectListItem { Value = "Inactive", Text = "Inactive" }
+    });
         }
 
 

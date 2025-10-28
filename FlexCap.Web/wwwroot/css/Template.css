@@ -3,6 +3,7 @@
 html, body {
     height: 100%;
     margin: 0;
+    overflow-y: hidden;
 }
 
 body {
@@ -17,10 +18,18 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 100vh;
-
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
 }
 
+.main-content-wrapper {
+    margin-left: 250px;
+    width: calc(100% - 250px);
+    min-height: 100vh;
+}
 
 .menu-item {
     display: flex;

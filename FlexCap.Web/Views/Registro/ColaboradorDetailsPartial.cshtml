@@ -17,7 +17,7 @@
             <p class="text-muted small">@(Model?.Position ?? "N/A")</p>
         </div>
 
-        <hr class="my-2" />
+        <hr class="my-1" />
 
         <dl class="row small">
 
@@ -30,7 +30,7 @@
             <dt class="col-5">Country:</dt>
             <dd class="col-7">@(Model?.Country ?? "N/A")</dd>
 
-            <hr class="my-2" />
+            <hr class="my-1" />
 
             <dt class="col-5">Email:</dt>
             <dd class="col-7 text-truncate">@(Model?.Email ?? "N/A")</dd>
@@ -38,7 +38,7 @@
             <dt class="col-5">Team:</dt>
             <dd class="col-7">@(Model?.TeamName ?? "N/A")</dd>
 
-            <hr class="my-2" />
+            <hr class="my-1" />
 
             @{
                 string statusValue = Model?.Status ?? "N/A";
@@ -49,7 +49,7 @@
 
             @if (statusValue == "Inativo")
             {
-                <dt class="col-12 mt-2 fw-bold text-danger">Inactivity Details:</dt>
+                <dt class="col-12 mt-2 fw-bold text-danger small">Inactivity Details:</dt>
 
                 <dt class="col-5">Reason:</dt>
                 <dd class="col-7">
@@ -73,7 +73,7 @@
                 }
                 else
                 {
-                    <dt class="col-12 small">Est. Return date not provided.</dt>
+                    <dt class="col-12 small">Return date not provided.</dt>
                 }
             }
         </dl>
@@ -85,7 +85,7 @@
 
             <form asp-controller="Registro" asp-action="Excluir" asp-route-id="@(Model?.Id)" method="post" onsubmit="return confirm('Are you sure you want to delete @(Model?.FullName)?');">
                 <button type="submit" class="btn btn-sm btn-outline-danger">
-                    <span class="material-icons small">delete</span> 
+                    <span class="material-icons small">delete</span>
                 </button>
                 @Html.AntiForgeryToken()
             </form>

@@ -133,54 +133,62 @@
                         </tr>
                     </thead>
                     <tbody>
+
+
                         @if (Model != null)
                         {
                             @foreach (var colaborador in Model)
                             {
+
                                 <tr class="colaborador-row" data-id="@colaborador.Id" style="cursor: pointer;">
                                     <td>
                                         <div class="photo-container">
-                                            <img src="@colaborador.PhotoUrl"
-                                                 class="rounded-circle"
-                                                 width="30" height="30"
-                                                 alt="Foto do Colaborador">
+                                            <img src="@colaborador.PhotoUrl" class="rounded-circle" width="30" height="30" alt="Foto do Colaborador">
 
                                             @if (colaborador.IsManager)
                                             {
-                                                <span class="manager-crown">
-                                                    &#x1F451;
-                                                </span>
+                                                <span class="manager-crown">&#x1F451;</span>
                                             }
                                         </div>
                                     </td>
                                     <td><strong>@colaborador.FullName</strong></td>
                                     <td>@colaborador.Position</td>
                                     <td>@colaborador.Country</td>
-                                    <td>@colaborador.Status</td>
+
+                                    <td>
+                                        @{
+                                            string statusValue = colaborador.Status ?? "N/A";
+                                            string statusDisplay = statusValue == "Ativo" ? "Active" :
+                                            (statusValue == "Inativo" ? "Inactive" : statusValue);
+                                        }
+                                        <span>@statusDisplay</span>
+                                    </td>
+
                                     <td>@colaborador.Department</td>
                                     <td>@colaborador.TeamName</td>
                                 </tr>
                             }
                         }
+
                     </tbody>
                 </table>
             </div>
         </div>
 
         <div id="details-panel-container" class="p-3 border rounded shadow-sm"
-             style="width: 25%; 
-            min-width: 250px; 
-            max-height: 480px; 
-            overflow-y: auto;
+             style="width: 25%;
+            min-width: 250px;
+            /* Remova a restrição de altura: */
+            /* max-height: 700px; */
+            overflow-y: hidden; /* 🚩 Mude para hidden para remover o scroll que não queremos */
             display: none;
             background-color: white;">
 
-            <div id="details-content">
-                <p class="text-muted">Selecione um colaborador para ver os detalhes.</p>
+            <div id="details-content" style="max-height: 100%;">
             </div>
         </div>
-    </div>
-</div>
+            </div>
+        </div>
 
 @section Scripts {
     <script>

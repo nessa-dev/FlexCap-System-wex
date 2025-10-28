@@ -37,7 +37,8 @@ namespace FlexCap.Web.Controllers
             _context.Database.EnsureCreated();
             {
                 var hashedPassword = BCrypt.Net.BCrypt.HashPassword("Test1234");
-                 string hrPasswordHash = BCrypt.Net.BCrypt.HashPassword("HR2025!");
+                string hrPasswordHash = BCrypt.Net.BCrypt.HashPassword("HR2025!");
+                string managerPasswordHash = BCrypt.Net.BCrypt.HashPassword("Manager2025!"); 
 
 
                 var colaboradores = new List<Colaborador>
@@ -48,18 +49,32 @@ namespace FlexCap.Web.Controllers
                 Email = "recursoshumanos@flexcap.com",
                 Position = "HR Manager",
                 Department = "RH",
-                Status = "Ativo",
+                Status = "Active",
                 PhotoUrl = string.Empty,
                 Country = string.Empty,
                 TeamName = "RH Operations",
                 PasswordHash = hrPasswordHash
             },
+
+           
+            new Colaborador {
+            FullName = "Carlos Manager",
+            Email = "carlos.manager@flexcap.com",
+            Position = "Project Manager", 
+            Department = "Mobility",
+            Status = "Active",
+            PhotoUrl = "https://randomuser.me/api/portraits/men/2.jpg",
+            Country = "United States",
+            TeamName = "Code Warriors",
+            PasswordHash = managerPasswordHash
+        },
+
             new Colaborador {
             FullName = "Júlia Freitas",
             Email = "julia.freitas@flexcap.com",
             Position = "Dev Pleno",
             Department = "Benefits",
-            Status = "Ativo",
+            Status = "Active",
             PhotoUrl = "https://randomuser.me/api/portraits/women/44.jpg",
             Country = "Brazil",
             TeamName = "Titans",
@@ -70,7 +85,7 @@ namespace FlexCap.Web.Controllers
                 Email = "jon.brown@flexcap.com",
                 Position = "QA Sênior",
                 Department = "Mobility", 
-                Status = "Inativo",
+                Status = "Inactive",
                 PhotoUrl = "https://randomuser.me/api/portraits/men/45.jpg",
                 Country = "United States", 
                 TeamName = "Code Warriors",
@@ -81,8 +96,8 @@ namespace FlexCap.Web.Controllers
                 FullName = "Pedro Souza",
                 Email = "pedro.souza@flexcap.com",
                 Position = "Dev Sênior",
-                Department = "Corporate Payments", 
-                Status = "Ativo",
+                Department = "Corporate Payments",
+                Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/men/46.jpg",
                 Country = "Japan", 
                 TeamName = "Bug Busters",
@@ -94,7 +109,7 @@ namespace FlexCap.Web.Controllers
                 Email = "mariana.gomes@flexcap.com",
                 Position = "HR Analyst",
                 Department = "Benefits",
-                Status = "Ativo",
+                Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/women/48.jpg",
                 Country = "Italy", 
                 TeamName = "Code Warriors",
@@ -105,7 +120,7 @@ namespace FlexCap.Web.Controllers
                 Email = "lucas.santos@flexcap.com",
                 Position = "Project Manager",
                 Department = "Mobility",
-                Status = "Ativo",
+                Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/men/49.jpg",
                 Country = "Canada", 
                 TeamName = "Bug Busters",
@@ -116,7 +131,7 @@ namespace FlexCap.Web.Controllers
                 Email = "ana.lima@flexcap.com",
                 Position = "Designer UX/UI",
                 Department = "Corporate Payments",
-                Status = "Ativo",
+                Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/women/50.jpg",
                 Country = "Brazil",
                 TeamName = "Titans",
@@ -127,7 +142,7 @@ namespace FlexCap.Web.Controllers
                 Email = "fernando.costa@flexcap.com",
                 Position = "Dev Back-end",
                 Department = "Mobility",
-                Status = "Ativo",
+                Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/men/51.jpg",
                 Country = "Italy",
                 TeamName = "Code Warriors",
@@ -138,7 +153,7 @@ namespace FlexCap.Web.Controllers
                 Email = "patricia.nunes@flexcap.com",
                 Position = "Intern",
                 Department = "Corporate Payments", 
-                Status = "Ativo",
+                Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/women/52.jpg",
                 Country = "Japan",
                 TeamName = "Bug Busters",
@@ -149,7 +164,7 @@ namespace FlexCap.Web.Controllers
                 Email = "gabriel.rocha@flexcap.com",
                 Position = "Sales Analyst",
                 Department = "Benefits",
-                Status = "Ativo",
+                Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/men/53.jpg",
                 Country = "Canada",
                 TeamName = "Bug Busters",
@@ -160,7 +175,7 @@ namespace FlexCap.Web.Controllers
                 Email = "isabela.ribeiro@flexcap.com",
                 Position = "Administrative Assistant",
                 Department = "Benefits",
-                Status = "Ativo",
+                Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/women/54.jpg",
                 Country = "Italy",
                 TeamName = "Bug Busters",
@@ -171,7 +186,7 @@ namespace FlexCap.Web.Controllers
                 Email = "gustavo.martins@flexcap.com",
                 Position = "QA Tester",
                 Department = "Mobility",
-                Status = "Ativo",
+                Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/men/55.jpg",
                 Country = "Canada",
                 TeamName = "Code Warriors",
@@ -182,7 +197,7 @@ namespace FlexCap.Web.Controllers
                 Email = "daniela.souza@flexcap.com",
                 Position = "Marketing Manager",
                 Department = "Benefits",
-                Status = "Ativo",
+                Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/women/56.jpg",
                 Country = "Canada",
                 TeamName = "Code Warriors",
@@ -193,7 +208,7 @@ namespace FlexCap.Web.Controllers
                 Email = "thiago.pereira@flexcap.com",
                 Position = "Intern",
                 Department = "Benefits",
-                Status = "Ativo",
+                Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/men/57.jpg",
                 Country = "United States",
                 TeamName = "Titans",
@@ -204,7 +219,7 @@ namespace FlexCap.Web.Controllers
                 Email = "carla.almeida@flexcap.com",
                 Position = "HR Consultant",
                 Department = "Corporate Payments", 
-                Status = "Ativo",
+                Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/women/58.jpg",
                 Country = "United States",
                 TeamName = "Titans",
@@ -215,7 +230,7 @@ namespace FlexCap.Web.Controllers
                 Email = "rodrigo.oliveira@flexcap.com",
                 Position = "Dev Back-end",
                 Department = "Mobility",
-                Status = "Ativo",
+                Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/men/59.jpg",
                 Country = "United States",
                 TeamName = "Titans",
@@ -226,7 +241,7 @@ namespace FlexCap.Web.Controllers
                 Email = "maria.nova@flexcap.com",
                 Position = "UX Strategist",
                 Department = "Benefits",
-                Status = "Ativo",
+                Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/women/60.jpg",
                 Country = "Brazil",
                 TeamName = "Pixel Pioneers",
@@ -237,7 +252,7 @@ namespace FlexCap.Web.Controllers
                 Email = "alex.cloud@flexcap.com",
                 Position = "Cloud Engineer",
                 Department = "Mobility",
-                Status = "Ativo",
+                Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/men/60.jpg",
                 Country = "Canada",
                 TeamName = "Cloud Crusaders" ,
@@ -248,7 +263,7 @@ namespace FlexCap.Web.Controllers
                 Email = "diana.dev@flexcap.com",
                 Position = "Full Stack Dev",
                 Department = "Corporate Payments",
-                Status = "Ativo",
+                Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/women/61.jpg",
                 Country = "United States",
                 TeamName = "Dev Dynamos",
@@ -285,15 +300,48 @@ namespace FlexCap.Web.Controllers
 
         public IActionResult Listar()
         {
-            ViewData["Title"] = "All Employees";
-            ViewData["Profile"] = "Rh"; 
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
 
+            if (!string.IsNullOrEmpty(userEmail))
+            {
+                var colaboradorLogado = _context.Colaboradores
+                                                .AsNoTracking()
+                                                .FirstOrDefault(c => c.Email == userEmail);
+
+                if (colaboradorLogado != null)
+                {
+                    if (colaboradorLogado.Position == "Project Manager")
+                    {
+                        ViewData["Profile"] = "Manager";
+                    }
+                    else if (colaboradorLogado.Position == "HR Manager" || colaboradorLogado.Position == "HR Analyst" || colaboradorLogado.Position == "HR Consultant")
+                    {
+                        ViewData["Profile"] = "Rh";
+                    }
+                    else
+                    {
+                        ViewData["Profile"] = "Colaborador";
+                    }
+                }
+                else
+                {
+                    ViewData["Profile"] = "Colaborador";
+                }
+            }
+            else
+            {
+                ViewData["Profile"] = "Colaborador";
+            }
+
+            ViewData["Title"] = "All Employees";
             var colaboradores = _context.Colaboradores
-                .Where(c => c.Email != "recursoshumanos@flexcap.com") 
+                .Where(c => c.Email != "recursoshumanos@flexcap.com")
                 .ToList();
 
             return View("Rh", colaboradores);
         }
+
+
 
         // CRUD COMPLETO 
         public IActionResult CrudCompleto()
@@ -366,34 +414,43 @@ namespace FlexCap.Web.Controllers
 
 
 
-
-        public IActionResult Colaborador()
+        [HttpGet]
+        public async Task<IActionResult> Colaborador()
         {
-            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var colaboradorLogado = _context.Colaboradores.FirstOrDefault(c => c.Email == userEmail);
-            var colaboradoresDoTime = new List<Colaborador>(); 
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
 
-            if (colaboradorLogado != null)
+            if (string.IsNullOrEmpty(userEmail))
             {
-                ViewData["FirstName"] = colaboradorLogado.FullName?.Split(' ')[0] ?? "Colaborador";
-                ViewData["UserTeam"] = colaboradorLogado.TeamName ?? "Sem Time";
-                ViewData["ActiveMembers"] = colaboradorLogado.TeamName != null
-                                            ? _context.Colaboradores.Count(c => c.TeamName == colaboradorLogado.TeamName && c.Status == "Ativo")
-                                            : 1;
-
-                colaboradoresDoTime = _context.Colaboradores
-                                            .Where(c => c.TeamName == colaboradorLogado.TeamName)
-                                            .ToList();
-
-                return View("~/Views/Home/colaborador.cshtml", colaboradoresDoTime);
+                return RedirectToAction("Logout", "Login");
             }
 
-            return RedirectToAction("Logout", "Login");
+            var colaboradorLogado = await _context.Colaboradores
+                                                .AsNoTracking()
+                                                .FirstOrDefaultAsync(c => c.Email == userEmail);
+
+            if (colaboradorLogado == null)
+            {
+                return NotFound("Perfil do colaborador não encontrado.");
+            }
+
+            var equipeDoUsuario = colaboradorLogado.TeamName ?? "Sem Time";
+
+            var membrosAtivos = await _context.Colaboradores
+                                                .CountAsync(c => c.TeamName == equipeDoUsuario && c.Status == "Ativo");
+            var totalMembrosTime = await _context.Colaboradores
+                                                .CountAsync(c => c.TeamName == equipeDoUsuario);
+
+            ViewData["FirstName"] = colaboradorLogado.FullName?.Split(' ')[0] ?? "Colaborador";
+            ViewData["UserTeam"] = equipeDoUsuario;
+            ViewData["ActiveMembers"] = membrosAtivos;
+            ViewData["TotalMembers"] = totalMembrosTime;
+            ViewData["Profile"] = "Colaborador"; 
+            return View("~/Views/Home/colaborador.cshtml");
         }
 
 
 
-        //Test1234
+
 
         [HttpGet]
         public async Task<IActionResult> ListarEquipe()
@@ -479,35 +536,46 @@ namespace FlexCap.Web.Controllers
         }
 
 
-
-
-
-
-        public IActionResult Manager()
+        [HttpGet]
+        [Authorize(Roles = "Project Manager")] 
+        public async Task<IActionResult> Manager()
         {
-            ViewData["Title"] = "Gestão de Colaboradores";
-            ViewData["Profile"] = "Manager";
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
 
-            string emailDoGestorLogado = "jon.brown@flexcap.com";
-
-            var gestorLogado = _context.Colaboradores
-                                       .FirstOrDefault(c => c.Email == emailDoGestorLogado);
-
-            if (gestorLogado != null)
+            if (string.IsNullOrEmpty(userEmail))
             {
-                ViewData["NomeDoUsuario"] = gestorLogado.FullName.Split(' ')[0];
+                return RedirectToAction("Index", "Login");
+            }
+            var currentUser = await _context.Colaboradores
+                                            .AsNoTracking()
+                                            .FirstOrDefaultAsync(c => c.Email == userEmail);
 
-                var timeDoGestor = gestorLogado.TeamName;
-
-                var colaboradoresDoTime = _context.Colaboradores
-                                                  .Where(c => c.TeamName == timeDoGestor)
-                                                  .ToList();
-
-                return View(colaboradoresDoTime);
+            if (currentUser == null)
+            {
+                return NotFound("User profile not found.");
             }
 
-            return View(new List<Colaborador>());
+            var equipeDoUsuario = currentUser.TeamName;
+
+            var totalMembrosTime = await _context.Colaboradores
+                                            .CountAsync(c => c.TeamName == equipeDoUsuario);
+
+            var membrosAtivos = await _context.Colaboradores
+                                            .CountAsync(c => c.TeamName == equipeDoUsuario && c.Status == "Ativo");
+
+            ViewData["FirstName"] = currentUser.FullName.Split(' ')[0]; 
+            ViewData["UserTeam"] = equipeDoUsuario;
+            ViewData["ActiveMembers"] = membrosAtivos;
+            ViewData["TotalMembers"] = totalMembrosTime; 
+
+            ViewData["Title"] = "Home Manager";
+
+            return View("~/Views/Home/Manager.cshtml");
         }
+
+
+
+        
 
         
     }
