@@ -1,11 +1,16 @@
-using Microsoft.EntityFrameworkCore;
-using FlexCap.Web.Data;
-using Microsoft.AspNetCore.Authentication.Cookies; 
+using FlexCap.Web.Data; 
+using FlexCap.Web.Services; 
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using FlexCap.Web.Services;
+using Microsoft.EntityFrameworkCore;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddTransient<IEmailService, MockEmailService>();
+
+builder.Services.AddScoped<RequestService>();
 
 builder.Services.AddControllersWithViews();
 

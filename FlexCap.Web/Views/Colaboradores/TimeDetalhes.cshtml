@@ -5,33 +5,34 @@
     Layout = "~/Views/Shared/Template.cshtml";
 
     string loggedInUserName = ViewData["LoggedInUserName"] as string ?? "";
+    string profile = ViewData["Profile"] as string ?? "Colaborador"; // Ex: "Manager", "Rh", "Colaborador"
 }
 
 <div class="py-4 w-100">
-
     <h3 class="fw-bold mb-3">Collaborators</h3>
     <p class="text-muted mb-4">@Model.Count members</p>
 
     <div class="row g-2">
         @if (Model != null)
         {
-            @foreach (var colaborador in Model)
+            foreach (var colaborador in Model)
             {
+                // 🧩 STATUS
                 string statusValue = colaborador.Status ?? "Ativo";
                 string statusDisplay = statusValue == "Ativo" ? "Active" : "Inactive";
-
-                var statusColorClass = statusValue == "Ativo" ? "text-success" : "text-danger";
                 var dotColorClass = statusValue == "Ativo" ? "bg-success" : "bg-danger";
 
+                // 🧩 MOTIVO E DATA (apenas se inativo)
+                string reasonText = colaborador.InactivityReason?.Trim() ?? "";
+                DateTime? returnDate = colaborador.EndDate;
+
+                // 🧩 NOME E USUÁRIO ATUAL
                 string nomeDisplay = colaborador.FullName;
-
                 bool isCurrentUser = colaborador.FullName?.Trim() == loggedInUserName?.Trim();
-
                 if (isCurrentUser)
                 {
                     nomeDisplay += " (You)";
                 }
-
 
                 <div class="col-12 mb-2">
                     <div class="card p-2 shadow-sm d-flex flex-row align-items-center" style="max-width: 500px;">
@@ -43,28 +44,37 @@
                         <div>
                             <h6 class="mb-0 fw-bold">
                                 @nomeDisplay
-
                                 @if (colaborador.Position?.Trim() == "Project Manager")
                                 {
-                                    <span class="manager-crown ms-1" style="font-size: 16px;">
-                                        &#x1F451;
-                                    </span>
+                                    <span class="manager-crown ms-1" style="font-size: 16px;">&#x1F451;</span>
                                 }
                             </h6>
                             <small class="text-muted">@colaborador.Position</small>
                         </div>
 
                         <div class="ms-auto d-flex align-items-center">
-                            <span class="@statusColorClass me-2 fw-bold small">@statusDisplay</span>
+                            <span class="me-2 small fw-bold @((statusValue == "Ativo") ? "text-success" : "text-danger")">
+                                @statusDisplay
+
+                                @* Mostrar motivo e data apenas se inativo E usuário logado for Manager *@
+                                @if (statusValue == "Inativo" && profile == "Manager" && !string.IsNullOrEmpty(reasonText))
+                                {
+                                    <span class="fw-normal text-danger">
+                                        (@reasonText
+                                        @if (returnDate.HasValue)
+                                        {
+                                            <text> até @returnDate.Value.ToString("dd/MM/yyyy")</text>
+                                        }
+            )
+                                    </span>
+                                }
+                            </span>
+
                             <span class="dot @dotColorClass"></span>
                         </div>
-
                     </div>
                 </div>
             }
-
-
-
         }
     </div>
 </div>

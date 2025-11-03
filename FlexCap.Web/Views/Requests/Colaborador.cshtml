@@ -1,73 +1,126 @@
-﻿@{
+﻿@using FlexCap.Web.Models.Requests 
+@using System.Collections.Generic
+
+@model FlexCap.Web.Models.Requests.SubmitViewModelWithHistory
+
+@{
     ViewData["Title"] = "Submit Request";
     Layout = "~/Views/Shared/Template.cshtml";
+}
+
+
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 }
 
 <div class="main-content-fixed py-4">
 
     <h3 class="fw-bold mb-4">Submit Request</h3>
 
-    <!-- Form -->
-    <div class="mb-3">
-        <input type="text" class="form-control" placeholder="Subject" aria-label="Subject">
-    </div>
+    <form asp-controller="Request" asp-action="Submit" method="post" enctype="multipart/form-data">
 
-    <div class="row g-2 mb-3">
-        <div class="col-12 col-sm-4">
-            <select class="form-select" aria-label="Type">
-                <option selected>Type</option>
-                <option value="1">Vacation</option>
-                <option value="2">Day Off</option>
-                <option value="3">Personal License</option>
-            </select>
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+        <div class="mb-3">
+            <input asp-for="Subject" type="text" class="form-control" placeholder="Subject" aria-label="Subject">
+            <span asp-validation-for="Subject" class="text-danger"></span>
         </div>
-        <div class="col-12 col-sm-4">
-            <input type="date" class="form-control" placeholder="DD/MM/YYYY" aria-label="Start Date">
+
+        <div class="row g-2 mb-3">
+            <div class="col-12 col-sm-4">
+                <select asp-for="TypeId" class="form-select" aria-label="Type">
+                    <option value="">Select Type</option>
+                    <option value="1">Vacation</option>
+                    <option value="2">Day Off</option>
+                    <option value="3">Personal License</option>
+                </select>
+                <span asp-validation-for="TypeId" class="text-danger"></span>
+            </div>
+
+            <div class="col-12 col-sm-4">
+                <input asp-for="StartDate" type="date" class="form-control" aria-label="Start Date">
+                <span asp-validation-for="StartDate" class="text-danger"></span>
+            </div>
+
+            <div class="col-12 col-sm-4">
+                <input asp-for="EndDate" type="date" class="form-control" aria-label="End date">
+                <span asp-validation-for="EndDate" class="text-danger"></span>
+            </div>
         </div>
-        <div class="col-12 col-sm-4">
-            <input type="date" class="form-control" placeholder="DD/MM/YYYY" aria-label="End date">
+
+        <div class="mb-3">
+            <textarea asp-for="Description" class="form-control" placeholder="Description" rows="4" aria-label="Description"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
         </div>
-    </div>
 
-    <div class="mb-3">
-        <textarea class="form-control" placeholder="Description" rows="4" aria-label="Description"></textarea>
-    </div>
-    <div class="mb-3">
-        <label for="attach-file" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 w-auto">
-            <i class="bi bi-paperclip"></i>
-            Attach File
-            <input type="file" id="attach-file" class="d-none">
-        </label>
-    </div>
+        <div class="mb-3">
+            <label for="attach-file" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 w-auto">
+                <i class="bi bi-paperclip"></i>
+                Attach File
+                <input asp-for="AttachmentFile" type="file" id="attach-file" class="d-none">
+            </label>
+        </div>
 
-    <div class="d-grid">
-        <button type="submit" class="btn btn-primary btn-lg">Send Request</button>
-    </div>
+        <div class="d-grid mb-5">
+            <button type="submit" class="btn btn-primary btn-lg" formnovalidate>Send Request</button>
+        </div>
 
-    <!-- History -->
+    </form>
+    
+    <hr>
+
+
+
+
+
+    <hr>
     <h5 class="fw-bold mt-5 mb-3">Requests History</h5>
     <table class="table align-middle">
         <tbody>
-            <tr>
-                <td>Vacation</td>
-                <td>April 20</td>
-                <td><span class="badge bg-success">Approved</span></td>
-            </tr>
-            <tr>
-                <td>Day Off</td>
-                <td>March 15</td>
-                <td><span class="badge bg-danger">Rejected</span></td>
-            </tr>
-            <tr>
-                <td>Personal License</td>
-                <td>February 5</td>
-                <td><span class="badge bg-warning text-dark">Pending</span></td>
-            </tr>
+            @if (Model.RequestHistory == null || !Model.RequestHistory.Any())
+            {
+                <tr>
+                    <td colspan="3" class="text-center text-muted">No history found for this collaborator.</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var item in Model.RequestHistory)
+                {
+                    string badgeClass = item.CurrentStatus switch
+                    {
+                        "Approved" => "bg-success",
+                        "Rejected" => "bg-danger",
+                        _ => "bg-warning text-dark"
+                    };
+
+                    <tr>
+                        <td>@item.Subject</td>
+                        <td>@item.SubmissionDate.ToShortDateString()</td>
+                        <td><span class="badge @badgeClass">@item.CurrentStatus</span></td>
+                    </tr>
+                }
+            }
         </tbody>
     </table>
 
-    <!-- Button Manager -->
+
+
+
+
     <div class="mt-4">
         <button class="btn btn-custom btn-lg">Request access as Manager</button>
     </div>
+
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

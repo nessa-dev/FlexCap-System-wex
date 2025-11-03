@@ -1,8 +1,14 @@
-﻿@model List<FlexCap.Web.Models.Colaborador>
+﻿@using FlexCap.Web.Models;
+@using FlexCap.Web.Models.Requests; 
+@using System.Collections.Generic; 
+
+
+@model FlexCap.Web.Models.HomeMetricsViewModel
 
 @{
     ViewData["Title"] = "Home Rh";
     Layout = "~/Views/Shared/Template.cshtml";
+
 }
 
 <div class="py-4" style="max-width: 850px; width: 100%; margin-left: 0.5rem; margin-right: auto; overflow: hidden; height: 100%;">
@@ -29,8 +35,8 @@
             <div class="card text-center h-100 shadow-sm">
                 <div class="card-body p-2">
                     <h6 class="card-title fw-bold mb-1">Requests pending approval</h6>
-                    <h2 class="fw-bold mb-0">4</h2>
-                    <p class="text-muted mb-3 small">Awaiting review</p>
+                    <h2 class="fw-bold mb-0">@Model.TotalPendingHR</h2>
+                    <p class="text-muted mb-3 small">Awaiting HR review</p>
                 </div>
             </div>
         </div>
@@ -39,57 +45,55 @@
         <div class="col-md-4">
             <div class="card text-center h-100 shadow-sm">
                 <div class="card-body p-2">
-                    <h6 class="card-title fw-bold mb-1">Active Sectors</h6>
-                    <h2 class="fw-bold mb-0">@ViewData["TotalSetores"]</h2>
-                    <p class="text-muted mb-3 small">Sectors</p>
+                    <h6 class="card-title fw-bold mb-1">Active departments</h6>
+                    <h2 class="fw-bold mb-0">@Model.ActiveSectorsCount</h2>
+                    <p class="text-muted mb-3 small">departments</p>
                 </div>
             </div>
         </div>
-    </div>
+
+
+
 
     <!-- Order table -->
-    <div class="card shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center p-2">
-            <h6 class="mb-0 fw-bold">Latest Registration Requests</h6> 
-            <div>
-                <a asp-controller="Colaboradores" asp-action="Listar" class="btn btn-custom btn-sm"><small>View all contributors</small></a>
-            </div>
-        </div>
+        <a asp-controller="HRApproval" asp-action="PendingList" class="btn btn-custom btn-sm">
+            <small>View all requests</small>
+        </a>
+
         <div class="table-responsive">
             <table class="table mb-0 table-sm">
                 <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Position</th>
-                        <th>Sectors</th>
-                        <th>Status</th>
-                        <th class="text-center">Actions</th>
-                    </tr>
                 </thead>
                 <tbody>
-                    <!-- Example lines -->
-                    <tr>
-                        <td>Janaína Lima</td>
-                        <td>UX Designer</td>
-                        <td>Design</td>
-                        <td><span class="badge bg-warning text-dark">Pending</span></td>
-                        <td class="text-center">
-                            <button class="btn btn-success btn-sm me-1"><i class="bi bi-check2"></i></button>
-                            <button class="btn btn-danger btn-sm"><i class="bi bi-x"></i></button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Roberto Cunha</td>
-                        <td>Fullstack Dev</td>
-                        <td>Technology</td>
-                        <td><span class="badge bg-warning text-dark">Pending</span></td>
-                        <td class="text-center">
-                            <button class="btn btn-success btn-sm me-1"><i class="bi bi-check2"></i></button>
-                            <button class="btn btn-danger btn-sm"><i class="bi bi-x"></i></button>
-                        </td>
-                    </tr>
+                    @if (Model.LatestPendingRequests == null || !Model.LatestPendingRequests.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">No requests currently pending your review.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var request in Model.LatestPendingRequests)
+                        {
+                            <tr>
+                                <td>@request.CollaboratorName</td>
+                                <td>[Position Sim.]</td>
+                                <td>[Dept Sim.]</td>
+                                <td><span class="badge bg-warning text-dark">Pending RH</span></td>
+                                <td class="text-center">
+                                    <a asp-controller="HRApproval" asp-action="ProcessAction" asp-route-requestId="@request.RequestId" class="btn btn-success btn-sm me-1" title="Review">
+                                        <i class="bi bi-search"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
                 </tbody>
             </table>
         </div>
+
+
+
+
     </div>
 </div>

@@ -30,7 +30,9 @@
         {
             return controller == currentController && action == currentAction ? "active" : "";
         };
-        string homeActionName = "Colaborador"; 
+        string homeActionName = "Colaborador";
+        string homeControllerName = "Home";
+
         if (currentProfile == "Manager")
         {
             homeActionName = "Manager";
@@ -39,8 +41,12 @@
         {
             homeActionName = "Rh";
         }
-        bool isHomeActive = currentController == "Colaboradores" && currentAction == homeActionName;
+        bool isHomeActive = currentController == "Home" &&
+        (currentAction == "Index" || currentAction == "Manager" || currentAction == "Rh" || currentAction == "Colaborador");
     }
+
+
+
 
 
     <div class="sidebar">
@@ -49,7 +55,7 @@
                 <img src="~/img/logo.png" alt="FlexCap Logo" class="img-fluid">
             </div>
 
-            <a asp-controller="Colaboradores" asp-action="@homeActionName" class="menu-item @(isHomeActive ? "active" : "")">
+            <a asp-controller="Home" asp-action="Index" class="menu-item @(isHomeActive ? "active" : "")">
                 <span class="material-icons">home</span> Home
             </a>
 
@@ -64,7 +70,8 @@
                 <a asp-controller="Calendar" asp-action="Manager" class="menu-item action @GetActive("Calendar", "Manager")">
                     <span class="material-icons">calendar_today</span> Corporate Calendar
                 </a>
-                <a asp-controller="Requests" asp-action="Manager" class="menu-item action @GetActive("Requests", "Manager")">
+                <a asp-controller="ManagerApproval" asp-action="PendingList"
+                   class="menu-item action @GetActive("ManagerApproval", "PendingList")">
                     <span class="material-icons">description</span> Requests
                 </a>
             }
@@ -79,7 +86,8 @@
                 <a asp-controller="Calendar" asp-action="Rh" class="menu-item action @GetActive("Calendar", "Rh")">
                     <span class="material-icons">calendar_today</span> Corporate Calendar
                 </a>
-                <a asp-controller="Requests" asp-action="Rh" class="menu-item action @GetActive("Requests", "Rh")">
+                <a asp-controller="HRApproval" asp-action="PendingList"
+                   class="menu-item action @GetActive("HRApproval", "PendingList")">
                     <span class="material-icons">description</span> Requests
                 </a>
             }
@@ -94,7 +102,8 @@
                 <a asp-controller="Calendar" asp-action="Colaborador" class="menu-item action @GetActive("Calendar", "Colaborador")">
                     <span class="material-icons">calendar_today</span> Corporate Calendar
                 </a>
-                <a asp-controller="Requests" asp-action="Colaborador" class="menu-item action @GetActive("Requests", "Colaborador")">
+                <a asp-controller="Request" asp-action="Submit"
+                   class="menu-item action @GetActive("Request", "Submit")">
                     <span class="material-icons">description</span> Requests
                 </a>
             }

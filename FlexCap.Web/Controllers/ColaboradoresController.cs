@@ -294,8 +294,12 @@ namespace FlexCap.Web.Controllers
                 .ToList();
             ViewData["TotalColaboradores"] = colaboradores.Count;
             ViewData["TotalSetores"] = colaboradores.Select(c => c.Department).Distinct().Count();
-            return View("~/Views/Home/Rh.cshtml", colaboradores);
+            return RedirectToAction("Index", "Home");
         }
+
+
+
+
 
 
         public IActionResult Listar()

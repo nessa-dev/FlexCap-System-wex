@@ -1,12 +1,14 @@
-﻿using FlexCap.Web.Models;
+﻿using FlexCap.Web.Data;
+using FlexCap.Web.Models;
+using FlexCap.Web.Services;
+using Microsoft.AspNetCore.Authorization; 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
-using FlexCap.Web.Data;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization; 
+using FlexCap.Web.Models.Requests;
 
 namespace FlexCap.Web.Controllers
 {
@@ -14,30 +16,105 @@ namespace FlexCap.Web.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly AppDbContext _context;
+        private readonly RequestService _requestService; 
 
-        public HomeController(ILogger<HomeController> logger, AppDbContext context)
+        public HomeController(ILogger<HomeController> logger, AppDbContext context, RequestService requestService)
         {
             _logger = logger;
             _context = context;
+            _requestService = requestService; 
         }
 
+
+
+
+
+
+        [Authorize]
         public async Task<IActionResult> Index()
         {
-            if (User?.Identity?.IsAuthenticated == true)
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+
+            if (string.IsNullOrEmpty(userEmail)) return RedirectToAction("Logout", "Login");
+
+            var colaboradorLogado = await _context.Colaboradores
+                                                    .AsNoTracking()
+                                                    .FirstOrDefaultAsync(c => c.Email == userEmail);
+
+            if (colaboradorLogado == null) return RedirectToAction("Logout", "Login");
+
+            bool isRh = colaboradorLogado.Position.Contains("HR");
+            bool isManager = colaboradorLogado.Position == "Project Manager";
+
+
+            if (isRh)
             {
-                var fullNameClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
 
-                if (!string.IsNullOrEmpty(fullNameClaim))
+                int pendingHrCount = await _requestService.GetPendingHRRequestsCountAsync();
+                int totalEmployees = await _context.Colaboradores.CountAsync(c => c.Email != "recursoshumanos@flexcap.com");
+                int activeSectorsCount = await _context.Colaboradores.Where(c => c.Department != "RH")
+                                                .Select(c => c.Department)
+                                                .Distinct()
+                                                .CountAsync();
+
+
+                var latestPendingRequests = await _context.Requests
+                    .Include(r => r.Colaborador) 
+                    .Where(r => r.Status == "Aguardando RH")
+                    .OrderByDescending(r => r.CreationDate)
+                    .Take(5) 
+                    .Select(r => new PendingRequestListItemViewModel
+                    {
+                        RequestId = r.Id,
+                        Subject = r.Subject,
+                        CurrentStatus = r.Status,
+                        SubmissionDate = r.CreationDate,
+
+                        CollaboratorName = r.Colaborador.FullName,
+                        Position = r.Colaborador.Position,
+                        Department = r.Colaborador.Department,
+
+                        TypeName = r.Colaborador.Department 
+                    })
+                    .ToListAsync();
+
+                var viewModel = new HomeMetricsViewModel
                 {
-                    ViewData["FirstName"] = fullNameClaim.Split(' ')[0];
-                }
+                    TotalPendingHR = pendingHrCount,
+                    TotalEmployees = totalEmployees,
+                    ActiveSectorsCount = activeSectorsCount,
+                    LatestPendingRequests = latestPendingRequests 
+                };
 
-                return View();
+                ViewData["TotalColaboradores"] = totalEmployees.ToString();
+                ViewData["TotalSetores"] = activeSectorsCount.ToString();
+
+                return View("Rh", viewModel);
             }
 
-            ViewData["FirstName"] = "Visitante";
-            return View();
+
+
+
+        
+            else if (isManager)
+            {
+                return RedirectToAction("Manager");
+            }
+            else
+            {
+                return RedirectToAction("Colaborador");
+            }
         }
+
+
+
+
+
+
+
+
+
+
 
         [Authorize] 
          public async Task<IActionResult> Colaborador()
@@ -87,7 +164,6 @@ namespace FlexCap.Web.Controllers
             ViewData["Profile"] = "Manager";
             string userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
-            // Se o usuário não estiver logado, redireciona (embora o [Authorize] já proteja)
             if (string.IsNullOrEmpty(userEmail))
             {
                 return RedirectToAction("Index", "Login");
@@ -102,39 +178,29 @@ namespace FlexCap.Web.Controllers
                 string primeiroNome = colaboradorLogado.FullName?.Split(' ')[0] ?? "Manager";
                 string nomeDoTime = colaboradorLogado.TeamName ?? "Sem Time";
 
-                // 1. CÁLCULO DE MÉTRICAS OTIMIZADO (ASYNC)
                 int membrosAtivos = await _context.Colaboradores
                                                     .CountAsync(c => c.TeamName == nomeDoTime && c.Status == "Ativo");
 
                 int totalMembrosTime = await _context.Colaboradores
                                                     .CountAsync(c => c.TeamName == nomeDoTime);
 
-                // 2. BUSCA DO TIME (MANTIDA, AGORA ASYNC E ORDENADA)
-                // Esta busca só é necessária se a View for a lista de cards
                 var colaboradoresDoTime = await _context.Colaboradores
                     .AsNoTracking()
                     .Where(c => c.TeamName == nomeDoTime)
-                    .OrderByDescending(c => c.Position == "Project Manager") // Ordena por Manager
+                    .OrderByDescending(c => c.Position == "Project Manager") 
                     .ThenBy(c => c.FullName)
                     .ToListAsync();
 
-
-                // DEFINE VIEW DATA
                 ViewData["FirstName"] = primeiroNome;
                 ViewData["UserTeam"] = nomeDoTime;
                 ViewData["ActiveMembers"] = membrosAtivos;
                 ViewData["TotalMembers"] = totalMembrosTime;
-
-                // Se HomeManager for um Dashboard, retorne apenas a View (sem Model)
-                // Se HomeManager for a lista de cards, retorne com o Model
-                return View("HomeManager", colaboradoresDoTime);
+                return View("Manager", colaboradoresDoTime);
             }
-
-            // Retorno de fallback (Se o usuário estiver autenticado, mas o registro não estiver no DB)
             ViewData["FirstName"] = "Usuário";
             ViewData["UserTeam"] = "Sem Time";
             ViewData["ActiveMembers"] = 0;
-            return View("HomeManager", new List<Colaborador>());
+            return View("Manager", new List<Colaborador>());
         }
 
 

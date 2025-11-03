@@ -7,28 +7,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Controllers\NewFolder\**" />
     <Compile Remove="Data\Migrations\**" />
-    <Compile Remove="Models\NewFolder\**" />
     <Compile Remove="Views\NewFolder1\**" />
+    <Compile Remove="Views\NewFolder\**" />
     <Compile Remove="Views\Usuarios\**" />
     <Compile Remove="wwwroot\NewFolder\**" />
-    <Content Remove="Controllers\NewFolder\**" />
     <Content Remove="Data\Migrations\**" />
-    <Content Remove="Models\NewFolder\**" />
     <Content Remove="Views\NewFolder1\**" />
+    <Content Remove="Views\NewFolder\**" />
     <Content Remove="Views\Usuarios\**" />
     <Content Remove="wwwroot\NewFolder\**" />
-    <EmbeddedResource Remove="Controllers\NewFolder\**" />
     <EmbeddedResource Remove="Data\Migrations\**" />
-    <EmbeddedResource Remove="Models\NewFolder\**" />
     <EmbeddedResource Remove="Views\NewFolder1\**" />
+    <EmbeddedResource Remove="Views\NewFolder\**" />
     <EmbeddedResource Remove="Views\Usuarios\**" />
     <EmbeddedResource Remove="wwwroot\NewFolder\**" />
-    <None Remove="Controllers\NewFolder\**" />
     <None Remove="Data\Migrations\**" />
-    <None Remove="Models\NewFolder\**" />
     <None Remove="Views\NewFolder1\**" />
+    <None Remove="Views\NewFolder\**" />
     <None Remove="Views\Usuarios\**" />
     <None Remove="wwwroot\NewFolder\**" />
   </ItemGroup>
@@ -66,7 +62,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\NewFolder\" />
     <Folder Include="wwwroot\Images\Profiles\" />
   </ItemGroup>
 

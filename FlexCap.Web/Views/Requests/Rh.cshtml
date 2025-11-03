@@ -1,16 +1,125 @@
-﻿@{
+﻿@model FlexCap.Web.Models.Requests.ManagerApprovalListViewModel
+@{
     ViewData["Title"] = "Gestão de Solicitações (RH)";
     Layout = "~/Views/Shared/Template.cshtml";
 }
 
-<div class="py-4" style="max-width: 850px; width: 100%; margin-left: 0.5rem; margin-right: auto; overflow-y: hidden; height: calc(100vh - 5rem);">
-
+<div class="py-4 container-fluid">
     <h3 class="fw-bold mb-3">Requests HR</h3>
-    <div class="p-3 border rounded">
+
+    <form asp-controller="HRApproval" asp-action="PendingList" method="get" class="d-flex mb-3 gap-3">
+
+        <select name="statusFilter" onchange="this.form.submit()" class="form-select form-select-sm" style="width: 150px;">
+            <option value="">All Statuses</option>
+            <option value="Approved">Pending</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>            
+        </select>
+        
+        <select name="typeFilter" onchange="this.form.submit()" class="form-select form-select-sm" style="width: 150px;">
+            <option value="">All Types</option>
+            <option value="Medical Leave">Medical Leave</option>
+            <option value="Personal License">Personal License</option>
+            <option value="Vacation">Vacation</option>
+            <option value="Day Off">Day Off</option>
+            <option value="Maternity Leave">Maternity Leave</option>
+            <option value="Suspension">Suspension</option>
+            <option value="Other">Other</option>
+        </select>
+        
+        <select name="departmentFilter" onchange="this.form.submit()" class="form-select form-select-sm" style="width: 150px;">
+            <option value="">All Departments</option>
+            <option value="Benefits">Benefits</option>
+            <option value="Mobility">Mobility</option>
+            <option value="Corporate Payments">Corporate Payments</option>
+        </select>
+        
+        </form>
+
+
+    <div class="row">
+
+        <div class="col-lg-9">
+            <div class="p-3 border rounded">
+
+                @if (Model.PendingRequests == null || !Model.PendingRequests.Any())
+                {
+                    <div class="p-5 border rounded text-center">
+                        <p class="text-muted mb-0">No requests match the current filters.</p>
+                    </div>
+                }
+                else
+                {
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            </thead>
+                        <tbody>
+                            @foreach (var request in Model.PendingRequests)
+                            {
+                                    string displayStatus = request.DisplayStatus;
+                                    
+                                    string badgeClass = displayStatus switch
+                                    {
+                                        "Pending" => "bg-warning text-dark",
+                                        "Approved" => "bg-success",
+                                        "Rejected" => "bg-danger",
+                                        _ => "bg-secondary"
+                                    };
+                                <tr>
+                                    <td>@request.CollaboratorName</td>
+                                    <td>[Position Sim.]</td>
+                                    <td>[Dept Sim.]</td>
+                                    <td>@request.TypeName</td>
+                                    <td>@request.SubmissionDate.ToShortDateString()</td>
+
+                                    <td><span class="badge @badgeClass">@displayStatus</span></td>
+
+                                    <td>
+                                        @if (request.CurrentStatus == "Waiting For HR")
+                                        {
+                                            <button type="button" class="btn btn-success btn-sm" title="Approve Final"><i class="bi bi-check-lg"></i></button>
+                                            <button type="button" class="btn btn-danger btn-sm" title="Reject"><i class="bi bi-x-lg"></i></button>
+                                            <button type="button" class="btn btn-secondary btn-sm" title="Return to Manager"><i class="bi bi-arrow-return-left"></i></button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-3">
+            <div class="p-3 border rounded bg-light">
+                <h5 class="fw-bold mb-3">Summary</h5>
+                
+                @{
+                    var pendingStatusList = new List<string> { "Waiting For HR", "Waiting For Manager", "Adjustment Requested" };
+                    var pendingCount = Model.PendingRequests.Count(r => pendingStatusList.Contains(r.CurrentStatus));
+                                        var pendingByType = Model.PendingRequests
+                        .Where(r => pendingStatusList.Contains(r.CurrentStatus))
+                        .GroupBy(r => r.TypeName)
+                        .Select(g => new { Type = g.Key, Count = g.Count() })
+                        .OrderByDescending(x => x.Count);
+                }
+
+                <h6 class="mb-3">@pendingCount Pending Requests</h6>
+
+                <ul class="list-unstyled small">
+                    @if (pendingCount > 0)
+                    {
+                        @foreach (var item in pendingByType)
+                        {
+                            <li>@item.Count @item.Type</li>
+                        }
+                    }
+                    else
+                    {
+                        <li>No requests currently pending approval.</li>
+                    }
+                </ul>
+            </div>
+        </div>
     </div>
-
 </div>
-
-
-
-
