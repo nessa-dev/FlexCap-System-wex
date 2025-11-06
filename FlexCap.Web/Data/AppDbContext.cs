@@ -16,5 +16,6 @@ namespace FlexCap.Web.Data
         public DbSet<TabelaTeste> DadosDeTeste { get; set; } = default!;
         public DbSet<RequestEntity> Requests { get; set; }
         public DbSet<RequestLogEntity> RequestLogs { get; set; }
+        public DbSet<RequestType> RequestTypes { get; set; }
     }
 }

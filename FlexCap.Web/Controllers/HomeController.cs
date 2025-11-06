@@ -92,10 +92,6 @@ namespace FlexCap.Web.Controllers
                 return View("Rh", viewModel);
             }
 
-
-
-
-        
             else if (isManager)
             {
                 return RedirectToAction("Manager");
@@ -116,92 +112,127 @@ namespace FlexCap.Web.Controllers
 
 
 
-        [Authorize] 
-         public async Task<IActionResult> Colaborador()
+        [Authorize]
+        public async Task<IActionResult> Colaborador()
         {
-            ViewData["Profile"] = "Colaborador";
-            Colaborador colaboradorLogado = null;
-
             var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            Colaborador colaboradorLogado = null;
+            int collaboratorId = -1;
 
             if (!string.IsNullOrEmpty(userEmail))
             {
                 colaboradorLogado = await _context.Colaboradores
-                                                .AsNoTracking()
-                                                .FirstOrDefaultAsync(c => c.Email == userEmail);
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(c => c.Email == userEmail);
+
+                var collaboratorIdString = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+                if (int.TryParse(collaboratorIdString, out int id))
+                {
+                    collaboratorId = id;
+                }
             }
 
-            if (colaboradorLogado != null)
-            {
-                string primeiroNome = colaboradorLogado.FullName?.Split(' ')[0] ?? "Colaborador";
-                string nomeDoTime = colaboradorLogado.TeamName ?? "Sem Time";
+            var viewModel = new HomeMetricsViewModel(); // Usa a nova ViewModel
 
+            if (colaboradorLogado != null && collaboratorId != -1)
+            {
+                string nomeDoTime = colaboradorLogado.TeamName ?? "Sem Time";
+                string primeiroNome = colaboradorLogado.FullName?.Split(' ')[0] ?? "Colaborador";
+
+                // Busca Métricas do Time
                 int membrosAtivos = await _context.Colaboradores.CountAsync(c => c.TeamName == nomeDoTime && c.Status == "Ativo");
                 int totalMembrosTime = await _context.Colaboradores.CountAsync(c => c.TeamName == nomeDoTime);
 
-                ViewData["FirstName"] = primeiroNome;
-                ViewData["UserTeam"] = nomeDoTime;
-                ViewData["ActiveMembers"] = membrosAtivos;
-                ViewData["TotalMembers"] = totalMembrosTime; 
-                return View("~/Views/Home/colaborador.cshtml");
-            }
-            ViewData["FirstName"] = "Usuário";
-            ViewData["UserTeam"] = "Sem Time";
-            ViewData["ActiveMembers"] = 0;
-            ViewData["TotalMembers"] = 0;
-            return View("~/Views/Home/colaborador.cshtml");
-        }
-
-
-
-
-
-
-
-        [HttpGet]
-        public async Task<IActionResult> Manager()
-        {
-            ViewData["Profile"] = "Manager";
-            string userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-
-            if (string.IsNullOrEmpty(userEmail))
-            {
-                return RedirectToAction("Index", "Login");
-            }
-
-            var colaboradorLogado = await _context.Colaboradores
-                                                .AsNoTracking()
-                                                .FirstOrDefaultAsync(c => c.Email == userEmail);
-
-            if (colaboradorLogado != null)
-            {
-                string primeiroNome = colaboradorLogado.FullName?.Split(' ')[0] ?? "Manager";
-                string nomeDoTime = colaboradorLogado.TeamName ?? "Sem Time";
-
-                int membrosAtivos = await _context.Colaboradores
-                                                    .CountAsync(c => c.TeamName == nomeDoTime && c.Status == "Ativo");
-
-                int totalMembrosTime = await _context.Colaboradores
-                                                    .CountAsync(c => c.TeamName == nomeDoTime);
-
-                var colaboradoresDoTime = await _context.Colaboradores
-                    .AsNoTracking()
-                    .Where(c => c.TeamName == nomeDoTime)
-                    .OrderByDescending(c => c.Position == "Project Manager") 
-                    .ThenBy(c => c.FullName)
+                // 🛑 BUSCA DO HISTÓRICO: Puxando as 3 mais recentes
+                var recentRequests = await _context.Requests
+                    .Include(r => r.RequestType) // Incluir o Tipo para o nome
+                    .Where(r => r.CollaboratorId == collaboratorId)
+                    .OrderByDescending(r => r.CreationDate)
+                    .Take(3) // 🛑 APENAS AS TRÊS MAIS RECENTES
+                    .Select(r => new PendingRequestListItemViewModel
+                    {
+                        CurrentStatus = r.Status,
+                        SubmissionDate = r.CreationDate,
+                        TypeName = r.RequestType.Name,
+                        RequestId = r.Id // Para futuros detalhes
+                    })
                     .ToListAsync();
 
-                ViewData["FirstName"] = primeiroNome;
-                ViewData["UserTeam"] = nomeDoTime;
-                ViewData["ActiveMembers"] = membrosAtivos;
-                ViewData["TotalMembers"] = totalMembrosTime;
-                return View("Manager", colaboradoresDoTime);
+                // Preenche o ViewModel (Substituindo o ViewData)
+                viewModel.FirstName = primeiroNome;
+                viewModel.UserTeam = nomeDoTime;
+                viewModel.ActiveMembers = membrosAtivos;
+                viewModel.TotalMembers = totalMembrosTime;
+                viewModel.ColaboratorHistory = recentRequests; 
+
             }
-            ViewData["FirstName"] = "Usuário";
-            ViewData["UserTeam"] = "Sem Time";
-            ViewData["ActiveMembers"] = 0;
-            return View("Manager", new List<Colaborador>());
+            // Retorna a View com a ViewModel completa
+            return View("~/Views/Home/colaborador.cshtml", viewModel);
         }
+
+
+
+
+
+
+
+        [Authorize]
+        public async Task<IActionResult> Manager()
+        {
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+
+            if (string.IsNullOrEmpty(userEmail))
+                return RedirectToAction("Logout", "Login");
+
+            var manager = await _context.Colaboradores
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Email == userEmail);
+
+            if (manager == null)
+                return RedirectToAction("Logout", "Login");
+
+            // ✅ Pegando o time do gerente
+            var teamName = manager.TeamName ?? "Sem Time";
+
+            // ✅ Contando membros ativos do time
+            var activeMembers = await _context.Colaboradores
+                .CountAsync(c => c.TeamName == teamName && c.Status == "Ativo");
+
+            // ✅ Pegando as requisições pendentes do time
+            var pendingRequests = await _context.Requests
+                .Include(r => r.Colaborador)
+            .Where(r => r.Status == "Waiting For Manager" && r.Colaborador.TeamName == teamName)
+                .OrderByDescending(r => r.CreationDate)
+                .Take(5)
+                .Select(r => new PendingRequestListItemViewModel
+                {
+                    RequestId = r.Id,
+                    Subject = r.Subject,
+                    SubmissionDate = r.CreationDate,
+                    CurrentStatus = r.Status,
+                    CollaboratorName = r.Colaborador.FullName,
+                    Department = r.Colaborador.Department,
+                    Position = r.Colaborador.Position,
+                    PhotoUrl = r.Colaborador.PhotoUrl,
+                    TypeName = r.RequestType.Name
+                })
+                .ToListAsync();
+
+            var viewModel = new HomeMetricsViewModel
+            {
+                // ✅ Usa apenas o primeiro nome extraído de FullName
+                FirstName = manager.FullName?.Split(' ')?.FirstOrDefault() ?? "Usuário",
+                UserTeam = teamName,
+                ActiveMembers = activeMembers,
+                PendingManagerRequests = pendingRequests
+            };
+
+            return View("Manager", viewModel);
+        }
+
+
+
+
 
 
 

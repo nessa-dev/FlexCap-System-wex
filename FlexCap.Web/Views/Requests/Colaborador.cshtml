@@ -1,4 +1,4 @@
-﻿@using FlexCap.Web.Models.Requests 
+﻿@using FlexCap.Web.Models.Requests
 @using System.Collections.Generic
 
 @model FlexCap.Web.Models.Requests.SubmitViewModelWithHistory
@@ -7,8 +7,6 @@
     ViewData["Title"] = "Submit Request";
     Layout = "~/Views/Shared/Template.cshtml";
 }
-
-
 
 @if (TempData["SuccessMessage"] != null)
 {
@@ -38,6 +36,11 @@
                     <option value="1">Vacation</option>
                     <option value="2">Day Off</option>
                     <option value="3">Personal License</option>
+                    <option value="2">Medical Leave</option>
+                    <option value="2">Maternity Leave</option>
+                    <option value="2">Suspension</option>
+                    <option value="2">Other</option>
+
                 </select>
                 <span asp-validation-for="TypeId" class="text-danger"></span>
             </div>
@@ -71,21 +74,24 @@
         </div>
 
     </form>
-    
-    <hr>
-
-
-
-
 
     <hr>
+
     <h5 class="fw-bold mt-5 mb-3">Requests History</h5>
     <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Submitted On</th>
+                <th>Status</th>
+                <th>Reason</th>
+            </tr>
+        </thead>
         <tbody>
             @if (Model.RequestHistory == null || !Model.RequestHistory.Any())
             {
                 <tr>
-                    <td colspan="3" class="text-center text-muted">No history found for this collaborator.</td>
+                    <td colspan="4" class="text-center text-muted">No history found for this collaborator.</td>
                 </tr>
             }
             else
@@ -96,6 +102,7 @@
                     {
                         "Approved" => "bg-success",
                         "Rejected" => "bg-danger",
+                        "Adjustment Requested" => "bg-info text-dark", // Status de Ajuste/Correção
                         _ => "bg-warning text-dark"
                     };
 
@@ -103,15 +110,25 @@
                         <td>@item.Subject</td>
                         <td>@item.SubmissionDate.ToShortDateString()</td>
                         <td><span class="badge @badgeClass">@item.CurrentStatus</span></td>
+
+                        <td>
+                            @if (item.CurrentStatus == "Rejected" || item.CurrentStatus == "Adjustment Requested")
+                            {
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-secondary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#reasonModal"
+                                        data-reason-text="@item.RejectionReason"
+                                        title="View Reason">
+                                    <i class="bi bi-info-circle"></i> View Reason
+                                </button>
+                            }
+                        </td>
                     </tr>
                 }
             }
         </tbody>
     </table>
-
-
-
-
 
     <div class="mt-4">
         <button class="btn btn-custom btn-lg">Request access as Manager</button>
@@ -119,7 +136,45 @@
 
 </div>
 
+<div class="modal fade" id="reasonModal" tabindex="-1" aria-labelledby="reasonModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reasonModalLabel">Reason for Action</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>The following reason was provided by the approver:</p>
+                <p id="rejectionReasonText" class="alert alert-secondary"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // LÓGICA PARA CARREGAR A RAZÃO NO MODAL
+            var reasonModal = document.getElementById('reasonModal');
+            if (reasonModal) {
+                reasonModal.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+                    // Lê o texto diretamente do atributo 'data-reason-text' do botão
+                    var reasonText = button.getAttribute('data-reason-text');
+
+                    var modalBody = reasonModal.querySelector('#rejectionReasonText');
+
+                    // Coloca o texto lido no modal
+                    modalBody.textContent = reasonText || 'No detailed reason was provided.';
+                });
+            }
+
+        });
+    </script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

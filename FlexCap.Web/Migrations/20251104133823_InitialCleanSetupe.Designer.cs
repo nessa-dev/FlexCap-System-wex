@@ -3,6 +3,7 @@ using System;
 using FlexCap.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlexCap.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251104133823_InitialCleanSetupe")]
+    partial class InitialCleanSetupe
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.9");
@@ -176,6 +179,7 @@ namespace FlexCap.Web.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Comment")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NewStatus")
@@ -187,10 +191,6 @@ namespace FlexCap.Web.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ActionByUserId");
-
-                    b.HasIndex("RequestId");
 
                     b.ToTable("RequestLogs");
                 });
@@ -234,25 +234,6 @@ namespace FlexCap.Web.Migrations
                     b.Navigation("Colaborador");
 
                     b.Navigation("RequestType");
-                });
-
-            modelBuilder.Entity("FlexCap.Web.Models.Requests.RequestLogEntity", b =>
-                {
-                    b.HasOne("FlexCap.Web.Models.Colaborador", "ActionByUser")
-                        .WithMany()
-                        .HasForeignKey("ActionByUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FlexCap.Web.Models.Requests.RequestEntity", "Request")
-                        .WithMany()
-                        .HasForeignKey("RequestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ActionByUser");
-
-                    b.Navigation("Request");
                 });
 
             modelBuilder.Entity("FlexCap.Web.Models.RequestType", b =>

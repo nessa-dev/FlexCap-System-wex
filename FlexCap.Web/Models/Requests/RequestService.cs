@@ -38,22 +38,33 @@ namespace FlexCap.Web.Services
                     subject = "Manager Approved - Awaiting Final HR Validation";
                     body = $"Your request '{request.Subject}' was approved by your Manager and is now with HR for final validation.";
                     break;
+                case "Adjustment Requested": // <<< NOVO STATUS PARA O FLUXO DE AJUSTE
+                    subject = "Request Requires Adjustment/Correction";
+                    body = $"Your request '{request.Subject}' requires adjustment by you, as requested by {decisionMaker}. Details: {request.RejectionReason}";
+                    break;
                 case "Approved":
                     subject = "SUCCESS! Request Fully Approved";
                     body = $"Congratulations! Your request '{request.Subject}' was fully approved and is now being processed.";
                     break;
                 case "Rejected":
                     subject = "Request Rejected";
+                    // Usamos RejectionReason para justificativas de rejeição e de ajuste
                     body = $"Your request '{request.Subject}' was rejected by {decisionMaker}. Reason: {request.RejectionReason}";
                     break;
-   
+
                 default:
                     return;
             }
             await _emailService.SendNotificationAsync(request.CollaboratorId, subject, body);
         }
 
- 
+        public async Task<int> GetV()
+        {
+            return await _context.SaveChangesAsync();
+        }
+
+
+
         public async Task<int> SubmitNewRequest(AbsenceRequestSubmitViewModel model, int collaboratorId)
         {
             var colaborador = await _context.Colaboradores.FirstOrDefaultAsync(c => c.Id == collaboratorId);
@@ -82,6 +93,9 @@ namespace FlexCap.Web.Services
             };
 
             _context.Requests.Add(newRequest);
+
+        
+
             await _context.SaveChangesAsync();
 
             await NotifyCollaboratorAsync(newRequest, "System");
@@ -89,11 +103,15 @@ namespace FlexCap.Web.Services
             return newRequest.Id;
         }
 
-       
+
         public async Task ProcessManagerDecision(int requestId, int managerUserId, string actionType, string justification)
         {
+            // CORREÇÃO ESSENCIAL: Garante que o valor não é NULL para ser usado no Log
+            string logComment = justification ?? "";
+
             var request = await _context.Requests.FindAsync(requestId);
 
+            // 1. Validação de Status (OK)
             if (request == null || request.Status != "Waiting For Manager")
             {
                 throw new InvalidOperationException("Request not pending Manager approval.");
@@ -102,11 +120,12 @@ namespace FlexCap.Web.Services
             string newStatus = string.Empty;
             string actionDescription = string.Empty;
 
+            // Lógica de Transição de Status
             switch (actionType.ToLower())
             {
                 case "approve": newStatus = "Waiting For HR"; actionDescription = "Manager Approved"; break;
-                case "reject": newStatus = "Rejected"; actionDescription = "Manager Rejected"; request.RejectionReason = justification; break;
-                case "requestadjustment": newStatus = "Adjustment Requested"; actionDescription = "Manager Requested Adjustment"; request.RejectionReason = justification; break;
+                case "reject": newStatus = "Rejected"; actionDescription = "Manager Rejected"; request.RejectionReason = logComment; break; // Use logComment aqui também
+                case "requestadjustment": newStatus = "Adjustment Requested"; actionDescription = "Manager Requested Adjustment"; request.RejectionReason = logComment; break; // Use logComment aqui também
                 default: throw new ArgumentException("Invalid action type.");
             }
 
@@ -114,6 +133,7 @@ namespace FlexCap.Web.Services
             request.CurrentManagerId = managerUserId;
             request.LastUpdateDate = DateTime.Now;
 
+            // 2. Descomentar e Ativar o Log (ESSENCIAL)
             _context.RequestLogs.Add(new RequestLogEntity
             {
                 RequestId = requestId,
@@ -121,12 +141,20 @@ namespace FlexCap.Web.Services
                 ActionType = actionDescription,
                 NewStatus = newStatus,
                 ActionTimestamp = DateTime.Now,
-                Comment = justification
+                // CORREÇÃO CRÍTICA: Use a variável segura contra NULL
+                Comment = logComment // Agora, se a aprovação for enviada, o valor é "", não NULL
             });
 
+            // 3. Salvar as Mudanças (Muda o Status no DB)
             await _context.SaveChangesAsync();
+
+            // 4. Notificação (Comente se der problema de travamento SMTP)
             await NotifyCollaboratorAsync(request, "Manager");
         }
+
+
+
+
 
         public async Task<int> GetPendingHRRequestsCountAsync()
         {
@@ -134,10 +162,16 @@ namespace FlexCap.Web.Services
                 .CountAsync(r => r.Status == "Waiting For HR");
         }
 
+
+
         public async Task ProcessHRDecision(int requestId, int hrUserId, string actionType, string justification)
         {
+            // 🛑 CORREÇÃO CRÍTICA: Garante que o justification é uma string vazia ("") se for nulo.
+            string logComment = justification ?? "";
+
             var request = await _context.Requests.FindAsync(requestId);
 
+            // 1. Validação de Status (OK)
             if (request == null || request.Status != "Waiting For HR")
             {
                 throw new InvalidOperationException("Request not pending HR validation.");
@@ -146,18 +180,36 @@ namespace FlexCap.Web.Services
             string newStatus = string.Empty;
             string actionDescription = string.Empty;
 
+            // Lógica de Transição de Status
             switch (actionType.ToLower())
             {
-                case "approve": newStatus = "Approved"; actionDescription = "HR Approved"; break;
-                case "reject": newStatus = "Rejected"; actionDescription = "HR Rejected"; request.RejectionReason = justification; break;
-                case "returntomanager": newStatus = "Waiting For Manager"; actionDescription = "HR Returned to Manager"; request.RejectionReason = justification; break;
-                default: throw new ArgumentException("Invalid action type.");
+                case "approve":
+                    newStatus = "Approved";
+                    actionDescription = "HR Approved";
+                    // O logComment será "" aqui.
+                    break;
+
+                case "reject":
+                    newStatus = "Rejected";
+                    actionDescription = "HR Rejected";
+                    request.RejectionReason = logComment; // Usa a justificativa para a razão
+                    break;
+
+                case "returntomanager":
+                    newStatus = "Waiting For Manager";
+                    actionDescription = "HR Returned to Manager";
+                    request.RejectionReason = logComment; // Usa a justificativa para a razão
+                    break;
+
+                default:
+                    throw new ArgumentException("Invalid action type.");
             }
 
             request.Status = newStatus;
             request.CurrentHRId = hrUserId;
             request.LastUpdateDate = DateTime.Now;
 
+            // 2. Registro do Log (Agora usa a variável segura logComment)
             _context.RequestLogs.Add(new RequestLogEntity
             {
                 RequestId = requestId,
@@ -165,11 +217,14 @@ namespace FlexCap.Web.Services
                 ActionType = actionDescription,
                 NewStatus = newStatus,
                 ActionTimestamp = DateTime.Now,
-                Comment = justification
+                // CORREÇÃO: Usa a variável segura logComment
+                Comment = logComment
             });
 
+            // 3. Salvar as Mudanças (Persiste o status final e o log)
             await _context.SaveChangesAsync();
 
+            // 4. Notificação
             await NotifyCollaboratorAsync(request, "HR");
         }
     }

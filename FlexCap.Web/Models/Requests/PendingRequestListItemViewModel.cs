@@ -12,6 +12,7 @@ namespace FlexCap.Web.Models.Requests
 
         public string Department { get; set; } = string.Empty;
 
+        public string? PhotoUrl { get; set; }
 
         public string Subject { get; set; } = string.Empty;
         public string TypeName { get; set; } = string.Empty;
@@ -20,7 +21,7 @@ namespace FlexCap.Web.Models.Requests
         public DateTime EndDate { get; set; }
 
         public string CurrentStatus { get; set; } = string.Empty;
-
+        public string? RejectionReason { get; set; }
         public string DisplayStatus
         {
             get

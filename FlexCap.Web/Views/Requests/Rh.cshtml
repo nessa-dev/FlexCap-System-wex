@@ -1,21 +1,30 @@
 ﻿@model FlexCap.Web.Models.Requests.ManagerApprovalListViewModel
+@using System.Linq
+
 @{
     ViewData["Title"] = "Gestão de Solicitações (RH)";
     Layout = "~/Views/Shared/Template.cshtml";
 }
 
 <div class="py-4 container-fluid">
-    <h3 class="fw-bold mb-3">Requests HR</h3>
+    <h3 class="fw-bold mb-3">Requests HR - Final Validation</h3>
+
+    <div class="alert alert-info d-flex align-items-start p-3" role="alert">
+        <i class="bi bi-info-circle-fill me-2 mt-1"></i>
+        <small>
+            These requests have been approved by the Manager and are awaiting final validation by HR.
+        </small>
+    </div>
 
     <form asp-controller="HRApproval" asp-action="PendingList" method="get" class="d-flex mb-3 gap-3">
 
         <select name="statusFilter" onchange="this.form.submit()" class="form-select form-select-sm" style="width: 150px;">
             <option value="">All Statuses</option>
-            <option value="Approved">Pending</option>
+            <option value="Pending">Pending</option>
             <option value="Approved">Approved</option>
-            <option value="Rejected">Rejected</option>            
+            <option value="Rejected">Rejected</option>
         </select>
-        
+
         <select name="typeFilter" onchange="this.form.submit()" class="form-select form-select-sm" style="width: 150px;">
             <option value="">All Types</option>
             <option value="Medical Leave">Medical Leave</option>
@@ -26,15 +35,15 @@
             <option value="Suspension">Suspension</option>
             <option value="Other">Other</option>
         </select>
-        
+
         <select name="departmentFilter" onchange="this.form.submit()" class="form-select form-select-sm" style="width: 150px;">
             <option value="">All Departments</option>
             <option value="Benefits">Benefits</option>
             <option value="Mobility">Mobility</option>
             <option value="Corporate Payments">Corporate Payments</option>
         </select>
-        
-        </form>
+
+    </form>
 
 
     <div class="row">
@@ -52,34 +61,82 @@
                 {
                     <table class="table table-hover align-middle mb-0">
                         <thead>
-                            </thead>
+                            <tr>
+                                <th>Collaborator</th>
+                                <th>Position</th>
+                                <th>Department</th>
+                                <th>Type</th>
+                                <th>Submission Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
                         <tbody>
                             @foreach (var request in Model.PendingRequests)
                             {
-                                    string displayStatus = request.DisplayStatus;
-                                    
-                                    string badgeClass = displayStatus switch
-                                    {
-                                        "Pending" => "bg-warning text-dark",
-                                        "Approved" => "bg-success",
-                                        "Rejected" => "bg-danger",
-                                        _ => "bg-secondary"
-                                    };
+                                string displayStatus = request.CurrentStatus; // Use CurrentStatus vindo do ViewModel
+
+                                string badgeClass = displayStatus switch
+                                {
+                                    "Waiting For HR" => "bg-primary",
+                                    "Waiting For Manager" => "bg-warning text-dark",
+                                    "Adjustment Requested" => "bg-info text-dark",
+                                    "Approved" => "bg-success",
+                                    "Rejected" => "bg-danger",
+                                    _ => "bg-secondary"
+                                };
                                 <tr>
                                     <td>@request.CollaboratorName</td>
-                                    <td>[Position Sim.]</td>
-                                    <td>[Dept Sim.]</td>
+
+                                    <td>@request.Position</td>
+
+                                    <td>@request.Department</td>
+
                                     <td>@request.TypeName</td>
                                     <td>@request.SubmissionDate.ToShortDateString()</td>
+                                    <td><span class="badge @badgeClass">@request.CurrentStatus</span></td>
 
-                                    <td><span class="badge @badgeClass">@displayStatus</span></td>
+                               
 
                                     <td>
                                         @if (request.CurrentStatus == "Waiting For HR")
                                         {
-                                            <button type="button" class="btn btn-success btn-sm" title="Approve Final"><i class="bi bi-check-lg"></i></button>
-                                            <button type="button" class="btn btn-danger btn-sm" title="Reject"><i class="bi bi-x-lg"></i></button>
-                                            <button type="button" class="btn btn-secondary btn-sm" title="Return to Manager"><i class="bi bi-arrow-return-left"></i></button>
+                                            <div class="d-flex gap-1">
+                                                <form asp-controller="HRApproval" asp-action="ProcessAction" method="post" style="display:inline;">
+                                                    <input type="hidden" name="RequestId" value="@request.RequestId" />
+                                                    <input type="hidden" name="ActionType" value="Approve" />
+                                                    <button type="submit" class="btn btn-success btn-sm" title="Final Approve">
+                                                        <i class="bi bi-check-lg"></i>
+                                                    </button>
+                                                </form>
+
+                                                <button type="button" class="btn btn-danger btn-sm"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#rejectHRModal"
+                                                        data-request-id="@request.RequestId"
+                                                        title="Reject">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+
+
+                                                <button type="button" class="btn btn-secondary btn-sm"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#requestDetailModal"
+                                                        data-request-id="@request.RequestId"
+                                                        title="View Details">
+                                                    <i class="bi bi-search"></i>
+                                                </button>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-dark btn-sm"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#requestDetailModal"
+                                                    data-request-id="@request.RequestId"
+                                                    title="View Full Details">
+                                                Details
+                                            </button>
                                         }
                                     </td>
                                 </tr>
@@ -93,18 +150,18 @@
         <div class="col-lg-3">
             <div class="p-3 border rounded bg-light">
                 <h5 class="fw-bold mb-3">Summary</h5>
-                
+
                 @{
-                    var pendingStatusList = new List<string> { "Waiting For HR", "Waiting For Manager", "Adjustment Requested" };
-                    var pendingCount = Model.PendingRequests.Count(r => pendingStatusList.Contains(r.CurrentStatus));
-                                        var pendingByType = Model.PendingRequests
-                        .Where(r => pendingStatusList.Contains(r.CurrentStatus))
-                        .GroupBy(r => r.TypeName)
-                        .Select(g => new { Type = g.Key, Count = g.Count() })
-                        .OrderByDescending(x => x.Count);
+                    var pendingHRStatus = "Waiting For HR";
+                    var pendingCount = Model.PendingRequests.Count(r => r.CurrentStatus == pendingHRStatus);
+                    var pendingByType = Model.PendingRequests
+                    .Where(r => r.CurrentStatus == pendingHRStatus)
+                    .GroupBy(r => r.TypeName)
+                    .Select(g => new { Type = g.Key, Count = g.Count() })
+                    .OrderByDescending(x => x.Count);
                 }
 
-                <h6 class="mb-3">@pendingCount Pending Requests</h6>
+                <h6 class="mb-3">@pendingCount Pending HR Requests</h6>
 
                 <ul class="list-unstyled small">
                     @if (pendingCount > 0)
@@ -116,10 +173,241 @@
                     }
                     else
                     {
-                        <li>No requests currently pending approval.</li>
+                        <li>No requests currently pending HR approval.</li>
                     }
                 </ul>
             </div>
         </div>
     </div>
 </div>
+
+
+<div class="modal fade" id="rejectHRModal" tabindex="-1" aria-labelledby="rejectHRModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form asp-controller="HRApproval" asp-action="ProcessAction" method="post">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rejectHRModalLabel">Reject Request (HR)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Please provide a clear **justification for rejecting** this request.</p>
+                    <input type="hidden" name="RequestId" id="modal-reject-hr-request-id" value="" />
+                    <input type="hidden" name="ActionType" value="Reject" />
+                    <div class="mb-3">
+                        <label for="reject-hr-justification-input" class="form-label">Justification:</label>
+                        <textarea class="form-control" id="reject-hr-justification-input" name="Justification" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Confirm Rejection</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="returnManagerModal" tabindex="-1" aria-labelledby="returnManagerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form asp-controller="HRApproval" asp-action="ProcessAction" method="post">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="returnManagerModalLabel">Return to Manager</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Explain why the request needs to be returned to the Manager for **further review/adjustment**.</p>
+                    <input type="hidden" name="RequestId" id="modal-return-manager-request-id" value="" />
+                    <input type="hidden" name="ActionType" value="ReturnToManager" />
+                    <div class="mb-3">
+                        <label for="return-manager-justification-input" class="form-label">Details:</label>
+                        <textarea class="form-control" id="return-manager-justification-input" name="Justification" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning text-dark">Confirm Return</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="modal fade" id="requestDetailModal" tabindex="-1" aria-labelledby="requestDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="requestDetailModalLabel">Detalhes da Solicitação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="loadingDetails" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+
+                <div id="requestDetailsContent" style="display:none;">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Colaborador:</strong> <span id="detailCollaboratorName"></span> (<span id="detailCollaboratorPosition"></span>)</p>
+                            <p class="mb-1"><strong>Departamento:</strong> <span id="detailCollaboratorDepartment"></span></p>
+                            <p class="mb-1"><strong>Status Atual:</strong> <span id="detailCurrentStatus" class="badge bg-secondary"></span></p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <p class="mb-1"><strong>Período:</strong> <span id="detailStartDate"></span> a <span id="detailEndDate"></span></p>
+                            <p class="mb-1"><strong>Type:</strong> <span id="detailTypeName"></span></p>
+                        </div>
+                    </div>
+                    <hr>
+                    <h6 class="fw-bold" id="detailSubject"></h6>
+                    <p id="detailDescription" class="text-muted"></p>
+                    <div id="attachmentSection" class="mt-4">
+                        <h6 class="fw-bold">Anexo</h6>
+                        <a id="detailAttachmentLink" href="#" target="_blank" class="btn btn-sm btn-outline-primary" style="display:none;">
+                            <i class="bi bi-paperclip"></i> Visualizar Anexo (<span id="detailAttachmentName"></span>)
+                        </a>
+                        <p id="noAttachmentText" class="text-muted" style="display:none;">Nenhum anexo foi fornecido.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // URL PARA BUSCAR OS DADOS (CHAMANDO O MANAGER CONTROLLER)
+            // Usamos ManagerApprovalController, pois ele contém a Action GetRequestDetails
+        const urlRequestDetails = '@Url.Action("GetRequestDetails", "HRApproval")';                    // =========================================================
+            // CONFIGURAÇÕES GERAIS DE MODAIS (Reject, Return, etc.)
+            // =========================================================
+            function setupModal(modalId, hiddenInputId) {
+                var modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.addEventListener('show.bs.modal', function (event) {
+                        var button = event.relatedTarget;
+                        var requestId = button.getAttribute('data-request-id');
+                        var modalInput = modal.querySelector('#' + hiddenInputId);
+                        if (modalInput) {
+                            modalInput.value = requestId;
+                        }
+                    });
+                }
+            }
+
+            // Configuração dos modais existentes
+            setupModal('rejectHRModal', 'modal-reject-hr-request-id');
+            setupModal('returnManagerModal', 'modal-return-manager-request-id');
+
+            // Configuração do Modal de Detalhes
+            setupModal('requestDetailModal', 'modal-detail-request-id'); // Note: Adicione o hidden input 'modal-detail-request-id' no modal HTML se necessário para outras funções.
+
+
+            // =========================================================
+            // LÓGICA DO MODAL DE DETALHES (AJAX) - Seu Código Adaptado
+            // =========================================================
+
+            // Função auxiliar para determinar a classe de status
+            const getStatusBadgeClass = (status) => {
+                if (status.includes('Waiting')) return 'bg-warning text-dark';
+                if (status === 'Approved') return 'bg-success';
+                if (status === 'Rejected') return 'bg-danger';
+                return 'bg-secondary';
+            };
+
+
+            var detailModal = document.getElementById('requestDetailModal');
+            if (detailModal) {
+                detailModal.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+                    var requestId = button.getAttribute('data-request-id');
+
+                    // Exibir o spinner e esconder o conteúdo
+                    document.getElementById('loadingDetails').style.display = 'block';
+                    document.getElementById('requestDetailsContent').style.display = 'none';
+
+                        fetch(`${urlRequestDetails}?requestId=${requestId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(error => {
+                                throw new Error(error.error || `Falha HTTP: ${response.status} ${response.statusText}`);
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // ✅ Agora sim podemos verificar o conteúdo
+                        if (!data || data.error) {
+                            throw new Error(data?.error || 'No data received from server.');
+                        }
+
+                            // 🛑 PREENCHIMENTO DOS CAMPOS COM DADOS REAIS
+                            document.getElementById('detailCollaboratorName').textContent = data.collaboratorName || 'N/A';
+                            document.getElementById('detailCollaboratorPosition').textContent = data.collaboratorPosition || 'N/A';
+                            document.getElementById('detailCollaboratorDepartment').textContent = data.collaboratorDepartment || 'N/A';
+                            document.getElementById('detailStartDate').textContent = data.startDate || 'N/A';
+                            document.getElementById('detailEndDate').textContent = data.endDate || 'N/A';
+                            document.getElementById('detailSubject').textContent = data.subject || 'Sem Assunto';
+                            document.getElementById('detailDescription').textContent = data.description || 'Sem descrição.';
+                            document.getElementById('detailTypeName').textContent = data.typeName || 'N/A';
+
+                            // Atualizar Status e cor
+                            var statusBadge = document.getElementById('detailCurrentStatus');
+                            statusBadge.textContent = data.currentStatus || 'Desconhecido';
+                            statusBadge.className = 'badge';
+                            const classesToAdd = getStatusBadgeClass(data.currentStatus).split(' ');
+                            statusBadge.classList.add(...classesToAdd);
+
+                            // Lógica do Anexo (Reutilizando a URL de Download)
+                            var attachmentLink = document.getElementById('detailAttachmentLink');
+                            var noAttachmentText = document.getElementById('noAttachmentText');
+
+                            if (data.attachmentPath) {
+                                // Assume que o Controller de Manager tem a Action DownloadAttachment
+                                const urlDownload = '@Url.Action("DownloadAttachment", "ManagerApproval")';
+                                attachmentLink.href = `${urlDownload}?requestId=${data.requestId}`;
+
+                                var fileName = data.attachmentPath.substring(data.attachmentPath.lastIndexOf('/') + 1);
+                                document.getElementById('detailAttachmentName').textContent = fileName;
+                                attachmentLink.style.display = 'inline-block';
+                                noAttachmentText.style.display = 'none';
+                            } else {
+                                attachmentLink.style.display = 'none';
+                                noAttachmentText.style.display = 'block';
+                            }
+
+                            // Esconder o spinner e mostrar o conteúdo
+                            document.getElementById('loadingDetails').style.display = 'none';
+                            document.getElementById('requestDetailsContent').style.display = 'block';
+                        })
+                        .catch(error => {
+                            console.error('Error in AJAX processing:', error);
+                            // Mostra a mensagem de erro no corpo do modal
+                            document.getElementById('requestDetailsContent').innerHTML =
+                                `<p class="text-danger text-center py-5">
+                                    <i class="bi bi-x-octagon-fill me-2"></i> Failed to load details.
+                                    <br><small>Details: ${error.message}</small>
+                                </p>`;
+                            document.getElementById('loadingDetails').style.display = 'none';
+                            document.getElementById('requestDetailsContent').style.display = 'block';
+                        });
+                });
+            }
+        });
+
+        // Renderiza os scripts de validação aqui (fora do bloco JS)
+        @{
+                await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+    </script>
+}

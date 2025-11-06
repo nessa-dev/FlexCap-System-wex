@@ -1,6 +1,8 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using FlexCap.Web.Models;
+using FlexCap.Web.Data;
 
 namespace FlexCap.Web.Models.Requests
 {
@@ -15,6 +17,9 @@ namespace FlexCap.Web.Models.Requests
 
         public int TypeId { get; set; }
 
+        [ForeignKey(nameof(TypeId))]
+        public RequestType RequestType { get; set; } 
+
         public DateTime StartDate { get; set; }
 
         public DateTime EndDate { get; set; }
@@ -23,19 +28,21 @@ namespace FlexCap.Web.Models.Requests
         public string Description { get; set; }
 
         public string AttachmentPath { get; set; }
+
         [Required]
-        [Column("CollaboratorId")] 
+        [Column("CollaboratorId")]
         public int CollaboratorId { get; set; }
+
         [ForeignKey(nameof(CollaboratorId))]
-        public Colaborador Colaborador { get; set; }
+        public Colaborador Colaborador { get; set; } 
 
         [Required]
         [StringLength(50)]
-        public string Status { get; set; } 
+        public string Status { get; set; }
 
         public DateTime CreationDate { get; set; }
 
-        public DateTime? LastUpdateDate { get; set; } 
+        public DateTime? LastUpdateDate { get; set; }
 
         public int? CurrentHRId { get; set; }
 

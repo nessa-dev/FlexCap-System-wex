@@ -29,6 +29,8 @@
                 <div class="d-flex align-items-center justify-content-between p-3 mb-2 rounded border request-item">
 
                     <div class="d-flex align-items-center">
+                        @* <img src="@request.CollaboratorPhotoUrl" class="rounded-circle me-3" style="width: 40px; height: 40px;" alt="Avatar" /> *@
+
                         <div class="ms-3">
                             <h6 class="mb-0 fw-bold">@request.CollaboratorName</h6>
                             <small class="text-muted">@request.Subject - @request.TypeName</small>
@@ -36,13 +38,14 @@
                     </div>
 
                     <div class="d-flex align-items-center gap-2">
-                        <form asp-controller="ManagerApproval" asp-action="ProcessAction" method="post" style="display:inline;">
-                            <input type="hidden" name="RequestId" value="@request.RequestId" />
-                            <input type="hidden" name="ActionType" value="Approve" />
-                            <button type="submit" class="btn btn-success btn-sm me-1" title="Approve">
-                                <i class="bi bi-check-lg"></i>
-                            </button>
-                        </form>
+
+                        <button type="button" class="btn btn-success btn-sm me-1"
+                                data-bs-toggle="modal"
+                                data-bs-target="#approveModal"
+                                data-request-id="@request.RequestId"
+                                title="Approve">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
 
                         <button type="button" class="btn btn-danger btn-sm"
                                 data-bs-toggle="modal"
@@ -52,20 +55,21 @@
                             <i class="bi bi-x-lg"></i>
                         </button>
 
-                        <button type="button" class="btn btn-info btn-sm text-white"
+                        <button type="button" class="btn btn-custom btn-sm text-white"
                                 data-bs-toggle="modal"
                                 data-bs-target="#requestDetailModal"
                                 data-request-id="@request.RequestId"
                                 title="View Details">
-                            <i class="bi bi-search"></i> Details
+                            Details
                         </button>
+
                     </div>
                 </div>
             }
         }
     </div>
-
 </div>
+
 
 <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -125,9 +129,89 @@
     </div>
 </div>
 
+
+
+<div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <form asp-controller="ManagerApproval" asp-action="ProcessAction" method="post">
+            @Html.AntiForgeryToken()
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="approveModalLabel">Confirm Approval</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>Are you sure you want to fully approve this request and forward it to HR?</p>
+
+                    <input type="hidden" name="RequestId" id="modal-approve-request-id" value="" />
+                    <input type="hidden" name="ActionType" value="Approve" />
+                    <input type="hidden" name="Justification" value="" />
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Confirm Approval</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="modal fade" id="requestDetailModal" tabindex="-1" aria-labelledby="requestDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="requestDetailModalLabel">Request Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="loadingDetails" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+
+                <div id="requestDetailsContent" style="display:none;">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Colaborador:</strong> <span id="detailCollaboratorName"></span> (<span id="detailCollaboratorPosition"></span>)</p>
+                            <p class="mb-1"><strong>Departamento:</strong> <span id="detailCollaboratorDepartment"></span></p>
+                            <p class="mb-1"><strong>Status Atual:</strong> <span id="detailCurrentStatus" class="badge bg-secondary"></span></p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <p class="mb-1"><strong>Período:</strong> <span id="detailStartDate"></span> a <span id="detailEndDate"></span></p>
+                            <p class="mb-1"><strong>Tipo:</strong> <span id="detailTypeName"></span></p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <h6 class="fw-bold" id="detailSubject"></h6>
+                    <p id="detailDescription" class="text-muted"></p>
+
+                    <div id="attachmentSection" class="mt-4">
+                        <h6 class="fw-bold">Annex</h6>
+                        <a id="detailAttachmentLink" href="#" target="_blank" class="btn btn-sm btn-outline-primary" style="display:none;">
+                            <i class="bi bi-paperclip"></i> View Attachment (<span id="detailAttachmentName"></span>)
+                        </a>
+                        <p id="noAttachmentText" class="text-muted" style="display:none;">No attachments were provided for this request.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+
+            // =========================================================
+            // CONFIGURAÇÕES GERAIS DE MODAIS (Reject e Adjust)
+            // =========================================================
             function setupModal(modalId, hiddenInputId) {
                 var modal = document.getElementById(modalId);
                 if (modal) {
@@ -145,9 +229,107 @@
             setupModal('rejectModal', 'modal-reject-request-id');
             setupModal('adjustModal', 'modal-adjust-request-id');
 
-            @{
-                await Html.RenderPartialAsync("_ValidationScriptsPartial");
+            setupModal('approveModal', 'modal-approve-request-id');
+            // =========================================================
+            // LÓGICA DO MODAL DE DETALHES (AJAX)
+            // =========================================================
+
+            // URL gerada pelo Razor de forma segura, dentro de aspas
+            const urlRequestDetails = '@Url.Action("GetRequestDetails", "ManagerApproval")';
+
+            var detailModal = document.getElementById('requestDetailModal');
+            if (detailModal) {
+                detailModal.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+                    var requestId = button.getAttribute('data-request-id');
+
+                    // Exibir o spinner e esconder o conteúdo
+                    document.getElementById('loadingDetails').style.display = 'block';
+                    document.getElementById('requestDetailsContent').style.display = 'none';
+
+                    // Requisição AJAX
+                    fetch(`${urlRequestDetails}?requestId=${requestId}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                // Se o status HTTP for 404/500, ainda tentamos ler o JSON
+                                return response.json().then(error => {
+                                    throw new Error(error.error || `Falha HTTP: ${response.status} ${response.statusText}`);
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Verifica se o JSON retornado contém um erro de backend
+
+                            if (data.error) {
+                                throw new Error(`Erro do Servidor: ${data.error}`);
+                            }
+
+                            // FUNÇÃO AUXILIAR PARA COR DA TAG DE STATUS
+                            const getStatusBadgeClass = (status) => {
+                                if (status.includes('Waiting')) return 'bg-warning text-dark';
+                                if (status === 'Approved') return 'bg-success';
+                                if (status === 'Rejected') return 'bg-danger';
+                                return 'bg-secondary';
+                            };
+
+                            // PREENCHIMENTO DOS CAMPOS DO MODAL
+                            document.getElementById('detailCollaboratorName').textContent = data.collaboratorName || 'N/A';
+                            document.getElementById('detailCollaboratorPosition').textContent = data.collaboratorPosition || 'N/A';
+                            document.getElementById('detailCollaboratorDepartment').textContent = data.collaboratorDepartment || 'N/A';
+                            document.getElementById('detailStartDate').textContent = data.startDate || 'N/A';
+                            document.getElementById('detailEndDate').textContent = data.endDate || 'N/A';
+                            document.getElementById('detailSubject').textContent = data.subject || 'Sem Assunto';
+                            document.getElementById('detailDescription').textContent = data.description || 'Sem descrição.';
+                            document.getElementById('detailTypeName').textContent = data.typeName || 'N/A';
+
+                            // Atualizar Status e cor
+                            var statusBadge = document.getElementById('detailCurrentStatus');
+                            statusBadge.textContent = data.currentStatus || 'Desconhecido';
+                            statusBadge.className = 'badge';
+                            const classesToAdd = getStatusBadgeClass(data.currentStatus).split(' ');
+                            statusBadge.classList.add(...classesToAdd);
+
+                            // Lógica do Anexo
+                            var attachmentLink = document.getElementById('detailAttachmentLink');
+                            var noAttachmentText = document.getElementById('noAttachmentText');
+
+                            if (data.attachmentPath) {
+                                // Simplificação: usa o último segmento do caminho como nome do arquivo
+                                var fileName = data.attachmentPath.substring(data.attachmentPath.lastIndexOf('/') + 1);
+                                document.getElementById('detailAttachmentName').textContent = fileName;
+                                attachmentLink.href = data.attachmentPath;
+                                attachmentLink.style.display = 'inline-block';
+                                noAttachmentText.style.display = 'none';
+                            } else {
+                                attachmentLink.style.display = 'none';
+                                noAttachmentText.style.display = 'block';
+                            }
+
+                            // Esconder o spinner e mostrar o conteúdo
+                            document.getElementById('loadingDetails').style.display = 'none';
+                            document.getElementById('requestDetailsContent').style.display = 'block';
+                        })
+                        .catch(error => {
+                            console.error('Error in AJAX processing:', error);
+
+                            // Mostra a mensagem de erro no corpo do modal
+                            document.getElementById('requestDetailsContent').innerHTML =
+                                `<p class="text-danger text-center py-5">
+                                    <i class="bi bi-x-octagon-fill me-2"></i> Failed to load.
+                                    <br><small>Detalhes: ${error.message}</small>
+                                </p>`;
+                            document.getElementById('loadingDetails').style.display = 'none';
+                            document.getElementById('requestDetailsContent').style.display = 'block';
+                        });
+                });
             }
         });
+
     </script>
+
+    @{
+        // Isso resolve o "jQuery is not defined" se a Partial View for o problema.
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

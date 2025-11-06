@@ -90,8 +90,10 @@ public class RequestController : Controller
 
     private async Task<List<PendingRequestListItemViewModel>> GetRequestHistoryAsync(int collaboratorId)
     {
+        // Adicionar Include para carregar RequestType se o TypeName na ViewModel precisar dele
         return await _context.Requests
             .Include(r => r.Colaborador)
+            .Include(r => r.RequestType) // Adicione este include se você mapear r.RequestType.Name
             .Where(r => r.CollaboratorId == collaboratorId)
             .OrderByDescending(r => r.CreationDate)
             .Select(r => new PendingRequestListItemViewModel
@@ -99,10 +101,25 @@ public class RequestController : Controller
                 Subject = r.Subject,
                 SubmissionDate = r.CreationDate,
                 CurrentStatus = r.Status,
-                CollaboratorName = r.Colaborador.FullName 
+
+                // 🛑 CORREÇÃO CRÍTICA: Mapear o motivo de rejeição/ajuste
+                RejectionReason = r.RejectionReason,
+
+                // Mapeamentos para a tabela de histórico (opcional, mas bom)
+                StartDate = r.StartDate,
+                EndDate = r.EndDate,
+
+                // Mapeamentos existentes:
+                CollaboratorName = r.Colaborador.FullName,
+                TypeName = r.RequestType.Name // Assumindo que você quer o nome do tipo
             })
             .ToListAsync();
     }
+
+
+
+
+
 
     private async Task<IActionResult> ReturnSubmitViewWithHistory(AbsenceRequestSubmitViewModel modelWithErrors)
     {

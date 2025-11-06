@@ -11,6 +11,6 @@ namespace FlexCap.Web.Models.Requests
         public string ActionType { get; set; }
 
         [StringLength(500)]
-        public string Justification { get; set; }
+        public string? Justification { get; set; }
     }
 }

@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Security.Claims; 
-using FlexCap.Web.Data;
-using FlexCap.Web.Services;
+﻿using FlexCap.Web.Data;
 using FlexCap.Web.Models.Requests;
+using FlexCap.Web.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Security.Claims; 
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting; 
 
 public class ManagerApprovalController : Controller
 {
@@ -28,7 +30,36 @@ public class ManagerApprovalController : Controller
         return -1;
     }
 
-    
+
+    public async Task<IActionResult> DownloadAttachment(int requestId, [FromServices] IWebHostEnvironment env)
+    {
+        var request = await _context.Requests.FindAsync(requestId);
+
+        if (request == null || string.IsNullOrEmpty(request.AttachmentPath))
+        {
+            return NotFound("Anexo não encontrado ou caminho não especificado.");
+        }
+
+        // Usamos a variável 'env' (sem underscore) injetada no método
+        var uploadsFolder = Path.Combine(env.ContentRootPath, "Uploads");
+
+        var filePath = Path.Combine(uploadsFolder, request.AttachmentPath);
+
+        if (!System.IO.File.Exists(filePath))
+        {
+            return NotFound("O arquivo de anexo não foi encontrado no servidor.");
+        }
+
+        var mimeType = "application/pdf";
+        var fileName = Path.GetFileName(request.AttachmentPath);
+
+        // Retorna o arquivo (FileResult)
+        return File(filePath, mimeType, fileName);
+    }
+
+
+
+
     public IActionResult PendingList()
     {
         var pendingStatus = "Waiting For Manager";
@@ -64,12 +95,69 @@ public class ManagerApprovalController : Controller
         return View("~/Views/Requests/Manager.cshtml", viewModel);
     }
 
-  
+
+
+    [HttpGet]
+    public async Task<IActionResult> GetRequestDetails(int requestId)
+    {
+        try
+        {
+            var request = await _context.Requests
+                .Include(r => r.Colaborador)
+                .FirstOrDefaultAsync(r => r.Id == requestId);
+
+            if (request == null)
+            {
+                // Retorna JSON em vez de HTML 404
+                return Json(new { error = "Request details not found." });
+            }
+
+            var result = new
+            {
+                requestId = request.Id,
+                subject = request.Subject,
+                description = request.Description,
+                startDate = request.StartDate.ToShortDateString(),
+                endDate = request.EndDate.ToShortDateString(),
+                attachmentPath = request.AttachmentPath,
+                collaboratorName = request.Colaborador?.FullName,
+                collaboratorPosition = request.Colaborador?.Position,
+                collaboratorDepartment = request.Colaborador?.Department,
+                currentStatus = request.Status
+            };
+
+            return Json(result);
+        }
+        catch (Exception ex)
+        {
+            // Se algo falhar, também retorna JSON (não HTML)
+            return Json(new { error = $"Erro ao buscar detalhes: {ex.Message}" });
+        }
+    }
+
+
+
+    [HttpGet]
+    public async Task<IActionResult> Detail(int id)
+    {
+        var request = await _context.Requests
+            .Include(r => r.Colaborador)
+            .FirstOrDefaultAsync(r => r.Id == id);
+
+        if (request == null)
+            return NotFound();
+
+        return View("Detail", request); // <- Crie uma View chamada Detail.cshtml depois
+    }
+
+
+
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ProcessAction(RequestActionViewModel model)
     {
+        // 🔹 Validação do model base
         if (!ModelState.IsValid)
         {
             TempData["ErrorMessage"] = "Invalid action. Please provide justification if required.";
@@ -80,8 +168,20 @@ public class ManagerApprovalController : Controller
         {
             var managerId = GetCurrentManagerId();
 
-            if (managerId <= 0) throw new UnauthorizedAccessException("Usuário Manager não autenticado ou ID inválido.");
+            if (managerId <= 0)
+            {
+                throw new UnauthorizedAccessException("Usuário Manager não autenticado ou ID inválido.");
+            }
 
+            // 🔹 Validação adicional: se for REJECT, precisa ter justificativa
+            if (model.ActionType.Equals("Reject", StringComparison.OrdinalIgnoreCase) &&
+                string.IsNullOrWhiteSpace(model.Justification))
+            {
+                TempData["ErrorMessage"] = "Please provide a justification for rejection.";
+                return RedirectToAction(nameof(PendingList));
+            }
+
+            // 🔹 Chamada ao serviço central de decisões
             await _requestService.ProcessManagerDecision(
                 model.RequestId,
                 managerId,
@@ -89,13 +189,38 @@ public class ManagerApprovalController : Controller
                 model.Justification
             );
 
-            TempData["SuccessMessage"] = $"Action '{model.ActionType}' processed. Request forwarded to HR.";
+            // 🔹 Mensagem de sucesso adaptada conforme o tipo de ação
+            if (model.ActionType.Equals("Approve", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["SuccessMessage"] = "Request approved and forwarded to HR.";
+            }
+            else if (model.ActionType.Equals("Reject", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["SuccessMessage"] = "Request rejected and returned to collaborator.";
+            }
+            else
+            {
+                TempData["SuccessMessage"] = $"Action '{model.ActionType}' processed successfully.";
+            }
         }
-        catch (Exception ex)
+        catch (UnauthorizedAccessException ex)
         {
             TempData["ErrorMessage"] = ex.Message;
         }
+        catch (InvalidOperationException ex)
+        {
+            TempData["ErrorMessage"] = $"Operation error: {ex.Message}";
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = $"Unexpected error: {ex.Message}";
+        }
 
+        // 🔹 Redireciona para lista, atualizando a tela
         return RedirectToAction(nameof(PendingList));
     }
+
+
+
+
 }

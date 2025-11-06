@@ -33,16 +33,33 @@ namespace FlexCap.Web.Controllers
         // --- MÉTODO SEED ---
         public IActionResult Seed()
         {
+            // 1. LIMPAR E CRIAR O BANCO PRIMEIRO (CORREÇÃO DA SEQUÊNCIA)
             _context.Database.EnsureDeleted();
             _context.Database.EnsureCreated();
-            {
-                var hashedPassword = BCrypt.Net.BCrypt.HashPassword("Test1234");
-                string hrPasswordHash = BCrypt.Net.BCrypt.HashPassword("HR2025!");
-                string managerPasswordHash = BCrypt.Net.BCrypt.HashPassword("Manager2025!"); 
 
+            // Agora, o banco está novo e vazio.
 
-                var colaboradores = new List<Colaborador>
-             {
+                        // 2. INSERIR TIPOS DE REQUISIÇÃO
+                        var requestTypes = new List<RequestType>
+                {
+                   new RequestType { Id = 1, Name = "Medical Leave" },
+                   new RequestType { Id = 2, Name = "Personal Licence" }, 
+                   new RequestType { Id = 3, Name = "Vacation" },        
+                   new RequestType { Id = 4, Name = "Day Off" },
+                   new RequestType { Id = 5, Name = "Maternity Leave" },
+                   new RequestType { Id = 6, Name = "Suspension" },       
+                   new RequestType { Id = 7, Name = "Other" }
+                };
+                        _context.Set<RequestType>().AddRange(requestTypes);
+                        _context.SaveChanges(); 
+
+                        // 3. INSERIR COLABORADORES
+                        var hashedPassword = BCrypt.Net.BCrypt.HashPassword("Test1234");
+                        string hrPasswordHash = BCrypt.Net.BCrypt.HashPassword("HR2025!");
+                        string managerPasswordHash = BCrypt.Net.BCrypt.HashPassword("Manager2025!");
+
+                        var colaboradores = new List<Colaborador>
+                {
 
             new Colaborador {
                 FullName = "Recursos Humanos Manager",
@@ -270,12 +287,15 @@ namespace FlexCap.Web.Controllers
                 PasswordHash = hashedPassword
             },
         };
+            _context.Colaboradores.AddRange(colaboradores);
+            _context.SaveChanges(); // Salva os colaboradores
 
-                _context.Colaboradores.AddRange(colaboradores);
-                _context.SaveChanges();
-                return RedirectToAction("Index", "Login");
-            }
-            return Content("Database already contains collaborators. Seed skipped.");
+            // ----------------------------------------------------
+            // 4. RETORNO
+            // ----------------------------------------------------
+
+            // Remove o bloco 'if (Database already contains...)' que estava no final, pois o teste está no topo.
+            return RedirectToAction("Index", "Login");
         }
 
 

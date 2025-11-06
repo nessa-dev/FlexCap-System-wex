@@ -1,12 +1,12 @@
-﻿@{
+﻿@model FlexCap.Web.Models.HomeMetricsViewModel
+@{
     ViewData["Title"] = "Home Colaborador";
     Layout = "~/Views/Shared/Template.cshtml";
 }
 
 <div class="py-4" style="max-width: 850px; width: 100%; margin-left: 0.5rem; margin-right: auto; overflow: hidden; height: 100%;">
+    <h3 class="fw-bold mb-4">Welcome, @(Model?.FirstName)!</h3>
 
-    <!-- Title -->
-    <h3 class="fw-bold mb-4">Welcome, @ViewData["FirstName"]!</h3>
     <div class="row g-4 mb-4">
 
         <!-- Team Overview -->
@@ -17,14 +17,14 @@
                     <div class="d-flex align-items-center">
                         <div class="d-flex flex-column rounded shadow-sm overflow-hidden me-2" style="width: 140px; height: 110px;">
                             <div class="d-flex justify-content-center align-items-center text-white" style="height: 55%; background-color: #001637;">
-                                <small class="fw-bold mb-0">@ViewData["UserTeam"]</small>
+                                <small class="fw-bold mb-0">@(Model?.UserTeam)</small>
                             </div>
                             <div class="d-flex justify-content-center align-items-center bg-white" style="height: 40%;">
                                 <i class="bi bi-check-lg" style="font-size: 1.5rem; color: #001637;"></i>
                             </div>
                         </div>
                         <div class="d-flex flex-column justify-content-center p-2 rounded shadow-sm border" style="height: 90px; flex-grow: 1; font-size: 0.8rem;">
-                            <p class="mb-1">@ViewData["ActiveMembers"] Active Members</p>
+                            <p class="mb-1">@(Model?.ActiveMembers) Active Members</p>
                             <p class="mb-0">1 Sprint in Progress</p>
                         </div>
                     </div>
@@ -56,8 +56,33 @@
         <!-- Pending Requests -->
         <div class="col-12 col-md-6">
             <div class="card shadow-sm">
-                <div class="card-body p-2">
-                    <h6 class="card-title texto-flexcap fw-bold mb-0">Pending Requests</h6>
+                <div class="card-body p-3">
+                    <h6 class="card-title fw-bold mb-3">Your Requests Status</h6>
+
+                    @if (Model?.ColaboratorHistory?.Any() == true)
+                    {
+                        @foreach (var request in Model.ColaboratorHistory)
+                        {
+                            string badgeClass = request.CurrentStatus switch
+                            {
+                                "Approved" => "bg-success",
+                                "Rejected" => "bg-danger",
+                                _ => "bg-warning text-dark"
+                            };
+
+                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                <div class="fw-bold">@request.TypeName</div>
+                                <div class="text-center">
+                                    <span class="badge @badgeClass">@request.DisplayStatus</span>
+                                </div>
+                                <div class="text-muted small">@request.SubmissionDate.ToString("MMM dd")</div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center pt-2">No recent requests found.</p>
+                    }
                 </div>
             </div>
         </div>
@@ -72,5 +97,4 @@
         </div>
 
     </div>
-
 </div>
