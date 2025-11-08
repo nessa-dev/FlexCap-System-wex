@@ -108,7 +108,6 @@ public class ManagerApprovalController : Controller
 
             if (request == null)
             {
-                // Retorna JSON em vez de HTML 404
                 return Json(new { error = "Request details not found." });
             }
 
@@ -130,7 +129,6 @@ public class ManagerApprovalController : Controller
         }
         catch (Exception ex)
         {
-            // Se algo falhar, também retorna JSON (não HTML)
             return Json(new { error = $"Erro ao buscar detalhes: {ex.Message}" });
         }
     }
@@ -147,7 +145,7 @@ public class ManagerApprovalController : Controller
         if (request == null)
             return NotFound();
 
-        return View("Detail", request); // <- Crie uma View chamada Detail.cshtml depois
+        return View("Detail", request); 
     }
 
 
@@ -173,7 +171,6 @@ public class ManagerApprovalController : Controller
                 throw new UnauthorizedAccessException("Usuário Manager não autenticado ou ID inválido.");
             }
 
-            // 🔹 Validação adicional: se for REJECT, precisa ter justificativa
             if (model.ActionType.Equals("Reject", StringComparison.OrdinalIgnoreCase) &&
                 string.IsNullOrWhiteSpace(model.Justification))
             {
@@ -181,7 +178,6 @@ public class ManagerApprovalController : Controller
                 return RedirectToAction(nameof(PendingList));
             }
 
-            // 🔹 Chamada ao serviço central de decisões
             await _requestService.ProcessManagerDecision(
                 model.RequestId,
                 managerId,
@@ -189,7 +185,6 @@ public class ManagerApprovalController : Controller
                 model.Justification
             );
 
-            // 🔹 Mensagem de sucesso adaptada conforme o tipo de ação
             if (model.ActionType.Equals("Approve", StringComparison.OrdinalIgnoreCase))
             {
                 TempData["SuccessMessage"] = "Request approved and forwarded to HR.";
@@ -215,8 +210,6 @@ public class ManagerApprovalController : Controller
         {
             TempData["ErrorMessage"] = $"Unexpected error: {ex.Message}";
         }
-
-        // 🔹 Redireciona para lista, atualizando a tela
         return RedirectToAction(nameof(PendingList));
     }
 

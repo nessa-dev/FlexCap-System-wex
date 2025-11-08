@@ -71,19 +71,20 @@ namespace FlexCap.Web.Controllers
                     // Agora, o redirecionamento usa apenas a lógica de Position/Role:
                     if (role == "HR Manager" || colaborador.Position == "HR Analyst" || colaborador.Position == "HR Consultant")
                     {
-                        // REDIRECIONAMENTO RH (DASHBOARD)
-                        return RedirectToAction("Rh", "Colaboradores");
+                        // Redireciona para o dashboard RH
+                        return RedirectToAction("Index", "Home");
                     }
                     else if (colaborador.Position == "Project Manager")
                     {
-                        // CORREÇÃO: REDIRECIONAMENTO MANAGER (DASHBOARD)
-                        return RedirectToAction("Manager", "Colaboradores");
+                        // Redireciona para o dashboard Manager
+                        return RedirectToAction("Index", "Home");
                     }
                     else
                     {
-                        // CORREÇÃO: REDIRECIONAMENTO COLABORADOR GERAL (DASHBOARD)
-                        return RedirectToAction("Colaborador", "Colaboradores");
+                        // Redireciona para o dashboard do Colaborador
+                        return RedirectToAction("Index", "Home");
                     }
+
                 }
 
                 ModelState.AddModelError("", "Invalid email or password.");

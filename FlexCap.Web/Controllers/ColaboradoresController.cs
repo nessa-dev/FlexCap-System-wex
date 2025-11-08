@@ -39,26 +39,26 @@ namespace FlexCap.Web.Controllers
 
             // Agora, o banco está novo e vazio.
 
-                        // 2. INSERIR TIPOS DE REQUISIÇÃO
-                        var requestTypes = new List<RequestType>
+            // 2. INSERIR TIPOS DE REQUISIÇÃO
+            var requestTypes = new List<RequestType>
                 {
                    new RequestType { Id = 1, Name = "Medical Leave" },
-                   new RequestType { Id = 2, Name = "Personal Licence" }, 
-                   new RequestType { Id = 3, Name = "Vacation" },        
+                   new RequestType { Id = 2, Name = "Personal Licence" },
+                   new RequestType { Id = 3, Name = "Vacation" },
                    new RequestType { Id = 4, Name = "Day Off" },
                    new RequestType { Id = 5, Name = "Maternity Leave" },
-                   new RequestType { Id = 6, Name = "Suspension" },       
+                   new RequestType { Id = 6, Name = "Suspension" },
                    new RequestType { Id = 7, Name = "Other" }
                 };
-                        _context.Set<RequestType>().AddRange(requestTypes);
-                        _context.SaveChanges(); 
+            _context.Set<RequestType>().AddRange(requestTypes);
+            _context.SaveChanges();
 
-                        // 3. INSERIR COLABORADORES
-                        var hashedPassword = BCrypt.Net.BCrypt.HashPassword("Test1234");
-                        string hrPasswordHash = BCrypt.Net.BCrypt.HashPassword("HR2025!");
-                        string managerPasswordHash = BCrypt.Net.BCrypt.HashPassword("Manager2025!");
+            // 3. INSERIR COLABORADORES
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword("Test1234");
+            string hrPasswordHash = BCrypt.Net.BCrypt.HashPassword("HR2025!");
+            string managerPasswordHash = BCrypt.Net.BCrypt.HashPassword("Manager2025!");
 
-                        var colaboradores = new List<Colaborador>
+            var colaboradores = new List<Colaborador>
                 {
 
             new Colaborador {
@@ -73,11 +73,11 @@ namespace FlexCap.Web.Controllers
                 PasswordHash = hrPasswordHash
             },
 
-           
+
             new Colaborador {
             FullName = "Carlos Manager",
             Email = "carlos.manager@flexcap.com",
-            Position = "Project Manager", 
+            Position = "Project Manager",
             Department = "Mobility",
             Status = "Active",
             PhotoUrl = "https://randomuser.me/api/portraits/men/2.jpg",
@@ -95,16 +95,16 @@ namespace FlexCap.Web.Controllers
             PhotoUrl = "https://randomuser.me/api/portraits/women/44.jpg",
             Country = "Brazil",
             TeamName = "Titans",
-            PasswordHash = hashedPassword 
+            PasswordHash = hashedPassword
                     },
             new Colaborador {
                 FullName = "Jon Brown",
                 Email = "jon.brown@flexcap.com",
                 Position = "QA Sênior",
-                Department = "Mobility", 
+                Department = "Mobility",
                 Status = "Inactive",
                 PhotoUrl = "https://randomuser.me/api/portraits/men/45.jpg",
-                Country = "United States", 
+                Country = "United States",
                 TeamName = "Code Warriors",
                 PasswordHash = hashedPassword
 
@@ -116,7 +116,7 @@ namespace FlexCap.Web.Controllers
                 Department = "Corporate Payments",
                 Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/men/46.jpg",
-                Country = "Japan", 
+                Country = "Japan",
                 TeamName = "Bug Busters",
                 PasswordHash = hashedPassword
 
@@ -128,7 +128,7 @@ namespace FlexCap.Web.Controllers
                 Department = "Benefits",
                 Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/women/48.jpg",
-                Country = "Italy", 
+                Country = "Italy",
                 TeamName = "Code Warriors",
                 PasswordHash = hashedPassword
             },
@@ -139,7 +139,7 @@ namespace FlexCap.Web.Controllers
                 Department = "Mobility",
                 Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/men/49.jpg",
-                Country = "Canada", 
+                Country = "Canada",
                 TeamName = "Bug Busters",
                 PasswordHash = hashedPassword
             },
@@ -169,7 +169,7 @@ namespace FlexCap.Web.Controllers
                 FullName = "Patrícia Nunes",
                 Email = "patricia.nunes@flexcap.com",
                 Position = "Intern",
-                Department = "Corporate Payments", 
+                Department = "Corporate Payments",
                 Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/women/52.jpg",
                 Country = "Japan",
@@ -235,7 +235,7 @@ namespace FlexCap.Web.Controllers
                 FullName = "Carla Almeida",
                 Email = "carla.almeida@flexcap.com",
                 Position = "HR Consultant",
-                Department = "Corporate Payments", 
+                Department = "Corporate Payments",
                 Status = "Active",
                 PhotoUrl = "https://randomuser.me/api/portraits/women/58.jpg",
                 Country = "United States",
@@ -299,7 +299,7 @@ namespace FlexCap.Web.Controllers
         }
 
 
-       
+
 
 
 
@@ -468,7 +468,7 @@ namespace FlexCap.Web.Controllers
             ViewData["UserTeam"] = equipeDoUsuario;
             ViewData["ActiveMembers"] = membrosAtivos;
             ViewData["TotalMembers"] = totalMembrosTime;
-            ViewData["Profile"] = "Colaborador"; 
+            ViewData["Profile"] = "Colaborador";
             return View("~/Views/Home/colaborador.cshtml");
         }
 
@@ -502,9 +502,9 @@ namespace FlexCap.Web.Controllers
                 .AsNoTracking()
                 .Where(c => c.TeamName == equipeDoUsuario)
 
-                .OrderByDescending(c => c.FullName == colaboradorLogado.FullName) 
-                .ThenByDescending(c => c.Position == "Project Manager")         
-                .ThenBy(c => c.FullName)                                        
+                .OrderByDescending(c => c.FullName == colaboradorLogado.FullName)
+                .ThenByDescending(c => c.Position == "Project Manager")
+                .ThenBy(c => c.FullName)
                 .ToListAsync();
 
             ViewData["Title"] = $"Membros da Equipe: {equipeDoUsuario}";
@@ -561,7 +561,7 @@ namespace FlexCap.Web.Controllers
 
 
         [HttpGet]
-        [Authorize(Roles = "Project Manager")] 
+        [Authorize(Roles = "Project Manager")]
         public async Task<IActionResult> Manager()
         {
             var userEmail = User.FindFirstValue(ClaimTypes.Email);
@@ -587,10 +587,10 @@ namespace FlexCap.Web.Controllers
             var membrosAtivos = await _context.Colaboradores
                                             .CountAsync(c => c.TeamName == equipeDoUsuario && c.Status == "Ativo");
 
-            ViewData["FirstName"] = currentUser.FullName.Split(' ')[0]; 
+            ViewData["FirstName"] = currentUser.FullName.Split(' ')[0];
             ViewData["UserTeam"] = equipeDoUsuario;
             ViewData["ActiveMembers"] = membrosAtivos;
-            ViewData["TotalMembers"] = totalMembrosTime; 
+            ViewData["TotalMembers"] = totalMembrosTime;
 
             ViewData["Title"] = "Home Manager";
 
@@ -599,8 +599,8 @@ namespace FlexCap.Web.Controllers
 
 
 
-        
 
-        
+
+
     }
 }
