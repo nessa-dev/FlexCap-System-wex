@@ -77,13 +77,11 @@
                         {
                             <tr>
                                 <td>@request.CollaboratorName</td>
-                                <td>[Position Sim.]</td>
-                                <td>[Dept Sim.]</td>
+                                <td>@request.Position</td>
+                                <td>@request.Department</td>
                                 <td><span class="badge bg-warning text-dark">Pending RH</span></td>
                                 <td class="text-center">
-                                    <a asp-controller="HRApproval" asp-action="ProcessAction" asp-route-requestId="@request.RequestId" class="btn btn-success btn-sm me-1" title="Review">
-                                        <i class="bi bi-search"></i>
-                                    </a>
+                                    
                                 </td>
                             </tr>
                         }

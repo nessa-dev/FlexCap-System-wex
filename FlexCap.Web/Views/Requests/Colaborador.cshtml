@@ -64,8 +64,8 @@
         <div class="mb-3">
             <label for="attach-file" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 w-auto">
                 <i class="bi bi-paperclip"></i>
-                Attach File
-                <input asp-for="AttachmentFile" type="file" id="attach-file" class="d-none">
+                Attach File (PDF only)
+                <input asp-for="AttachmentFile" type="file" id="attach-file" class="d-none" accept=".pdf" />
             </label>
         </div>
 

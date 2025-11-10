@@ -25,6 +25,6 @@ namespace FlexCap.Web.Models.Requests
         public string Description { get; set; }
 
         [Display(Name = "Attachment File")]
-        public IFormFile AttachmentFile { get; set; }
+        public IFormFile? AttachmentFile { get; set; }
     }
 }

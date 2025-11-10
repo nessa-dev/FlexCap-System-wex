@@ -37,17 +37,17 @@ public class ManagerApprovalController : Controller
 
         if (request == null || string.IsNullOrEmpty(request.AttachmentPath))
         {
-            return NotFound("Anexo não encontrado ou caminho não especificado.");
+            return NotFound("Attachment not found or path not specified.");
         }
 
         // Usamos a variável 'env' (sem underscore) injetada no método
-        var uploadsFolder = Path.Combine(env.ContentRootPath, "Uploads");
+        var uploadsFolder = Path.Combine(env.WebRootPath, "Uploads");
 
         var filePath = Path.Combine(uploadsFolder, request.AttachmentPath);
 
         if (!System.IO.File.Exists(filePath))
         {
-            return NotFound("O arquivo de anexo não foi encontrado no servidor.");
+            return NotFound("The attachment file was not found on the server.");
         }
 
         var mimeType = "application/pdf";

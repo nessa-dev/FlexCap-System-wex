@@ -27,7 +27,7 @@ namespace FlexCap.Web.Models.Requests
         [StringLength(500)]
         public string Description { get; set; }
 
-        public string AttachmentPath { get; set; }
+        public string? AttachmentPath { get; set; }
 
         [Required]
         [Column("CollaboratorId")]

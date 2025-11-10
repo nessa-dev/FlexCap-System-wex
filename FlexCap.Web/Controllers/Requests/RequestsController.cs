@@ -3,7 +3,7 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using FlexCap.Web.Data; 
+using FlexCap.Web.Data;
 using FlexCap.Web.Models.Requests;
 using FlexCap.Web.Services;
 using Microsoft.EntityFrameworkCore;
@@ -11,12 +11,14 @@ using Microsoft.EntityFrameworkCore;
 public class RequestController : Controller
 {
     private readonly RequestService _requestService;
-    private readonly AppDbContext _context; 
+    private readonly AppDbContext _context;
+    private readonly IWebHostEnvironment _env;
 
-    public RequestController(RequestService requestService, AppDbContext context)
+    public RequestController(RequestService requestService, AppDbContext context, IWebHostEnvironment env)
     {
         _requestService = requestService;
-        _context = context; 
+        _context = context;
+        _env = env;
     }
 
 
@@ -37,6 +39,7 @@ public class RequestController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Submit(AbsenceRequestSubmitViewModel model)
     {
+        // Validações básicas
         if (!model.StartDate.HasValue)
         {
             ModelState.AddModelError(nameof(model.StartDate), "The start date is mandatory.");
@@ -45,7 +48,6 @@ public class RequestController : Controller
         {
             ModelState.AddModelError(nameof(model.EndDate), "The end date is mandatory.");
         }
-
         if (model.EndDate.HasValue && model.StartDate.HasValue && model.EndDate.Value < model.StartDate.Value)
         {
             ModelState.AddModelError(nameof(model.EndDate), "The end date cannot be earlier than the start date.");
@@ -58,30 +60,30 @@ public class RequestController : Controller
 
         try
         {
-            var collaboratorIdString = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+            var collaboratorIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(collaboratorIdString) || !int.TryParse(collaboratorIdString, out int collaboratorId))
             {
                 throw new InvalidOperationException("User ID could not be determined or is invalid.");
             }
 
+            // ✅ Agora o arquivo vem direto do model.AttachmentFile
             await _requestService.SubmitNewRequest(model, collaboratorId);
 
             TempData["SuccessMessage"] = "Request submitted successfully! It is awaiting Manager approval.";
-
             return RedirectToAction(nameof(Submit));
         }
         catch (InvalidOperationException ex)
         {
             ModelState.AddModelError("", ex.Message);
-
             return await ReturnSubmitViewWithHistory(model);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            ModelState.AddModelError("", "An unexpected error occurred while saving your request.");
+            ModelState.AddModelError("", $"An unexpected error occurred while saving your request: {ex.Message}");
             return await ReturnSubmitViewWithHistory(model);
         }
     }
+
 
 
 

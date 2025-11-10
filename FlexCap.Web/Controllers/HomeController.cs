@@ -57,9 +57,9 @@ namespace FlexCap.Web.Controllers
 
                 var latestPendingRequests = await _context.Requests
                     .Include(r => r.Colaborador)
-                    .Where(r => r.Status == "Aguardando RH")
+                    .Where(r => r.Status == "Waiting For HR")
                     .OrderByDescending(r => r.CreationDate)
-                    .Take(5)
+                    .Take(4)
                     .Select(r => new PendingRequestListItemViewModel
                     {
                         RequestId = r.Id,

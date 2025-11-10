@@ -134,6 +134,29 @@ public class HRApprovalController : Controller
 
 
 
+    public async Task<IActionResult> DownloadAttachment(int requestId, [FromServices] IWebHostEnvironment env)
+    {
+        var request = await _context.Requests.FindAsync(requestId);
+
+        if (request == null || string.IsNullOrEmpty(request.AttachmentPath))
+            return NotFound("Attachment not found or path not specified.");
+
+        var uploadsFolder = Path.Combine(env.WebRootPath, "Uploads");
+        var filePath = Path.Combine(uploadsFolder, request.AttachmentPath);
+
+        if (!System.IO.File.Exists(filePath))
+            return NotFound("The attachment file was not found on the server.");
+
+        var mimeType = "application/pdf";
+        var fileName = Path.GetFileName(request.AttachmentPath);
+
+        return File(filePath, mimeType, fileName);
+    }
+
+
+
+
+
 
     [HttpPost]
     [ValidateAntiForgeryToken]

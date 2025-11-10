@@ -68,13 +68,34 @@ namespace FlexCap.Web.Services
         public async Task<int> SubmitNewRequest(AbsenceRequestSubmitViewModel model, int collaboratorId)
         {
             var colaborador = await _context.Colaboradores.FirstOrDefaultAsync(c => c.Id == collaboratorId);
-            if (colaborador == null) throw new InvalidOperationException("Collaborator not found.");
+            if (colaborador == null)
+                throw new InvalidOperationException("Collaborator not found.");
 
             var managerDaEquipe = await _context.Colaboradores
                 .FirstOrDefaultAsync(c => c.TeamName == colaborador.TeamName && c.Position == "Project Manager");
 
-            if (managerDaEquipe == null) throw new InvalidOperationException($"Project Manager not found for team {colaborador.TeamName}.");
+            if (managerDaEquipe == null)
+                throw new InvalidOperationException($"Project Manager not found for team {colaborador.TeamName}.");
 
+            // 🟢 Upload do arquivo PDF (opcional)
+            string? savedAttachmentPath = null;
+            if (model.AttachmentFile != null && model.AttachmentFile.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Uploads");
+                Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(model.AttachmentFile.FileName)}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.AttachmentFile.CopyToAsync(stream);
+                }
+
+                savedAttachmentPath = $"/Uploads/{uniqueFileName}";
+            }
+
+            // 🟢 Criação do request
             var newRequest = new RequestEntity
             {
                 CollaboratorId = collaboratorId,
@@ -83,25 +104,23 @@ namespace FlexCap.Web.Services
                 StartDate = model.StartDate.Value,
                 EndDate = model.EndDate.Value,
                 Description = model.Description,
-
-                Status = "Waiting For Manager", 
-
+                Status = "Waiting For Manager",
                 CurrentManagerId = managerDaEquipe.Id,
                 CreationDate = DateTime.Now,
                 LastUpdateDate = DateTime.Now,
-                AttachmentPath = model.AttachmentFile != null ? "Path/to/file.pdf" : null
+                AttachmentPath = savedAttachmentPath // pode ser null se não tiver arquivo
             };
 
             _context.Requests.Add(newRequest);
-
-        
-
             await _context.SaveChangesAsync();
 
             await NotifyCollaboratorAsync(newRequest, "System");
 
             return newRequest.Id;
         }
+
+
+
 
 
         public async Task ProcessManagerDecision(int requestId, int managerUserId, string actionType, string justification)

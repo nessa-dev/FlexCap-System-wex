@@ -47,14 +47,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 const noAttachmentText = document.getElementById("noAttachmentText");
 
                 if (data.attachmentPath) {
-                    attachmentLink.href = data.attachmentPath;
-                    attachmentName.textContent = data.attachmentPath.split("/").pop();
+                    const attachmentLink = document.getElementById('detailAttachmentLink');
+                    const fileName = data.attachmentPath.split("/").pop();
+
+                    document.getElementById("detailAttachmentName").textContent = fileName;
+
+                    // 🔗 Define o link correto para baixar
+                    attachmentLink.href = `/HRApproval/DownloadAttachment?requestId=${data.requestId}`;
                     attachmentLink.style.display = "inline-block";
                     noAttachmentText.style.display = "none";
                 } else {
                     attachmentLink.style.display = "none";
                     noAttachmentText.style.display = "block";
                 }
+
 
                 loading.style.display = "none";
                 content.style.display = "block";

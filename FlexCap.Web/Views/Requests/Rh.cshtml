@@ -265,7 +265,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="requestDetailModalLabel">Detalhes da Solicitação</h5>
+                <h5 class="modal-title" id="requestDetailModalLabel">Request Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -284,12 +284,12 @@
                 <div id="requestDetailsContent" style="display:none;">
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <p class="mb-1"><strong>Colaborador:</strong> <span id="detailCollaboratorName"></span> (<span id="detailCollaboratorPosition"></span>)</p>
-                            <p class="mb-1"><strong>Departamento:</strong> <span id="detailCollaboratorDepartment"></span></p>
-                            <p class="mb-1"><strong>Status Atual:</strong> <span id="detailCurrentStatus" class="badge bg-secondary"></span></p>
+                            <p class="mb-1"><strong>Collaborator:</strong> <span id="detailCollaboratorName"></span> (<span id="detailCollaboratorPosition"></span>)</p>
+                            <p class="mb-1"><strong>Department:</strong> <span id="detailCollaboratorDepartment"></span></p>
+                            <p class="mb-1"><strong>Current Status:</strong> <span id="detailCurrentStatus" class="badge bg-secondary"></span></p>
                         </div>
                         <div class="col-md-6 text-md-end">
-                            <p class="mb-1"><strong>Período:</strong> <span id="detailStartDate"></span> a <span id="detailEndDate"></span></p>
+                            <p class="mb-1"><strong>Period:</strong> <span id="detailStartDate"></span> a <span id="detailEndDate"></span></p>
                             <p class="mb-1"><strong>Type:</strong> <span id="detailTypeName"></span></p>
                         </div>
                     </div>
@@ -297,14 +297,16 @@
                     <h6 class="fw-bold" id="detailSubject"></h6>
                     <p id="detailDescription" class="text-muted"></p>
                     <div id="attachmentSection" class="mt-4">
-                        <h6 class="fw-bold">Anexo</h6>
+                        <h6 class="fw-bold">Annex</h6>
                         <a id="detailAttachmentLink" href="#" target="_blank" class="btn btn-sm btn-outline-primary" style="display:none;">
-                            <i class="bi bi-paperclip"></i> Visualizar Anexo (<span id="detailAttachmentName"></span>)
+                            <i class="bi bi-paperclip"></i> View Attachment (<span id="detailAttachmentName"></span>)
                         </a>
-                        <p id="noAttachmentText" class="text-muted" style="display:none;">Nenhum anexo foi fornecido.</p>
+                        <p id="noAttachmentText" class="text-muted" style="display:none;">No attachments were provided for this request.</p>
                     </div>
                 </div>
             </div>
+
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
