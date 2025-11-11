@@ -1,13 +1,476 @@
-﻿@{
-    ViewData["Title"] = "Calendário do RH";
+﻿@model IEnumerable<FlexCap.Web.Models.Calendar.CalendarModel>
+@{
+    // Title translated to English
+    ViewData["Title"] = "HR Calendar";
     Layout = "~/Views/Shared/Template.cshtml";
 }
 
-<div class="py-4" style="max-width: 850px; width: 100%; margin-left: 0.5rem; margin-right: auto; overflow-y: hidden; height: calc(100vh - 5rem);">
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
-    <h3 class="fw-bold mb-3">Calendar</h3>
-    <div class="p-3 border rounded">
+<style>
+    /* Layout principal */
+    #calendar {
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+
+    /* Alinhamento à esquerda */
+    .fc {
+        text-align: left;
+    }
+
+    /* Responsividade geral */
+    @@media (max-width: 768px) {
+        #calendar {
+            font-size: 0.7rem;
+        }
+
+        .fc-toolbar-title {
+            font-size: 1rem;
+        }
+
+        .fc .fc-daygrid-day-number {
+            font-size: 0.6rem;
+        }
+
+        .fc .fc-col-header-cell {
+            font-size: 0.6rem;
+        }
+
+        #monthEventsCard {
+            margin-top: 1rem;
+        }
+    }
+
+    /* Cabeçalho compacto */
+    .fc-header-toolbar {
+        padding: 0;
+        margin-bottom: 0 !important;
+        font-size: 0.8rem;
+    }
+
+    /* Altura das células */
+    .fc .fc-daygrid-day-frame {
+        min-height: 10px;
+        height: 100% !important;
+    }
+
+    /* Números dos dias */
+    .fc .fc-daygrid-day-number {
+        font-size: 0.65rem;
+        padding: 2px;
+        margin: 0;
+    }
+
+    /* Cabeçalho dos dias (Sun, Mon...) */
+    .fc .fc-col-header-cell {
+        font-size: 0.7rem;
+        padding: 2px 0;
+    }
+
+    /* Compactar eventos */
+    .fc-daygrid-event-dot {
+        width: 5px;
+        height: 5px;
+        margin: 0 2px;
+    }
+
+    .fc-daygrid-event {
+        padding: 0 !important;
+        font-size: 0.65rem;
+    }
+
+    /* Lista lateral de eventos do mês */
+    #monthEventsCard {
+        font-size: 0.75rem;
+        border-radius: 0.5rem;
+    }
+
+        #monthEventsCard h6 {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+    #eventList {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    /* Cores de eventos */
+    .badge-color-box {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        margin-right: 4px;
+        vertical-align: middle;
+    }
+</style>
+
+
+<div class="py-4 container-fluid">
+    <h3 class="fw-bold mb-4 text-start">Corporate Calendar</h3>
+
+    <div class="row align-items-start">
+        <!-- 🗓️ Calendar Section -->
+        <div class="col-12 col-lg-8">
+            <div class="border rounded p-4 shadow-sm bg-white" style="max-width: 600px;">
+                <div class="d-flex justify-content-start align-items-center mb-3 gap-3">
+                    <div class="form-group">
+                        <label for="month-filter" class="visually-hidden">Month</label>
+                        <select id="month-filter" class="form-select"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="year-filter" class="visually-hidden">Year</label>
+                        <select id="year-filter" class="form-select"></select>
+                    </div>
+                </div>
+
+                <div id="calendar"></div>
+                <div class="text-muted small mt-2" style="font-style: italic; opacity: 0.8;">
+                    💡 Click on an event to delete it.
+                </div>
+
+                <div class="d-flex flex-wrap justify-content-start gap-3 mt-4">
+                    <button class="btn btn-primary px-4" data-bs-toggle="modal" data-bs-target="#eventModal">Register Event</button>
+                    <button class="btn btn-success px-4" data-bs-toggle="modal" data-bs-target="#holidayModal">Register Holiday</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 📅 “This Month” Panel -->
+        <div class="col-12 col-lg-4 mt-4 mt-lg-0">
+            <div class="border rounded p-3 shadow-sm bg-light h-100">
+                <h6 class="fw-bold mb-3 text-start">This Month</h6>
+                <ul id="thisMonthList" class="list-unstyled small mb-0">
+                    <li class="text-muted">No events this month.</li>
+                </ul>
+            </div>
+        </div>
     </div>
-
 </div>
 
+<!-- 🪟 Event Modal -->
+<div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Register Event</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label>Title</label>
+                    <input type="text" id="eventTitle" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label>Date</label>
+                    <input type="date" id="eventDate" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label>Type</label>
+                    <select id="eventType" class="form-select">
+                        <option value="Corporate Training">Corporate Training</option>
+                        <option value="Online Event">Online Event</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" id="saveEventBtn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 🪟 Holiday Modal -->
+<div class="modal fade" id="holidayModal" tabindex="-1" aria-labelledby="holidayModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Register Holiday</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label>Title</label>
+                    <input type="text" id="holidayTitle" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label>Date</label>
+                    <input type="date" id="holidayDate" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label>Country</label>
+                    <select id="holidayType" class="form-select">
+                        <option value="Holiday (Brazil)">Holiday (Brazil)</option>
+                        <option value="Holiday (EUA)">Holiday (USA)</option>
+                        <option value="Holiday (Japan)">Holiday (Japan)</option>
+                        <option value="Holiday (Italy)">Holiday (Italy)</option>
+                        <option value="Holiday (Canada)">Holiday (Canada)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" id="saveHolidayBtn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', async function () {
+        const calendarEl = document.getElementById('calendar');
+        const monthFilter = document.getElementById('month-filter');
+        const yearFilter = document.getElementById('year-filter');
+        const thisMonthList = document.getElementById('thisMonthList');
+        let calendarInstance;
+
+        function showError(msg, err) {
+            console.error(msg, err);
+            alert('Error: ' + msg);
+        }
+
+        function getColorByType(type) {
+            switch (type) {
+                case 'Holiday (Brazil)': return '#28a745';   // Verde
+                case 'Holiday (USA)':
+                case 'Holiday (EUA)': return '#dc3545';      // Vermelho
+                case 'Holiday (Japan)': return '#ff69b4';    // Rosa
+                case 'Holiday (Italy)': return '#17a2b8';    // Azul claro
+                case 'Holiday (Canada)': return '#6610f2';   // Roxo
+                case 'Corporate Training': return '#ffc107'; // Amarelo
+                case 'Online Event': return '#0d6efd';       // Azul
+                default: return '#6c757d';                   // Cinza
+            }
+        }
+
+        async function loadAndRenderEvents(month, year) {
+            let events = [];
+            try {
+                const resp = await fetch(`/Calendar/GetEvents?month=${month}&year=${year}`);
+                if (!resp.ok) throw new Error('GET /Calendar/GetEvents returned ' + resp.status);
+                events = await resp.json();
+            } catch (err) {
+                showError('Error fetching events from server.', err);
+                events = [];
+            }
+
+            // se já existir, limpa e recarrega
+            if (calendarInstance) {
+                calendarInstance.removeAllEvents();
+                events.forEach(e => {
+                    calendarInstance.addEvent({
+                        id: e.id,
+                        title: e.title,
+                        start: e.date,
+                        color: e.color
+                    });
+                });
+                updateMonthEvents(new Date(year, month - 1, 1));
+                return;
+            }
+
+            // cria o calendário apenas 1x
+            calendarInstance = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                height: 'auto',
+                contentHeight: 70,
+                selectable: true,
+                displayEventTime: false,
+                headerToolbar: {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: ''
+                },
+                events: events.map(e => ({
+                    id: e.id,
+                    title: e.title,
+                    start: e.date,
+                    color: e.color
+                })),
+                dateClick: function (info) {
+                    const iso = info.dateStr;
+                    document.getElementById('eventDate').value = iso;
+                    document.getElementById('holidayDate').value = iso;
+                },
+                datesSet: function (info) {
+                    const currentMonth = info.view.currentStart.getMonth() + 1;
+                    const currentYear = info.view.currentStart.getFullYear();
+                    monthFilter.value = currentMonth;
+                    yearFilter.value = currentYear;
+                    updateMonthEvents(info.view.currentStart);
+                },
+                eventClick: async function (info) {
+                    const event = info.event;
+                    if (confirm(`Do you want to delete "${event.title}"?`)) {
+                        try {
+                            const response = await fetch(`/Calendar/DeleteEvent?id=${event.id}`, {
+                                method: 'DELETE'
+                            });
+                            if (response.ok) {
+                                event.remove();
+                                updateMonthEvents(calendarInstance.view.currentStart);
+                                alert("Event deleted successfully!");
+                            } else {
+                                alert("Error deleting event.");
+                            }
+                        } catch (error) {
+                            showError("Error deleting event.", error);
+                        }
+                    }
+                }
+            });
+
+            calendarInstance.render();
+            updateMonthEvents(new Date(year, month - 1, 1));
+        }
+
+        // Filtros mês/ano
+        function initializeFilters() {
+            const currentYear = new Date().getFullYear();
+            const currentMonth = new Date().getMonth() + 1;
+
+            const months = [
+                'January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+
+            months.forEach((m, i) => {
+                const opt = document.createElement('option');
+                opt.value = i + 1;
+                opt.textContent = m;
+                monthFilter.appendChild(opt);
+            });
+
+            for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = i;
+                yearFilter.appendChild(opt);
+            }
+
+            monthFilter.value = currentMonth;
+            yearFilter.value = currentYear;
+
+            monthFilter.addEventListener('change', () => {
+                const m = monthFilter.value;
+                const y = yearFilter.value;
+                calendarInstance.gotoDate(new Date(y, m - 1, 1));
+                loadAndRenderEvents(m, y);
+            });
+
+            yearFilter.addEventListener('change', () => {
+                const m = monthFilter.value;
+                const y = yearFilter.value;
+                calendarInstance.gotoDate(new Date(y, m - 1, 1));
+                loadAndRenderEvents(m, y);
+            });
+        }
+
+        // Atualiza painel "This Month"
+        function updateMonthEvents(currentDate) {
+            if (!calendarInstance) return;
+            const events = calendarInstance.getEvents();
+            thisMonthList.innerHTML = '';
+
+            const month = currentDate.getMonth();
+            const year = currentDate.getFullYear();
+
+            const monthEvents = events.filter(e => {
+                const start = e.start;
+                return start.getMonth() === month && start.getFullYear() === year;
+            });
+
+            if (monthEvents.length === 0) {
+                thisMonthList.innerHTML = '<li class="text-muted small">No events this month.</li>';
+                return;
+            }
+
+            monthEvents.forEach(e => {
+                const color = e.backgroundColor || "#6c757d";
+                const dateStr = e.start.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                const li = document.createElement("li");
+                li.className = "d-flex justify-content-between align-items-center small";
+                li.innerHTML = `<span><span class="badge-color-box" style="background:${color}"></span>${e.title}</span><span class="text-muted">${dateStr}</span>`;
+                thisMonthList.appendChild(li);
+            });
+        }
+
+        // Inicializa tudo
+        initializeFilters();
+        loadAndRenderEvents(new Date().getMonth() + 1, new Date().getFullYear());
+
+        // --- SAVE EVENT ---
+        document.getElementById("saveEventBtn").addEventListener("click", async function () {
+            const title = document.getElementById("eventTitle").value.trim();
+            const date = document.getElementById("eventDate").value;
+            const type = document.getElementById("eventType").value;
+            if (!title || !date) { alert("Please fill in all fields."); return; }
+
+            const color = getColorByType(type);
+            try {
+                const resp = await fetch("/Calendar/CreateEvent", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title, date, type, color })
+                });
+
+                if (!resp.ok) throw new Error("Failed to save event");
+                const saved = await resp.json();
+
+                calendarInstance.addEvent({
+                    id: saved.id,
+                    title: saved.title,
+                    start: saved.date,
+                    color: saved.color
+                });
+                updateMonthEvents(calendarInstance.view.currentStart);
+                bootstrap.Modal.getInstance(document.getElementById("eventModal"))?.hide();
+                document.getElementById("eventTitle").value = "";
+                document.getElementById("eventDate").value = "";
+            } catch (err) {
+                showError("Error saving event.", err);
+            }
+        });
+
+        // --- SAVE HOLIDAY ---
+        document.getElementById("saveHolidayBtn").addEventListener("click", async function () {
+            const title = document.getElementById("holidayTitle").value.trim();
+            const date = document.getElementById("holidayDate").value;
+            const type = document.getElementById("holidayType").value;
+            if (!title || !date) { alert("Please fill in all fields."); return; }
+
+            const color = getColorByType(type);
+            try {
+                const resp = await fetch("/Calendar/CreateEvent", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title, date, type, color })
+                });
+
+                if (!resp.ok) throw new Error("Failed to save holiday");
+                const saved = await resp.json();
+
+                calendarInstance.addEvent({
+                    id: saved.id,
+                    title: saved.title,
+                    start: saved.date,
+                    color: saved.color
+                });
+                updateMonthEvents(calendarInstance.view.currentStart);
+                bootstrap.Modal.getInstance(document.getElementById("holidayModal"))?.hide();
+                document.getElementById("holidayTitle").value = "";
+                document.getElementById("holidayDate").value = "";
+            } catch (err) {
+                showError("Error saving holiday.", err);
+            }
+        });
+    });
+</script>

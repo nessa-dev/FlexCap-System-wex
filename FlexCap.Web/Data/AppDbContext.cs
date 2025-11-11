@@ -17,5 +17,7 @@ namespace FlexCap.Web.Data
         public DbSet<RequestEntity> Requests { get; set; }
         public DbSet<RequestLogEntity> RequestLogs { get; set; }
         public DbSet<RequestType> RequestTypes { get; set; }
+        public DbSet<FlexCap.Web.Models.Calendar.CalendarModel> CalendarEvents { get; set; }
+
     }
 }

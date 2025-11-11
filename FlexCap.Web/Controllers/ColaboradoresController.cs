@@ -25,11 +25,6 @@ namespace FlexCap.Web.Controllers
 
 
 
-
-
-
-
-
         // --- MÉTODO SEED ---
         public IActionResult Seed()
         {
