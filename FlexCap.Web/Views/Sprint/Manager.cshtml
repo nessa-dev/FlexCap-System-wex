@@ -1,12 +1,457 @@
 ﻿@{
-    ViewData["Title"] = "Sprint e Gantt";
+    ViewData["Title"] = "Sprints & Gantt";
     Layout = "~/Views/Shared/Template.cshtml";
 }
 
-<div class="py-4" style="max-width: 850px; width: 100%; margin-left: 0.5rem; margin-right: auto; overflow-y: hidden; height: calc(100vh - 5rem);">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <h3 class="fw-bold mb-3">Sprint e Gantt</h3>
-    <div class="p-3 border rounded">
+<style>
+    #gantt-chart-container {
+        border: 1px solid #ccc;
+        background-color: #fff;
+    }
+
+    /* Cabeçalho de meses e dias */
+    .gantt-row-header {
+        font-weight: 600;
+        background-color: #f8f9fa;
+        color: #495057;
+        text-align: center;
+    }
+
+    .gantt-month-row {
+        display: flex;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .gantt-day-row {
+        display: flex;
+    }
+
+    .gantt-cell {
+        border-right: 1px solid #eee;
+        border-bottom: 1px solid #eee;
+        text-align: center;
+        padding: 4px 0;
+        font-size: 0.8rem;
+        flex: 1;
+        min-width: 25px;
+    }
+
+    /* Corpo do gráfico */
+    .gantt-body {
+        position: relative;
+        background-color: #ffffff;
+        border-left: 1px solid #dee2e6;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    /* Barras */
+    .gantt-bar {
+        position: absolute;
+        height: 35px;
+        border-radius: 6px;
+        color: #fff;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        cursor: pointer;
+    }
+
+    .sprint-bar {
+        background-color: #0d6efd;
+    }
+
+    /* Tooltip */
+    .gantt-tooltip {
+        position: absolute;
+        padding: 6px 10px;
+        background-color: #fff6da;
+        border: 1px solid #f9d774;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 50;
+        transform: translate(-50%, -120%);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    #finishedSprintModal .form-range {
+        width: 100%;
+    }
+
+    #progressPieChart {
+        max-width: 280px;
+    }
+
+
+</style>
+
+
+
+<div class="py-4" style="max-width: 900px; width: 100%; margin-left: 40px;">
+
+    <h3 class="fw-bold mb-3">Sprints & Gantt</h3>
+
+    <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+
+        <div class="d-flex flex-column gap-2">
+            <button class="btn btn-dark fw-semibold" data-bs-toggle="modal" data-bs-target="#registerSprintModal">Register Sprint</button>
+            <button class="btn btn-dark fw-semibold" data-bs-toggle="modal" data-bs-target="#editSprintModal">Edit Sprint</button>
+        </div>
+
+        <div class="d-flex flex-column gap-2 flex-grow-1" style="max-width: 600px;">
+
+            <div class="alert alert-warning p-2 mb-0 d-flex align-items-center" role="alert">
+                <span class="me-2 fs-5">🔥</span>
+                30% of the team will be unavailabe between **June 10 and June 12** due to holidays in Brazil.
+            </div>
+
+            <div class="alert p-2 mb-0 d-flex align-items-center" role="alert" style="background-color: #d1ecf1; border-color: #bee5eb;">
+                <span class="me-2 fs-5" style="color: #007bff;">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                </span>
+                Maria Costa is on medical leave until **June 5**. Impact on sprint estimated: **15%**
+            </div>
+        </div>
+
     </div>
 
+
+    <!-- 2. HTML do card usa as variáveis calculadas acima -->
+
+
+
+
+
+
+
+
+    <div class="border rounded p-3 shadow-sm bg-white overflow-x-auto">
+        <div id="gantt-chart-container" class="position-relative" style="min-width: 850px;">
+            <div id="gantt-header" class="gantt-row-header d-flex flex-column border-bottom"></div>
+            <div id="gantt-body" class="gantt-body position-relative" style="height: 250px;"></div>
+        </div>
+    </div>
+
+
+
+    <!-- Finished Sprints Button -->
+    <button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#finishedSprintModal">
+        Finished sprints
+    </button>
+
+    <!-- Finished Sprint Modal -->
+    <div class="modal fade" id="finishedSprintModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+
+                <!-- HEADER -->
+                <div class="modal-header border-0 pb-0">
+                    <h4 class="modal-title fw-bold">Finished Sprints</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- BODY -->
+                <div class="modal-body pt-0">
+
+                    <!-- No Sprint Created -->
+                    <div id="noSprintSection" class="text-center d-none">
+                        <p class="text-muted fs-5">
+                            There is no active sprint to display results.
+                        </p>
+                    </div>
+
+                    <!-- FORM MUST BE INSIDE MODAL-BODY -->
+                    <form id="sprintResultsForm" class="d-none">
+
+                        <div class="row">
+
+                            <!-- LEFT SIDE – FORM -->
+                            <div class="col-md-7 pe-4">
+
+                                <div class="mb-3">
+                                    <label class="fw-bold">Sprint Name:</label>
+                                    <div id="resultSprintName"></div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="fw-bold">Sprint Goal:</label>
+                                    <div id="resultSprintGoal"></div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="fw-bold">Sprint Duration:</label>
+                                    <div id="resultSprintDuration"></div>
+                                </div>
+
+                                <hr>
+
+                                <label class="form-label mb-2">
+                                    What percentage of planned tasks were completed?
+                                </label>
+
+                                <div class="d-flex align-items-center gap-3">
+                                    <input type="range" id="progressSlider" min="0" max="100" value="50" class="form-range">
+                                    <span id="progressValue" class="fw-bold">50%</span>
+                                </div>
+
+                                <hr>
+
+                                <div class="mb-3">
+                                    <label class="form-label">What were the main blockers during this sprint?</label>
+                                    <textarea id="blockersText" class="form-control" rows="3"></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">What worked well?</label>
+                                    <textarea id="workedWellText" class="form-control" rows="3"></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">What can be improved in the next sprint?</label>
+                                    <textarea id="improvementText" class="form-control" rows="3"></textarea>
+                                </div>
+
+                            </div>
+
+                            <!-- RIGHT SIDE – PIE CHART -->
+                            <div class="col-md-5 border-start d-flex justify-content-center align-items-center">
+                                <div style="width: 100%; max-width: 300px; height: 300px; margin: auto;">
+                                    <canvas id="progressPieChart"></canvas>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- FOOTER MUST BE INSIDE THE FORM AND INSIDE modal-content -->
+                        <div class="modal-footer mt-3 border-0">
+                            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button id="saveSprintResultsBtn" class="btn btn-primary" type="submit">Save Results</button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+    <!-- Histórico de Sprint -->
+    <div class="mt-4">
+        <h6 class="fw-bold mb-3">Sprint History</h6>
+
+        <div id="finishedSprintsContainer" class="d-grid gap-2">
+            <p class="text-muted">Loading sprint history...</p>
+        </div>
+
+        <div id="viewAllSprintsWrapper" class="text-center mt-3 d-none">
+            <button id="viewAllSprintsButton"
+                    class="btn btn-outline-secondary btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#allSprintsHistoryModal">
+                View all sprints
+            </button>
+        </div>
+    </div>
+    <div class="modal fade" id="allSprintsHistoryModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h4 class="modal-title fw-bold">All Finished Sprints</h4>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="allSprintsList" class="d-grid gap-2"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Sprint Details Modal -->
+    <div class="modal fade" id="sprintDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content p-4">
+
+                <div class="modal-header border-0">
+                    <h4 class="modal-title fw-bold" id="detailTitle"></h4>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <p class="text-muted" id="detailDates"></p>
+
+                <div class="modal-body">
+
+                    <h6 class="fw-bold">Sprint Goal</h6>
+                    <p id="detailGoal"></p>
+
+                    <h6 class="fw-bold">What worked well</h6>
+                    <p id="detailWorked"></p>
+
+                    <h6 class="fw-bold">Improvements</h6>
+                    <p id="detailImprovement"></p>
+
+                    <h6 class="fw-bold">Blockers</h6>
+                    <p id="detailBlockers"></p>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+    
+    <!-- CRIAR SPRINT  -->
+
+<div class="modal fade" id="registerSprintModal" tabindex="-1" aria-labelledby="registerSprintModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title fw-bold" id="registerSprintModalLabel">Create Sprint</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createSprintForm">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="sprintName" placeholder="Sprint Name" />
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="sprintGoal" placeholder="Sprint Goal" />
+                    </div>
+
+                    <div class="d-flex flex-wrap align-items-center mb-3 gap-2">
+
+                        <button type="button" class="btn btn-outline-secondary" id="selectMembersBtn" data-bs-toggle="modal" data-bs-target="#membersModal">
+                            Members
+                        </button>
+
+                        <label class="form-label mb-0 me-2 fw-semibold">Date Range:</label>
+                        <input type="date" class="form-control d-inline-block" id="sprintStartDate" style="width: 150px;" placeholder="mm/dd/yyyy" />
+                        <span class="fw-bold">-</span>
+                        <input type="date" class="form-control d-inline-block" id="sprintEndDate" style="width: 150px;" placeholder="mm/dd/yyyy" />
+                    </div>
+
+                    <div class="mb-3">
+                        <textarea class="form-control" id="sprintNotes" rows="4" placeholder="Notes"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer justify-content-end border-0">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-dark px-4" id="saveSprintBtn">Create</button>
+            </div>
+        </div>
+    </div>
 </div>
+
+
+<div class="modal fade" id="membersModal" tabindex="-1" aria-labelledby="membersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="membersModalLabel">Select Team Members</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <button id="selectAllMembers" class="btn btn-sm btn-outline-primary">Select All</button>
+                    <button id="clearSelection" class="btn btn-sm btn-outline-secondary">Clear Selection</button>
+                </div>
+
+                <div id="membersListContainer" class="list-group">
+                    <p class="text-muted small">Loading members...</p>
+                </div>
+            </div>
+
+            <div class="modal-footer d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary" id="backToRegisterModalBtn">
+                    <i class="bi bi-arrow-left"></i> Back
+                </button>
+
+                <button type="button" class="btn btn-primary" id="doneSelectingMembersBtn">Done</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="modal fade" id="editSprintModal" tabindex="-1" aria-labelledby="editSprintModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editSprintModalLabel">Edit Current Sprint</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div id="editSprintLoading" class="text-center my-3 text-muted">
+                    <i class="bi bi-arrow-repeat spin"></i> Loading current sprint...
+                </div>
+
+                <div id="editSprintForm" class="d-none">
+                    <div class="mb-3">
+                        <label class="form-label">Sprint Name</label>
+                        <input type="text" id="editSprintName" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Goal</label>
+                        <textarea id="editSprintGoal" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" id="editSprintStartDate" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">End Date</label>
+                        <input type="date" id="editSprintEndDate" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea id="editSprintNotes" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button id="deleteSprintBtn" type="button" class="btn btn-danger me-auto d-none">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button id="saveSprintChangesBtn" type="button" class="btn btn-primary d-none">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+        <script src="~/js/sprint-gantt.js"></script>
+}

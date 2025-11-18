@@ -1,5 +1,6 @@
 ﻿using FlexCap.Web.Models;
 using FlexCap.Web.Models.Requests;
+using FlexCap.Web.Models.Sprint;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 
@@ -18,6 +19,9 @@ namespace FlexCap.Web.Data
         public DbSet<RequestLogEntity> RequestLogs { get; set; }
         public DbSet<RequestType> RequestTypes { get; set; }
         public DbSet<FlexCap.Web.Models.Calendar.CalendarModel> CalendarEvents { get; set; }
+        public DbSet<SprintModel> Sprints { get; set; }
+        public DbSet<SprintResultModel> SprintResults { get; set; }
+
 
     }
 }

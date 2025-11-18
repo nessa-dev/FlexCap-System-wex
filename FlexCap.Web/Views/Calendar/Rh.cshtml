@@ -307,25 +307,25 @@
                     yearFilter.value = currentYear;
                     updateMonthEvents(info.view.currentStart);
                 },
-                eventClick: async function (info) {
-                    const event = info.event;
-                    if (confirm(`Do you want to delete "${event.title}"?`)) {
-                        try {
-                            const response = await fetch(`/Calendar/DeleteEvent?id=${event.id}`, {
-                                method: 'DELETE'
-                            });
-                            if (response.ok) {
-                                event.remove();
-                                updateMonthEvents(calendarInstance.view.currentStart);
-                                alert("Event deleted successfully!");
-                            } else {
-                                alert("Error deleting event.");
-                            }
-                        } catch (error) {
-                            showError("Error deleting event.", error);
-                        }
-                    }
+                    eventClick: async function (info) {
+        const event = info.event;
+        if (confirm(`Do you want to delete "${event.title}"?`)) {
+            try {
+                const response = await fetch(`/Calendar/DeleteEvent/${event.id}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    event.remove();
+                    updateMonthEvents(calendarInstance.view.currentStart);
+                    alert("Event deleted successfully!");
+                } else {
+                    alert("Error deleting event.");
                 }
+            } catch (error) {
+                showError("Error deleting event.", error);
+            }
+        }
+    }
             });
 
             calendarInstance.render();

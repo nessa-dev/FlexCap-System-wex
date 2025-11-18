@@ -3,6 +3,7 @@ using System;
 using FlexCap.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlexCap.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251112191802_AddSprintTables")]
+    partial class AddSprintTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.9");
@@ -220,56 +223,6 @@ namespace FlexCap.Web.Migrations
                     b.ToTable("RequestLogs");
                 });
 
-            modelBuilder.Entity("FlexCap.Web.Models.Sprint.SprintResultModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("ActualFinishDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Blockers")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("CompletionPercentage")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Goal")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Improvement")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("PlannedEndDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("SprintId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("WorkedWell")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SprintResults");
-                });
-
             modelBuilder.Entity("FlexCap.Web.Models.SprintModel", b =>
                 {
                     b.Property<int>("Id")
@@ -281,9 +234,6 @@ namespace FlexCap.Web.Migrations
 
                     b.Property<string>("Goal")
                         .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()

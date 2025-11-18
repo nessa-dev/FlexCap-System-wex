@@ -24,7 +24,6 @@ namespace FlexCap.Web.Controllers
         }
 
 
-
         // --- MÉTODO SEED ---
         public IActionResult Seed()
         {
@@ -449,13 +448,13 @@ namespace FlexCap.Web.Controllers
 
             if (colaboradorLogado == null)
             {
-                return NotFound("Perfil do colaborador não encontrado.");
+                return NotFound("Employee profile not found.");
             }
 
-            var equipeDoUsuario = colaboradorLogado.TeamName ?? "Sem Time";
+            var equipeDoUsuario = colaboradorLogado.TeamName ?? "No Team";
 
             var membrosAtivos = await _context.Colaboradores
-                                                .CountAsync(c => c.TeamName == equipeDoUsuario && c.Status == "Ativo");
+                                                .CountAsync(c => c.TeamName == equipeDoUsuario && c.Status == "Active");
             var totalMembrosTime = await _context.Colaboradores
                                                 .CountAsync(c => c.TeamName == equipeDoUsuario);
 
@@ -487,7 +486,7 @@ namespace FlexCap.Web.Controllers
 
             if (colaboradorLogado == null)
             {
-                return NotFound("Perfil do colaborador logado não encontrado.");
+                return NotFound("The logged-in employee's profile could not be found.");
             }
 
             var equipeDoUsuario = colaboradorLogado.TeamName;
@@ -580,7 +579,7 @@ namespace FlexCap.Web.Controllers
                                             .CountAsync(c => c.TeamName == equipeDoUsuario);
 
             var membrosAtivos = await _context.Colaboradores
-                                            .CountAsync(c => c.TeamName == equipeDoUsuario && c.Status == "Ativo");
+                                            .CountAsync(c => c.TeamName == equipeDoUsuario && c.Status == "Active");
 
             ViewData["FirstName"] = currentUser.FullName.Split(' ')[0];
             ViewData["UserTeam"] = equipeDoUsuario;

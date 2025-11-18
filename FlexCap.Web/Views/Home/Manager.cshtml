@@ -124,12 +124,61 @@
 
 
         <!-- This Week -->
-        <div class="col-12 col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-body p-2">
-                    <h5 class="card-title texto-flexcap fw-bold mb-0">This Week</h5>
+        <div class="col-12 col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <h5 class="card-title texto-flexcap fw-bold mb-3">This Week</h5>
+                    <ul id="thisWeekEventsList" class="list-unstyled mb-0">
+                        <li class="text-muted small">Loading events...</li>
+                    </ul>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+
+
+                        <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const listEl = document.getElementById('thisWeekEventsList');
+
+        async function loadThisWeekEvents() {
+            listEl.innerHTML = '<li class="text-muted small">Loading events...</li>';
+
+            try {
+                // Chama o endpoint C#: /Calendar/GetThisWeekEvents
+                const resp = await fetch('/Calendar/GetThisWeekEvents');
+                if (!resp.ok) throw new Error('Failed to fetch events: ' + resp.status);
+                
+                const events = await resp.json();
+
+                if (events.length === 0) {
+                    listEl.innerHTML = '<li class="text-muted small">No events scheduled for this week.</li>';
+                    return;
+                }
+
+                listEl.innerHTML = ''; // Limpa o "Loading..."
+
+                events.forEach(event => {
+                    const li = document.createElement('li');
+                    li.classList.add('mb-3', 'd-flex', 'align-items-start');
+                    
+                    // O HTML injetado, usando o IconClass (e.g., bi-calendar-check-fill) 
+                    // e o DayOfWeekShort (e.g., (Tue)) que vêm do Controller.
+                            li.innerHTML = `
+                    <i class="bi ${event.iconClass} me-3 fs-5" style="color: #007bff;"></i>
+                    <div class="d-flex justify-content-between flex-grow-1">
+                        <span class="fw-semibold">${event.title}</span>
+                        <span class="text-muted small">${event.dayOfWeekShort}</span>
+                    </div>
+                `;
+                listEl.appendChild(li);
+            });
+
+            } catch (error) {
+                console.error("Error loading weekly events:", error);
+                listEl.innerHTML = '<li class="text-danger small">Error loading events.</li>';
+            }
+        }
+
+        loadThisWeekEvents();
+    });
+</script>

@@ -6,10 +6,11 @@
 
     // 🚩 VARIÁVEL OBRIGATÓRIA: Deve ser passada pela Action C#
     string loggedInUserName = ViewData["LoggedInUserName"] as string ?? "";
+
+    // 💡 Defina o CSS do dot aqui se necessário, ou em um arquivo CSS separado
 }
 
 <div class="py-4 w-100">
-
     <h3 class="fw-bold mb-3">Collaborators</h3>
     <p class="text-muted mb-4">@Model.Count members</p>
 
@@ -18,26 +19,44 @@
         {
             @foreach (var colaborador in Model)
             {
-                string statusValue = colaborador.Status ?? "N/A";
-                string statusDisplay = statusValue == "Ativo" ? "Active" : "Inactive";
+                // **1. BLOCO DE CÁLCULO C# (sem @{...})**
+                var statusKey = (colaborador.Status ?? "N/A").ToUpperInvariant().Trim();
 
-                var statusColorClass = statusValue == "Ativo" ? "text-success" : "text-danger";
-                var dotColorClass = statusValue == "Ativo" ? "bg-success" : "bg-danger";
+                string statusDisplay;
+                string statusColorClass;
+                string dotColorClass;
 
-                string nomeDisplay = colaborador.FullName;
-
-               
-                bool isCurrentUser = colaborador.FullName?.Trim() == loggedInUserName?.Trim();
-
-                if (isCurrentUser)
+                if (statusKey == "ATIVO" || statusKey == "ACTIVE")
                 {
-                    nomeDisplay += " (You)";
+                    statusDisplay = "Active";
+                    statusColorClass = "text-success";
+                    dotColorClass = "bg-success";
+                }
+                else
+                {
+                    statusDisplay = "Inactive";
+                    statusColorClass = "text-danger";
+                    dotColorClass = "bg-danger";
                 }
 
+                // Nome e verificação do usuário atual
+                var nomeDisplay = colaborador.FullName;
+                bool isCurrentUser = colaborador.FullName?.Trim() == loggedInUserName?.Trim();
+                if (isCurrentUser) { nomeDisplay += " (You)"; }
+
+                // DEBUG visível na página
+                // Esta linha estava causando o erro se estivesse aninhada incorretamente.
+                <p style="color:gray; font-size:12px;">
+                    DEBUG → @colaborador.FullName : "@colaborador.Status" (Key: @statusKey, Display: @statusDisplay)
+                </p>
+
+
+                <!-- 2. HTML do card usa as variáveis calculadas acima -->
                 <div class="col-12 mb-2">
                     <div class="card p-2 shadow-sm d-flex flex-row align-items-center" style="max-width: 500px;">
 
                         <div class="position-relative me-3">
+                            <!-- Assumindo que você tem uma função/lógica para PhotoUrl que não é nula -->
                             <img src="@colaborador.PhotoUrl" class="rounded-circle" width="40" height="40" alt="Foto do Colaborador">
 
                             @if (colaborador.Position?.Trim() == "Project Manager")
@@ -64,3 +83,12 @@
         }
     </div>
 </div>
+<!-- O CSS para a classe .dot é obrigatório para que a bolinha apareça! -->
+<style>
+    .dot {
+        height: 10px;
+        width: 10px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+</style>
