@@ -353,8 +353,19 @@ namespace FlexCap.Web.Controllers
 
             ViewData["Title"] = "All Employees";
             var colaboradores = _context.Colaboradores
-                .Where(c => c.Email != "recursoshumanos@flexcap.com")
-                .ToList();
+             .Where(c => c.Email != "recursoshumanos@flexcap.com")
+             .ToList();
+
+            // Normalizar Status
+            foreach (var c in colaboradores)
+            {
+                if (c.Status?.Trim().Equals("Ativo", StringComparison.OrdinalIgnoreCase) == true)
+                    c.Status = "Active";
+
+                else if (c.Status?.Trim().Equals("Inativo", StringComparison.OrdinalIgnoreCase) == true)
+                    c.Status = "Inactive";
+            }
+
 
             return View("Rh", colaboradores);
         }
@@ -381,6 +392,10 @@ namespace FlexCap.Web.Controllers
             return View("EditarUsuario", colaborador);
         }
 
+
+
+
+        // Editar Colaborador (POST)
         // Editar Colaborador (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -390,6 +405,20 @@ namespace FlexCap.Web.Controllers
             {
                 var colaboradorOriginal = _context.Colaboradores.Find(colaborador.Id);
                 if (colaboradorOriginal == null) return NotFound();
+
+                // Evita erro de e-mail duplicado quando o usuário NÃO mudou o e-mail
+                if (colaborador.Email != colaboradorOriginal.Email)
+                {
+                    bool emailJaExiste = _context.Colaboradores
+                        .Any(c => c.Email == colaborador.Email && c.Id != colaborador.Id);
+
+                    if (emailJaExiste)
+                    {
+                        ModelState.AddModelError("Email", "This email is already registered.");
+                        PopulateViewBags();
+                        return View("EditarUsuario", colaborador);
+                    }
+                }
 
                 colaboradorOriginal.FullName = colaborador.FullName;
                 colaboradorOriginal.Email = colaborador.Email;
@@ -402,12 +431,35 @@ namespace FlexCap.Web.Controllers
                 _context.SaveChanges();
                 return RedirectToAction("Listar");
             }
-            ViewBag.Departments = new SelectList(new[] { "Benefits", "Mobility", "Corporate Payments" });
-            ViewBag.Teams = new SelectList(new[] { "Code Warriors", "Bug Busters", "Titans", "Pixel Pioneers", "Cloud Crusaders", "Dev Dynamos" });
-            ViewBag.Countries = new SelectList(new[] { "Brazil", "United States", "Italy", "Japan", "Canada" });
 
+            PopulateViewBags();
             return View("EditarUsuario", colaborador);
         }
+
+
+        private void PopulateViewBags()
+        {
+            ViewBag.Departments = new SelectList(new[] { "Benefits", "Mobility", "Corporate Payments", "RH" });
+            ViewBag.Teams = new SelectList(new[] { "Titans", "Code Warriors", "Bug Busters", "Pixel Pioneers", "Cloud Crusaders", "Dev Dynamos", "RH Operations" });
+            ViewBag.Countries = new SelectList(new[] { "Brazil", "United States", "Italy", "Japan", "Canada" });
+            ViewBag.Positions = new SelectList(new[] { "Dev Sênior", "Dev Pleno", "QA Sênior", "Project Manager", "HR Analyst", "Intern", "Designer UX/UI", "Sales Analyst", "Administrative Assistant", "QA Tester", "Marketing Manager", "HR Consultant", "Dev Back-end", "UX Strategist", "Cloud Engineer", "Full Stack Dev" });
+
+            ViewBag.InactivityReasons = new SelectList(new[] {
+        "Medical Leave",
+        "Personal License",
+        "Vacation",
+        "Day Off",
+        "Maternity Leave",
+        "Suspension",
+        "Other"
+    });
+
+            ViewBag.StatusOptions = new SelectList(new[] {
+        new SelectListItem { Value = "Active", Text = "Active" },
+        new SelectListItem { Value = "Inactive", Text = "Inactive" }
+    });
+        }
+
 
         // Excluir Colaborador (GET - confirmação)
         public IActionResult Excluir(int id)

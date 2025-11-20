@@ -18,7 +18,6 @@ namespace FlexCap.Web.Models
 
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress(ErrorMessage = "Invalid email format.")]
-        [Remote("CheckEmailAvailability", "Colaborador", ErrorMessage = "This email is already registered.")]
         [Display(Name = "E-mail")]
         public string Email { get; set; } = string.Empty;
 

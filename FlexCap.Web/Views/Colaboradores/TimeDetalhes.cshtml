@@ -1,80 +1,122 @@
-﻿@model List<FlexCap.Web.Models.Colaborador>
+﻿    @model List<FlexCap.Web.Models.Colaborador>
 
-@{
-    ViewData["Title"] = "Colaboradores da Equipe";
-    Layout = "~/Views/Shared/Template.cshtml";
+    @{
+        ViewData["Title"] = "Colaboradores da Equipe";
+        Layout = "~/Views/Shared/Template.cshtml";
 
-    string loggedInUserName = ViewData["LoggedInUserName"] as string ?? "";
-    string profile = ViewData["Profile"] as string ?? "Colaborador"; // Ex: "Manager", "Rh", "Colaborador"
-}
+        string loggedInUserName = ViewData["LoggedInUserName"] as string ?? "";
+        string profile = ViewData["Profile"] as string ?? "Colaborador"; // Ex: "Manager", "Rh", "Colaborador"
+    }
 
-<div class="py-4 w-100">
-    <h3 class="fw-bold mb-3">Collaborators</h3>
-    <p class="text-muted mb-4">@Model.Count members</p>
+<style>
+    .status-label {
+        font-weight: bold;
+        font-size: 13px;
+        margin-right: 6px; /* deixa mais bonitinho */
+    }
 
-    <div class="row g-2">
-        @if (Model != null)
-        {
-            foreach (var colaborador in Model)
+    .status-active {
+        color: #28a745 !important; /* verde */
+    }
+
+    .status-inactive {
+        color: #dc3545 !important; /* vermelho */
+    }
+
+    .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-left: 4px;
+    }
+
+    .bg-success {
+        background-color: #28a745 !important;
+    }
+
+    .bg-danger {
+        background-color: #dc3545 !important;
+    }
+</style>
+
+
+
+
+    <div class="py-4 w-100">
+        <h3 class="fw-bold mb-3">Collaborators</h3>
+        <p class="text-muted mb-4">@Model.Count members</p>
+
+        <div class="row g-2">
+            @if (Model != null)
             {
-                // 🧩 STATUS
-                string statusValue = colaborador.Status ?? "Ativo";
-                string statusDisplay = statusValue == "Ativo" ? "Active" : "Inactive";
-                var dotColorClass = statusValue == "Ativo" ? "bg-success" : "bg-danger";
-
-                // 🧩 MOTIVO E DATA (apenas se inativo)
-                string reasonText = colaborador.InactivityReason?.Trim() ?? "";
-                DateTime? returnDate = colaborador.EndDate;
-
-                // 🧩 NOME E USUÁRIO ATUAL
-                string nomeDisplay = colaborador.FullName;
-                bool isCurrentUser = colaborador.FullName?.Trim() == loggedInUserName?.Trim();
-                if (isCurrentUser)
+                foreach (var colaborador in Model)
                 {
-                    nomeDisplay += " (You)";
-                }
+                string dbStatus = colaborador.Status?.Trim() ?? "Active";
 
-                <div class="col-12 mb-2">
-                    <div class="card p-2 shadow-sm d-flex flex-row align-items-center" style="max-width: 500px;">
+                string statusDisplay =
+                dbStatus.Equals("Active", StringComparison.OrdinalIgnoreCase) ? "Active" :
+                (dbStatus.Equals("Inactive", StringComparison.OrdinalIgnoreCase) ? "Inactive" : "N/A");
 
-                        <div class="me-3">
-                            <img src="@colaborador.PhotoUrl" class="rounded-circle" width="40" height="40" alt="Foto do Colaborador">
-                        </div>
+                var dotColorClass =
+                dbStatus.Equals("Active", StringComparison.OrdinalIgnoreCase) ? "bg-success" : "bg-danger";
+                
+                
+                    // 🧩 MOTIVO E DATA (apenas se inativo)
+                    string reasonText = colaborador.InactivityReason?.Trim() ?? "";
+                    DateTime? returnDate = colaborador.EndDate;
 
-                        <div>
-                            <h6 class="mb-0 fw-bold">
-                                @nomeDisplay
-                                @if (colaborador.Position?.Trim() == "Project Manager")
-                                {
-                                    <span class="manager-crown ms-1" style="font-size: 16px;">&#x1F451;</span>
-                                }
-                            </h6>
-                            <small class="text-muted">@colaborador.Position</small>
-                        </div>
+                    // 🧩 NOME E USUÁRIO ATUAL
+                    string nomeDisplay = colaborador.FullName;
+                    bool isCurrentUser = colaborador.FullName?.Trim() == loggedInUserName?.Trim();
+                    if (isCurrentUser)
+                    {
+                        nomeDisplay += " (You)";
+                    }
 
-                        <div class="ms-auto d-flex align-items-center">
-                            <span class="me-2 small fw-bold @((statusValue == "Ativo") ? "text-success" : "text-danger")">
+                    <div class="col-12 mb-2">
+                        <div class="card p-2 shadow-sm d-flex flex-row align-items-center" style="max-width: 500px;">
+
+                            <div class="me-3">
+                                <img src="@colaborador.PhotoUrl" class="rounded-circle" width="40" height="40" alt="Foto do Colaborador">
+                            </div>
+
+                            <div>
+                                <h6 class="mb-0 fw-bold">
+                                    @nomeDisplay
+                                    @if (colaborador.Position?.Trim() == "Project Manager")
+                                    {
+                                        <span class="manager-crown ms-1" style="font-size: 16px;">&#x1F451;</span>
+                                    }
+                                </h6>
+                                <small class="text-muted">@colaborador.Position</small>
+                            </div>
+
+                            <div class="ms-auto d-flex align-items-center">
+                                @* AQUI USAMOS O NOVO statusDisplay E dotColorClass *@
+                            <span class="status-label @(dbStatus.Equals("Active", StringComparison.OrdinalIgnoreCase) ? "status-active" : "status-inactive")">
                                 @statusDisplay
 
-                                @* Mostrar motivo e data apenas se inativo E usuário logado for Manager *@
-                                @if (statusValue == "Inativo" && profile == "Manager" && !string.IsNullOrEmpty(reasonText))
-                                {
-                                    <span class="fw-normal text-danger">
-                                        (@reasonText
-                                        @if (returnDate.HasValue)
-                                        {
-                                            <text> até @returnDate.Value.ToString("dd/MM/yyyy")</text>
-                                        }
-            )
-                                    </span>
-                                }
-                            </span>
+                                    @* Mostrar motivo e data apenas se inativo E usuário logado for Manager *@
+                                    @if (dbStatus.Equals("Inativo", StringComparison.OrdinalIgnoreCase) && profile == "Manager" && !string.IsNullOrEmpty(reasonText))
+                                    {
+                                        <span class="fw-normal text-danger">
+                                            (@reasonText
+                                            @if (returnDate.HasValue)
+                                            {
+                                                <text> até @returnDate.Value.ToString("dd/MM/yyyy")</text>
+                                            }
+                                            )
+                                        </span>
+                                    }
+                                </span>
 
-                            <span class="dot @dotColorClass"></span>
+                                <span class="dot @dotColorClass"></span>
+                            </div>
                         </div>
                     </div>
-                </div>
+                }
             }
-        }
+        </div>
     </div>
-</div>
+

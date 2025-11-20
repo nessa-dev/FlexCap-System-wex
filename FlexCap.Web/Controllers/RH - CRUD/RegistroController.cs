@@ -25,8 +25,6 @@ namespace FlexCap.Web.Controllers
         }
 
 
-
-
         private Colaborador CriarNovoColaborador(ColaboradorViewModel model)
         {
             string finalPosition = model.Position!;
@@ -86,15 +84,6 @@ namespace FlexCap.Web.Controllers
             PopulateViewBags();
             return View("CadastrarUsuario", new ColaboradorViewModel() { Status = "Ativo" });
         }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -170,15 +159,6 @@ namespace FlexCap.Web.Controllers
         }
 
 
-      
-
-
-
-
-
-
-
-
 
         [HttpGet]
         [Authorize(Roles = "HR Manager, HR Analyst, HR Consultant")]
@@ -212,22 +192,6 @@ namespace FlexCap.Web.Controllers
 
             return View(model);
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -314,20 +278,6 @@ namespace FlexCap.Web.Controllers
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         [AcceptVerbs("GET", "POST")]
         public async Task<IActionResult> CheckEmailAvailability(string email)
         {
@@ -341,35 +291,28 @@ namespace FlexCap.Web.Controllers
             return Json(true);
         }
 
+
         [HttpGet]
         public async Task<IActionResult> GetColaboradorDetails(int id)
         {
             var colaborador = await _context.Colaboradores
-                                            .AsNoTracking()
-                                            .FirstOrDefaultAsync(c => c.Id == id);
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == id);
 
             if (colaborador == null)
             {
                 return Content("<p class='text-danger'>Colaborador não encontrado.</p>");
             }
 
+            // 🔥 Normaliza status aqui também
+            if (colaborador.Status?.Trim().Equals("Ativo", StringComparison.OrdinalIgnoreCase) == true)
+                colaborador.Status = "Active";
+
+            else if (colaborador.Status?.Trim().Equals("Inativo", StringComparison.OrdinalIgnoreCase) == true)
+                colaborador.Status = "Inactive";
+
             return PartialView("ColaboradorDetailsPartial", colaborador);
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -387,6 +330,8 @@ namespace FlexCap.Web.Controllers
             var dados = await _context.DadosDeTeste.ToListAsync();
             return View(dados);
         }
+
+
 
         [Authorize(Roles = "HR Manager, HR Analyst, HR Consultant")]
         [HttpGet]
@@ -411,16 +356,6 @@ namespace FlexCap.Web.Controllers
             }
             return View(dado);
         }
-
-
-
-
-
-
-
-
-
-
 
 
 

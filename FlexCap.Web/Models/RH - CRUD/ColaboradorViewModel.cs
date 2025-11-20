@@ -18,7 +18,6 @@ namespace FlexCap.Web.Models
 
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress(ErrorMessage = "Invalid email format.")]
-        [Remote("CheckEmailAvailability", "Registro", ErrorMessage = "This email is already registered.")]
         public string? Email { get; set; }
 
         [Required(ErrorMessage = "Position is required.")]

@@ -157,10 +157,25 @@
 
                                     <td>
                                         @{
-                                            string statusValue = colaborador.Status ?? "N/A";
-                                            string statusDisplay = statusValue == "Ativo" ? "Active" :
-                                            (statusValue == "Inativo" ? "Inactive" : statusValue);
+                                            // 1. Garante que o status não é nulo/vazio, assumindo "Ativo" como padrão.
+                                            string dbStatus = colaborador.Status?.Trim() ?? "Active";
+
+                                            string statusDisplay = "N/A";
+                                            string statusClass = "text-secondary";
+
+                                            if (dbStatus.Equals("Active", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                statusDisplay = "Active";
+                                                statusClass = "text-success";
+                                            }
+                                            else if (dbStatus.Equals("Inactive", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                statusDisplay = "Inactive";
+                                                statusClass = "text-danger";
+                                            }
                                         }
+                                    
+
                                         <span>@statusDisplay</span>
                                     </td>
 

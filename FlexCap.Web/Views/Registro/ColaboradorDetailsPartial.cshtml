@@ -41,13 +41,28 @@
             <hr class="my-1" />
 
             @{
-                string statusValue = Model?.Status ?? "N/A";
-                string statusText = (statusValue == "Ativo" ? "Active" : (statusValue == "Inativo" ? "Inactive" : "N/A"));
-            }
-            <dt class="col-5">Status:</dt>
-            <dd class="col-7 fw-bold @(statusValue == "Inativo" ? "text-danger" : "text-success")">@statusText</dd>
+                string dbStatus = Model?.Status?.Trim() ?? "Active";
 
-            @if (statusValue == "Inativo")
+                string statusText = "N/A";
+                string statusColorClass = "text-secondary";
+
+                if (dbStatus.Equals("Active", StringComparison.OrdinalIgnoreCase))
+                {
+                    statusText = "Active";
+                    statusColorClass = "text-success";
+                }
+                else if (dbStatus.Equals("Inactive", StringComparison.OrdinalIgnoreCase))
+                {
+                    statusText = "Inactive";
+                    statusColorClass = "text-danger";
+                }
+            }
+
+
+            <dt class="col-5">Status:</dt>
+            <dd class="col-7 fw-bold @statusColorClass">@statusText</dd>
+
+            @if (statusText == "Inactive") // Usa a variável traduzida
             {
                 <dt class="col-12 mt-2 fw-bold text-danger small">Inactivity Details:</dt>
 
@@ -80,7 +95,7 @@
 
         <div class="mt-4 d-flex justify-content-between gap-2">
             <a asp-controller="Registro" asp-action="Editar" asp-route-id="@(Model?.Id)" class="btn btn-sm btn-custom flex-fill">
-                <span class="material-icons small me-1">edit</span> 
+                <span class="material-icons small me-1">edit</span>
             </a>
 
             <form asp-controller="Registro" asp-action="Excluir" asp-route-id="@(Model?.Id)" method="post" onsubmit="return confirm('Are you sure you want to delete @(Model?.FullName)?');">
