@@ -94,10 +94,22 @@ namespace FlexCap.Web.Controllers
                 int.TryParse(managerIdString, out int managerId);
 
                 var teamName = colaboradorLogado.TeamName ?? "Sem Time";
-                var activeMembers = await _context.Colaboradores
-                    .CountAsync(c => c.TeamName == teamName && c.Status == "Ativo");
+                var normalizedTeam = colaboradorLogado.TeamName?.Trim().ToLower();
 
-                // 🔥 Busca das solicitações pendentes do gerente
+                var activeMembers = await _context.Colaboradores
+                    .Where(c => c.TeamName != null &&
+                                c.TeamName.Trim().ToLower() == normalizedTeam &&
+                                c.Status == "Active")
+                    .CountAsync();
+
+                // 🔥 Buscar sprint ativa
+                var activeSprintExists = await _context.Sprints
+                    .AnyAsync(s => s.IsActive == true);
+
+                // 🔥 0 ou 1
+                int activeSprintCount = activeSprintExists ? 1 : 0;
+
+                // 🔥 Solicitações pendentes
                 var pendingRequests = await _context.Requests
                     .Include(r => r.Colaborador)
                     .Include(r => r.RequestType)
@@ -123,12 +135,13 @@ namespace FlexCap.Web.Controllers
                     FirstName = colaboradorLogado.FullName?.Split(' ')?.FirstOrDefault() ?? "Usuário",
                     UserTeam = teamName,
                     ActiveMembers = activeMembers,
+                    ActiveSprintCount = activeSprintCount,   // 🔥 IMPORTANTE
                     PendingManagerRequests = pendingRequests
                 };
 
-                // 🔥 Corrigido: renderiza a view Manager.cshtml e envia o model
                 return View("~/Views/Home/Manager.cshtml", viewModel);
             }
+
 
 
             // 🔹 Colaborador
@@ -141,7 +154,7 @@ namespace FlexCap.Web.Controllers
                 var primeiroNome = colaboradorLogado.FullName?.Split(' ')[0] ?? "Colaborador";
 
                 var membrosAtivos = await _context.Colaboradores
-                    .CountAsync(c => c.TeamName == nomeDoTime && c.Status == "Ativo");
+                    .CountAsync(c => c.TeamName == nomeDoTime && c.Status == "Active");
                 var totalMembrosTime = await _context.Colaboradores
                     .CountAsync(c => c.TeamName == nomeDoTime);
 

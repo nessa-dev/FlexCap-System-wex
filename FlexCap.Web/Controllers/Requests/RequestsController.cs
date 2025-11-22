@@ -66,7 +66,20 @@ public class RequestController : Controller
                 throw new InvalidOperationException("User ID could not be determined or is invalid.");
             }
 
-            // ✅ Agora o arquivo vem direto do model.AttachmentFile
+            // 🔥 VERIFICAÇÃO: permitir apenas 1 solicitação por dia
+            var today = DateTime.UtcNow.Date;
+
+            bool alreadySubmittedToday = await _context.Requests
+                .AnyAsync(r => r.CollaboratorId == collaboratorId &&
+                               r.CreationDate.Date == today);
+
+            if (alreadySubmittedToday)
+            {
+                ModelState.AddModelError("", "You can only submit one request per day.");
+                return await ReturnSubmitViewWithHistory(model);
+            }
+
+            // 🔥 Salva a solicitação normalmente
             await _requestService.SubmitNewRequest(model, collaboratorId);
 
             TempData["SuccessMessage"] = "Request submitted successfully! It is awaiting Manager approval.";
@@ -83,6 +96,7 @@ public class RequestController : Controller
             return await ReturnSubmitViewWithHistory(model);
         }
     }
+
 
 
 

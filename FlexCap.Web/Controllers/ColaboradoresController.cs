@@ -56,6 +56,7 @@ namespace FlexCap.Web.Controllers
                 {
 
             new Colaborador {
+
                 FullName = "Recursos Humanos Manager",
                 Email = "recursoshumanos@flexcap.com",
                 Position = "HR Manager",
@@ -69,6 +70,7 @@ namespace FlexCap.Web.Controllers
 
 
             new Colaborador {
+
             FullName = "Carlos Manager",
             Email = "carlos.manager@flexcap.com",
             Position = "Project Manager",
@@ -469,7 +471,6 @@ namespace FlexCap.Web.Controllers
             return View("ExcluirUsuario", colaborador);
         }
 
-        // Excluir Colaborador (POST - confirmação final)
         [HttpPost]
         public IActionResult Excluir(int id, [Bind("Id")] Colaborador colaborador)
         {
@@ -547,11 +548,29 @@ namespace FlexCap.Web.Controllers
             var colaboradoresDoTime = await _context.Colaboradores
                 .AsNoTracking()
                 .Where(c => c.TeamName == equipeDoUsuario)
-
                 .OrderByDescending(c => c.FullName == colaboradorLogado.FullName)
                 .ThenByDescending(c => c.Position == "Project Manager")
                 .ThenBy(c => c.FullName)
                 .ToListAsync();
+
+            foreach (var c in colaboradoresDoTime)
+            {
+                if (string.IsNullOrWhiteSpace(c.Status))
+                {
+                    c.Status = "Inactive"; // evita N/A
+                }
+
+                var status = c.Status.Trim().ToLowerInvariant();
+
+                if (status == "ativo")
+                    c.Status = "Active";
+
+                else if (status == "inativo")
+                    c.Status = "Inactive";
+
+                else if (status != "active" && status != "inactive")
+                    c.Status = "Inactive"; // fallback seguro
+            }
 
             ViewData["Title"] = $"Membros da Equipe: {equipeDoUsuario}";
             ViewData["Profile"] = perfil;
@@ -560,6 +579,7 @@ namespace FlexCap.Web.Controllers
 
             return View("TimeDetalhes", colaboradoresDoTime);
         }
+
 
 
 

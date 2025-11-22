@@ -3,8 +3,6 @@
 @{
     ViewData["Title"] = "Gestão de Colaboradores";
     Layout = "~/Views/Shared/Template.cshtml";
-
-    var firstName = ViewData["FirstName"] as string ?? "Manager";
 }
 
 @model List<FlexCap.Web.Models.Colaborador>
@@ -19,10 +17,33 @@
         {
             var loggedInFullName = User.FindFirst(ClaimTypes.Name)?.Value;
 
-            @foreach (var colaborador in Model)
+            foreach (var colaborador in Model)
             {
-                var statusColorClass = colaborador.Status == "Ativo" ? "text-success" : "text-danger";
-                var dotColorClass = colaborador.Status == "Ativo" ? "bg-success" : "bg-danger";
+                // Normaliza o status
+                var statusKey = (colaborador.Status ?? "N/A").Trim().ToUpperInvariant();
+
+                string statusDisplay;
+                string statusColorClass;
+                string dotColorClass;
+
+                if (statusKey == "ACTIVE" || statusKey == "ATIVO" || statusKey == "1")
+                {
+                    statusDisplay = "Active";
+                    statusColorClass = "text-success fw-bold";
+                    dotColorClass = "bg-success";
+                }
+                else if (statusKey == "INACTIVE" || statusKey == "INATIVO" || statusKey == "0")
+                {
+                    statusDisplay = "Inactive";
+                    statusColorClass = "text-danger fw-bold";
+                    dotColorClass = "bg-danger";
+                }
+                else
+                {
+                    statusDisplay = "N/A";
+                    statusColorClass = "text-secondary fw-bold";
+                    dotColorClass = "bg-secondary";
+                }
 
                 var nomeDisplay = colaborador.FullName;
 
@@ -34,12 +55,14 @@
                 <div class="col-12 mb-2">
                     <div class="card p-2 shadow-sm d-flex flex-row align-items-center">
                         <img src="@colaborador.PhotoUrl" class="rounded-circle me-3" width="40" height="40" alt="Colaborator Photo">
+
                         <div>
                             <h6 class="mb-0 fw-bold">@nomeDisplay</h6>
                             <small class="text-muted small">@colaborador.Position</small>
                         </div>
+
                         <div class="ms-auto d-flex align-items-center">
-                            <span class="@statusColorClass me-2 fw-bold small">@colaborador.Status</span>
+                            <span class="@statusColorClass me-2 small">@statusDisplay</span>
                             <span class="dot @dotColorClass"></span>
                         </div>
                     </div>
@@ -48,3 +71,12 @@
         }
     </div>
 </div>
+
+<style>
+    .dot {
+        height: 10px;
+        width: 10px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+</style>

@@ -5,6 +5,8 @@ namespace FlexCap.Web.Models
 {
     public class HomeMetricsViewModel
     {
+        public int ActiveSprintCount { get; set; }
+
         // Propriedades do RH (Mantidas)
         public int TotalPendingHR { get; set; }
         public int TotalEmployees { get; set; }

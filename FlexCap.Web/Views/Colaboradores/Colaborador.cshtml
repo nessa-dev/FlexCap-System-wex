@@ -14,34 +14,39 @@
     <div class="row g-2">
         @if (Model != null)
         {
-            @foreach (var colaborador in Model)
+            foreach (var colaborador in Model)
             {
+                // Normaliza o status
                 var statusKey = (colaborador.Status ?? "N/A").ToUpperInvariant().Trim();
 
                 string statusDisplay;
                 string statusColorClass;
                 string dotColorClass;
 
-                if (statusKey == "ATIVO" || statusKey == "ACTIVE")
+                // LÓGICA COMPLETA E CORRIGIDA
+                if (statusKey == "ATIVO" || statusKey == "ACTIVE" || statusKey == "1")
                 {
                     statusDisplay = "Active";
-                    statusColorClass = "text-success";
+                    statusColorClass = "text-success fw-bold";
                     dotColorClass = "bg-success";
+                }
+                else if (statusKey == "INATIVO" || statusKey == "INACTIVE" || statusKey == "0")
+                {
+                    statusDisplay = "Inactive";
+                    statusColorClass = "text-danger fw-bold";
+                    dotColorClass = "bg-danger";
                 }
                 else
                 {
-                    statusDisplay = "Inactive";
-                    statusColorClass = "text-danger";
-                    dotColorClass = "bg-danger";
+                    statusDisplay = "N/A";
+                    statusColorClass = "text-secondary fw-bold";
+                    dotColorClass = "bg-secondary";
                 }
 
+                // Nome do colaborador (marca YOU)
                 var nomeDisplay = colaborador.FullName;
                 bool isCurrentUser = colaborador.FullName?.Trim() == loggedInUserName?.Trim();
-                if (isCurrentUser) { nomeDisplay += " (You)"; }
-
-                <p style="color:gray; font-size:12px;">
-                    DEBUG → @colaborador.FullName : "@colaborador.Status" (Key: @statusKey, Display: @statusDisplay)
-                </p>
+                if (isCurrentUser) nomeDisplay += " (You)";
 
                 <div class="col-12 mb-2">
                     <div class="card p-2 shadow-sm d-flex flex-row align-items-center" style="max-width: 500px;">
@@ -51,9 +56,7 @@
 
                             @if (colaborador.Position?.Trim() == "Project Manager")
                             {
-                                <span class="manager-crown position-absolute top-0 end-0" style="font-size: 16px;">
-                                    &#x1F451;
-                                </span>
+                                <span class="manager-crown position-absolute top-0 end-0" style="font-size: 16px;">&#x1F451;</span>
                             }
                         </div>
 
@@ -63,7 +66,7 @@
                         </div>
 
                         <div class="ms-auto d-flex align-items-center">
-                            <span class="@statusColorClass me-2 fw-bold small status-clean">@statusDisplay</span>
+                            <span class="@statusColorClass me-2 small status-clean">@statusDisplay</span>
                             <span class="dot @dotColorClass"></span>
                         </div>
 
@@ -82,26 +85,10 @@
         display: inline-block;
     }
 
-    /* Classe usada no span do status — forçamos TUDO para transparente */
-    .status-clean,
-    span.status-clean,
-    .status-clean * {
+    /* Remove qualquer fundo indesejado */
+    .status-clean {
         background: transparent !important;
-        background-color: transparent !important;
-        background-image: none !important;
-        box-shadow: none !important;
-        -webkit-box-shadow: none !important;
-        border: none !important;
         padding: 0 !important;
-        margin: 0 !important;
+        margin-left: -6px !important; /* Ajuste para ficar mais à esquerda */
     }
-
-        /* Caso alguma regra global esteja aplicando um destaque (ex: <mark>, .badge, highlight) */
-        span.status-clean,
-        span.status-clean mark,
-        span.status-clean .badge,
-        span.status-clean .label {
-            background: transparent !important;
-            color: inherit !important;
-        }
 </style>
