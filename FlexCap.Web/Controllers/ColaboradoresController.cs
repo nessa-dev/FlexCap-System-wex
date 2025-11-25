@@ -56,7 +56,6 @@ namespace FlexCap.Web.Controllers
                 {
 
             new Colaborador {
-
                 FullName = "Recursos Humanos Manager",
                 Email = "recursoshumanos@flexcap.com",
                 Position = "HR Manager",
@@ -70,7 +69,6 @@ namespace FlexCap.Web.Controllers
 
 
             new Colaborador {
-
             FullName = "Carlos Manager",
             Email = "carlos.manager@flexcap.com",
             Position = "Project Manager",

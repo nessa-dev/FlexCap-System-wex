@@ -103,19 +103,20 @@
             <button class="btn btn-dark fw-semibold" data-bs-toggle="modal" data-bs-target="#editSprintModal">Edit Sprint</button>
         </div>
 
+
         <div class="d-flex flex-column gap-2 flex-grow-1" style="max-width: 600px;">
-
-            <div class="alert alert-warning p-2 mb-0 d-flex align-items-center" role="alert">
-                <span class="me-2 fs-5">🔥</span>
-                30% of the team will be unavailabe between **June 10 and June 12** due to holidays in Brazil.
+            <div id="impactNotificationsContainer" class="d-grid gap-2 mb-4" style="max-width: 600px;">
+                <!-- Se houver notificações, o JavaScript irá injetá-las aqui. -->
             </div>
 
-            <div class="alert p-2 mb-0 d-flex align-items-center" role="alert" style="background-color: #d1ecf1; border-color: #bee5eb;">
-                <span class="me-2 fs-5" style="color: #007bff;">
-                    <i class="bi bi-lightning-charge-fill"></i>
-                </span>
-                Maria Costa is on medical leave until **June 5**. Impact on sprint estimated: **15%**
+
+
+
+            <div id="absenceImpactContainer" class="d-grid gap-2 mb-4" style="max-width: 700px;">
+                <!-- JS vai colocar as notificações aqui -->
             </div>
+
+
         </div>
 
     </div>

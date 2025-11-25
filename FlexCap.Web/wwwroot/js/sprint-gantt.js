@@ -419,17 +419,14 @@ document.addEventListener('DOMContentLoaded', () => {
             name: nameInput.value,
             goal: goalInput.value,
             startDate: startInput.value, // Deve ser YYYY-MM-DD
-            endDate: endInput.value,   // Deve ser YYYY-MM-DD
+            endDate: endInput.value,    // Deve ser YYYY-MM-DD
             notes: notesInput.value,
-
-            // Manter os IDs de membros originais, se esta funcionalidade não for integrada aqui:
             participatingMemberIds: currentSprint.participatingMemberIds
         };
 
         if (!updated.name || !updated.startDate || !updated.endDate) {
             return alert('Please fill in the Name and date range.');
         }
-
 
         try {
             const resp = await fetch('/Sprint/Update', {
@@ -438,41 +435,80 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(updated)
             });
 
-            if (!resp.ok) {
-                const errorText = await resp.text();
-                console.error('Update Error Details:', errorText);
-                throw new Error('Error saving sprint');
-            }
-            alert('Sprint updated successfully!');
+            // 💡 CORREÇÃO CRÍTICA: Trata tanto 200 OK quanto 204 No Content como sucesso.
+            if (resp.ok || resp.status === 204) {
 
-            await renderGantt();
-            // Se o update for OK, fecha o modal e recarrega o Gantt (se necessário)
-            bootstrap.Modal.getInstance(editModalEl).hide();
-            // if (typeof loadGanttData === 'function') loadGanttData(); // Chama a função de recarregamento do Gantt
+                // 1. Fecha o modal
+                bootstrap.Modal.getInstance(editModalEl).hide();
+
+                // 2. Avisa o usuário
+                alert('Sprint updated successfully! The page will now refresh.');
+
+                // 💡 SOLUÇÃO FINAL: Força o recarregamento da página. 
+                // Isso garante que o Gantt, notificações e todos os dados sejam atualizados.
+                window.location.reload();
+
+            } else {
+                // Se houver um erro real (4xx ou 5xx), tentamos ler o corpo da resposta
+                let errorMessage = `Error saving sprint (Status: ${resp.status}).`;
+                try {
+                    // Tenta ler JSON para feedback detalhado
+                    const errorBody = await resp.json();
+                    errorMessage += ` Details: ${JSON.stringify(errorBody)}`;
+                } catch {
+                    // Se não for JSON, apenas retorna o status
+                    errorMessage += ` Check server logs.`;
+                }
+
+                console.error('Update Error Details:', errorMessage);
+                alert(errorMessage);
+            }
         } catch (err) {
-            console.error(err);
-            alert('Error updating sprint. Check console for details.');
+            console.error("Critical connection or execution error:", err);
+            alert('Error updating sprint: A critical error occurred. See console for details.');
         }
-    });
+    })
+
 
     // --- Deletar sprint (DELETE) ---
     deleteBtn.addEventListener('click', async () => {
         if (!currentSprint) return;
-        if (!confirm(`Are you sure you want to delete "${currentSprint.name}" (ID: ${currentSprint.id})?`)) return;
+        if (!confirm(`Are you sure you want to delete "${currentSprint.name}" (ID: ${currentSprint.id})? This action cannot be undone.`)) return;
 
         try {
             const resp = await fetch(`/Sprint/Delete/${currentSprint.id}`, { method: 'DELETE' });
 
-            if (!resp.ok) throw new Error('Error deleting sprint');
+            // 💡 CORREÇÃO 1: Trata tanto 200 OK quanto 204 No Content como sucesso.
+            // Isso impede que o fluxo caia no 'else' se o servidor retornar 204.
+            if (resp.ok || resp.status === 204) {
 
-            alert('Sprint deleted successfully!');
-            bootstrap.Modal.getInstance(editModalEl).hide();
+                // 1. Fecha o modal (importante fazer isso antes da recarga)
+                const modalInstance = bootstrap.Modal.getInstance(editModalEl);
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
 
-            await renderGantt();
-            // if (typeof loadGanttData === 'function') loadGanttData(); // Chama a função de recarregamento do Gantt
+                // 2. Avisa o usuário
+                alert('Sprint deleted successfully!');
+
+                // 💡 CORREÇÃO 2: Força o recarregamento da página. 
+                // Esta é a forma mais robusta e completa de garantir que o Gantt e 
+                // todos os botões (ex: "Criar Sprint") atualizem corretamente.
+                // Isso interrompe o JS, evitando que o bloco 'catch' seja acionado depois.
+                window.location.reload();
+
+            } else {
+                // Se falhar (e o status for 4xx ou 5xx)
+                const errorText = await resp.text();
+                console.error('Delete Error Details (Server Status > 204):', errorText);
+                alert(`Error deleting sprint (Status: ${resp.status}). Check console.`);
+            }
+
         } catch (err) {
-            console.error(err);
-            alert('Error deleting sprint.');
+            // 🛑 CORREÇÃO 3: O bloco 'catch' só deve tratar falhas de rede/execução crítica.
+            // A lógica de sucesso (com o reload) deve ser suficiente para evitar que esta mensagem apareça.
+            console.error('Critical Error on Delete Execution:', err);
+            alert('An unexpected error occurred during deletion. See console for details.');
         }
     });
 
@@ -891,3 +927,332 @@ function formatDate(dateStr) {
         year: "numeric"
     });
 }
+
+
+
+
+
+
+
+
+
+// ----------------------------------------------------------------------
+// FUNÇÃO PRINCIPAL DE INICIALIZAÇÃO E LIMPEZA (ÚNICA CHAMADA)
+// ----------------------------------------------------------------------
+document.addEventListener('DOMContentLoaded', async () => {
+    const container = document.getElementById("impactNotificationsContainer");
+
+    // 1. VERIFICAÇÃO CRÍTICA DO CONTAINER
+    if (!container) {
+        console.error("ERRO CRÍTICO: Container #impactNotificationsContainer não encontrado.");
+        return;
+    }
+
+    // Zera o container ANTES de qualquer carregamento.
+    container.innerHTML = "";
+
+    // 2. Chama as funções sequencialmente. O await garante que a execução termine antes de seguir.
+    // Usamos await para que o erro de uma não interrompa a injeção da outra.
+
+    // 🚨 1º Chamada: Licença Individual (que não estava aparecendo)
+    await loadAbsenceImpact();
+
+    // 🚨 2º Chamada: Feriado (que estava aparecendo)
+    await loadSprintHolidayNotifications();
+
+    // 3. Se o container estiver vazio no final, adiciona mensagem de fallback.
+    if (container.innerHTML.trim() === "") {
+        container.innerHTML = '<div class="text-muted small">Nenhuma notificação de impacto para esta sprint.</div>';
+    }
+});
+// (As funções loadAbsenceImpact e loadSprintHolidayNotifications devem ser definidas abaixo)
+
+// ----------------------------------------------------------------------
+// FUNÇÃO 1: Notificação de Feriado (SÓ ADICIONA CONTEÚDO)
+// ----------------------------------------------------------------------
+async function loadSprintHolidayNotifications() {
+    const container = document.getElementById('impactNotificationsContainer');
+    if (!container) return; // Proteção
+
+    try {
+        const res = await fetch('/Sprint/GetHolidayNotifications');
+        if (!res.ok) return;
+
+        const notifications = await res.json();
+        if (!notifications || notifications.length === 0) return;
+
+        notifications.forEach(n => {
+            const percent = n.affectedPercent ?? 0;
+            const alertClass = percent >= 50 ? 'alert-danger' : 'alert-warning';
+
+            const html = `
+                <div class="alert ${alertClass} d-flex align-items-center mb-2" role="alert">
+                    ${n.message}
+                </div>
+            `;
+            // 🚨 APENAS ADICIONAMOS (appendChild)
+            container.insertAdjacentHTML('beforeend', html);
+        });
+
+    } catch (err) {
+        console.error('Falha ao carregar notificações de feriado:', err);
+    }
+}
+
+
+// ----------------------------------------------------------------------
+// FUNÇÃO 2: Notificação de Ausência Individual (SÓ ADICIONA CONTEÚDO)
+// ----------------------------------------------------------------------
+async function loadAbsenceImpact() {
+    const container = document.getElementById("impactNotificationsContainer");
+    if (!container) return; // Proteção
+
+    try {
+        const response = await fetch("/Sprint/GetAbsenceImpact");
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (data.length === 0) return;
+
+        data.forEach(n => {
+            const icon = n.ImpactPercent >= 10 ? '🔥' : '⚡';
+            const alertClass = n.ImpactPercent >= 10 ? 'alert-danger' : 'alert-info';
+
+            const html = `
+                <div class="alert ${alertClass} small mb-0 d-flex align-items-start p-2" role="alert" style="border-left: 4px solid;">
+                    <span class="me-2 fs-5" style="font-size: 24px;">${icon}</span>
+                    <div class="flex-grow-1">${n.message}</div>
+                </div>
+            `;
+            // APENAS ADICIONAMOS
+            container.insertAdjacentHTML('beforeend', html);
+        });
+
+    } catch (err) {
+        console.error("Erro fatal na função loadAbsenceImpact:", err);
+    }
+}
+
+
+
+// ======================================================================
+//  SPRINT HISTORY — COLLABORATOR VIEW
+// ======================================================================
+
+// ------------------------------
+// 1. LOAD HISTORY
+// ------------------------------
+async function loadSprintHistory() {
+
+    const container = document.getElementById("finishedSprintsContainer");
+
+    if (!container) {
+        console.warn("finishedSprintsContainer not found (collaborator view).");
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="text-center text-muted py-3">Loading history...</div>
+    `;
+
+    try {
+        const response = await fetch("/Sprint/GetFinished");
+        const sprints = await response.json();
+
+        container.innerHTML = "";
+
+        if (!sprints || sprints.length === 0) {
+            container.innerHTML = `
+                <div class="text-center text-muted p-3">
+                    No finished sprints yet.
+                </div>`;
+            return;
+        }
+
+        // render only the last 2 on home
+        const latestTwo = sprints.slice(0, 2);
+        latestTwo.forEach(renderSprintCard);
+
+        // Show "view all" button if more exist
+        if (sprints.length > 2) {
+            const wrapper = document.getElementById("viewAllSprintsWrapper");
+            if (wrapper) wrapper.classList.remove("d-none");
+        }
+
+        loadAllSprintsModal(sprints);
+
+    } catch (err) {
+        console.error("Error loading sprint history:", err);
+        container.innerHTML = `
+            <div class="text-danger text-center p-3">Error loading history.</div>
+        `;
+    }
+}
+
+
+
+// ------------------------------
+// 2. CARD COMPONENT
+// ------------------------------
+function renderSprintCard(s) {
+    const container = document.getElementById("finishedSprintsContainer");
+    if (!container) return;
+
+    const card = document.createElement("div");
+    card.classList.add("card", "shadow-sm", "mb-2");
+
+    card.innerHTML = `
+        <div class="d-flex align-items-center p-2 justify-content-between">
+
+            <div class="flex-grow-1 me-2">
+                <h6 class="mb-0 fw-bold">${s.name}</h6>
+                <small class="text-muted">${formatDate(s.startDate)} – ${formatDate(s.plannedEndDate)}</small>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+
+                <div style="width: 48px; height: 48px;">
+                    <canvas id="chart-${s.id}"></canvas>
+                </div>
+
+                <div class="text-end me-2">
+                    <h5 class="mb-0 fw-bold text-success">${s.completionPercentage}%</h5>
+                    <small class="text-muted">productivity</small>
+                </div>
+
+                <button class="btn btn-sm btn-success rounded-circle view-details-btn"
+                        data-sprint='${JSON.stringify(s)}'
+                        style="width: 32px; height: 32px; display:flex; align-items:center; justify-content:center;">
+                    <i class="fas fa-plus"></i>
+                </button>
+
+            </div>
+        </div>
+    `;
+
+    container.appendChild(card);
+
+    renderHistoryChart(`chart-${s.id}`, s.completionPercentage);
+}
+
+
+
+// ------------------------------
+// 3. MINI PIE CHART
+// ------------------------------
+function renderHistoryChart(canvasId, pct) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+
+    new Chart(ctx, {
+        type: "doughnut",
+        data: {
+            datasets: [{
+                data: [pct, 100 - pct],
+                backgroundColor: ["#28a745", "#ffc107"],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            cutout: "55%",
+            responsive: true,
+            plugins: { legend: { display: false } }
+        }
+    });
+}
+
+
+
+// ======================================================================
+// 4. VIEW ALL SPRINTS — MODAL LIST
+// ======================================================================
+function loadAllSprintsModal(sprints) {
+    const list = document.getElementById("allSprintsList");
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    sprints.forEach(s => {
+        list.insertAdjacentHTML("beforeend", `
+            <div class="border rounded p-3 d-flex justify-content-between align-items-center mb-2">
+
+                <div>
+                    <h6 class="fw-bold mb-1">${s.name}</h6>
+                    <small class="text-muted">${formatDate(s.startDate)} – ${formatDate(s.plannedEndDate)}</small>
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+
+                    <span class="fw-bold text-success">${s.completionPercentage}%</span>
+
+                    <button class="btn btn-success btn-sm rounded-circle view-details-btn"
+                            data-sprint='${JSON.stringify(s)}'
+                            style="width: 32px; height: 32px; display:flex; align-items:center; justify-content:center;">
+                        <i class="fas fa-plus"></i>
+                    </button>
+
+                </div>
+            </div>
+        `);
+    });
+}
+
+
+
+// ======================================================================
+// 5. OPEN DETAILS MODAL
+// ======================================================================
+document.addEventListener("click", (event) => {
+    const btn = event.target.closest(".view-details-btn");
+    if (!btn) return;
+
+    const sprint = JSON.parse(btn.dataset.sprint);
+    openSprintDetailsModal(sprint);
+});
+
+
+function openSprintDetailsModal(s) {
+
+    document.getElementById("detailTitle").textContent = s.name;
+
+    document.getElementById("detailDates").textContent =
+        `${formatDate(s.startDate)} → ${formatDate(s.actualFinishDate)}`;
+
+    document.getElementById("detailGoal").textContent = s.goal || "—";
+    document.getElementById("detailWorked").textContent = s.workedWell || "—";
+    document.getElementById("detailImprovement").textContent = s.improvement || "—";
+    document.getElementById("detailBlockers").textContent = s.blockers || "—";
+
+    new bootstrap.Modal(document.getElementById("sprintDetailsModal")).show();
+}
+
+
+
+// ======================================================================
+// 6. UTILS
+// ======================================================================
+function formatDate(dateStr) {
+    return new Date(dateStr).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+    });
+}
+
+
+
+// ======================================================================
+// 7. AUTO LOAD WHEN PAGE OPENS
+// ======================================================================
+document.addEventListener("DOMContentLoaded", () => {
+    loadSprintHistory();
+});
+
+
+
+
+
+
+
+
+

@@ -1,14 +1,233 @@
-﻿@{
-    ViewData["Title"] = "Sprint e Gantt";
+﻿@* SPRINT – COLLABORATOR VIEW (FULL + CORRECT) *@
+@{
+    ViewData["Title"] = "Sprints";
     Layout = "~/Views/Shared/Template.cshtml";
 }
 
-<div class="py-4" style="max-width: 850px; width: 100%; margin-left: 0.5rem; margin-right: auto; overflow-y: hidden; height: calc(100vh - 5rem);">
+<style>
+    #gantt-chart-container {
+        border: 1px solid #ccc;
+        background-color: #fff;
+    }
 
-    <h3 class="fw-bold mb-3">Sprint e Gantt</h3>
-    <div class="p-3 border rounded">
-        
+    .gantt-row-header {
+        font-weight: 600;
+        background-color: #f8f9fa;
+        color: #495057;
+        text-align: center;
+    }
+
+    .gantt-month-row {
+        display: flex;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .gantt-day-row {
+        display: flex;
+    }
+
+    .gantt-cell {
+        border-right: 1px solid #eee;
+        border-bottom: 1px solid #eee;
+        text-align: center;
+        padding: 4px 0;
+        font-size: 0.8rem;
+        min-width: 25px;
+    }
+
+    .gantt-body {
+        position: relative;
+        background-color: #ffffff;
+        border-left: 1px solid #dee2e6;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .gantt-bar {
+        position: absolute;
+        height: 35px;
+        border-radius: 6px;
+        color: #fff;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        cursor: default;
+    }
+
+    .sprint-bar {
+        background-color: #0d6efd;
+    }
+
+    .gantt-tooltip {
+        position: absolute;
+        padding: 6px 10px;
+        background-color: #fff6da;
+        border: 1px solid #f9d774;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 50;
+        transform: translate(-50%, -120%);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+</style>
+
+<div class="py-4 w-100" style="max-width: 900px; margin-left: 0.5rem; margin-right: auto;">
+
+    <h3 class="fw-bold mb-3">@ViewData["Title"]</h3>
+
+    <div id="impactNotificationsContainer" class="mb-4"></div>
+
+    <div id="loadingStatus" class="alert alert-info text-center">
+        Checking your participation in the active sprint...
+    </div>
+
+    <div id="restrictedContent" class="d-none">
+
+        <!-- GANTT -->
+        <div class="border rounded p-3 shadow-sm bg-white overflow-x-auto mb-5">
+            <div id="gantt-chart-container" class="position-relative" style="min-width: 850px;">
+                <div id="gantt-header" class="gantt-row-header d-flex flex-column border-bottom"></div>
+                <div id="gantt-body" class="gantt-body position-relative" style="height: 250px;"></div>
+            </div>
+        </div>
+
+        <h4 class="fw-bold mb-3">Team Sprint History</h4>
+        <div id="finishedSprintsContainer" class="d-grid gap-2"></div>
+        <!-- VIEW ALL BUTTON -->
+        <div id="viewAllSprintsWrapper" class="text-center d-none mt-3">
+            <button class="btn btn-outline-success"
+                    data-bs-toggle="modal"
+                    data-bs-target="#allSprintsModal">
+                View all sprints
+            </button>
+        </div>
+
+        <div id="historyLoading" class="d-none">Loading history...</div>
+        <div id="historyErrorContainer" class="d-none alert alert-danger"></div>
+        <div id="historyEmptyMessage" class="d-none text-muted"></div>
+
 
     </div>
 
+    <div id="accessDeniedMessage" class="d-none">
+        <div class="alert alert-warning">
+            There is no active sprint, or you are not listed as a participant.
+        </div>
+    </div>
 </div>
+
+<!-- MODAL — ALL FINISHED SPRINTS -->
+<div class="modal fade" id="allSprintsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">All Finished Sprints</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div id="allSprintsList" class="d-grid gap-2"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- MODAL — SPRINT DETAILS -->
+<div class="modal fade" id="sprintDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 id="detailTitle" class="modal-title fw-bold"></h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <p class="text-muted mb-1" id="detailDates"></p>
+
+                <hr>
+
+                <h6 class="fw-bold">Goal</h6>
+                <p id="detailGoal">—</p>
+
+                <h6 class="fw-bold">Worked Well</h6>
+                <p id="detailWorked">—</p>
+
+                <h6 class="fw-bold">Improvements</h6>
+                <p id="detailImprovement">—</p>
+
+                <h6 class="fw-bold">Blockers</h6>
+                <p id="detailBlockers">—</p>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+@section Scripts {
+
+    <script src="~/js/sprint-gantt.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+
+            const loadingEl = document.getElementById('loadingStatus');
+            const restrictedContentEl = document.getElementById('restrictedContent');
+            const deniedMessageEl = document.getElementById('accessDeniedMessage');
+
+            loadingEl.classList.remove('d-none');
+            restrictedContentEl.classList.add('d-none');
+            deniedMessageEl.classList.add('d-none');
+
+            try {
+                // Chama o endpoint de verificação e dados
+                const response = await fetch('/Sprint/IsParticipatingAndGetTeamData');
+
+                if (!response.ok) {
+                    throw new Error('API Failed to respond with status ' + response.status);
+                }
+
+                const data = await response.json();
+
+                loadingEl.classList.add('d-none');
+
+                if (data.isParticipating === true) {
+
+                    restrictedContentEl.classList.remove('d-none');
+
+                    // 1. CARREGA GANTT (função global do sprint-gantt.js)
+                    if (typeof loadGanttData === 'function') {
+                        loadGanttData(data.sprintId, true);
+                    }
+
+                    // 2. CARREGA HISTÓRICO (função global do sprint-gantt.js)
+                    // Agora, ele chama a função do Manager diretamente
+                    if (typeof loadSprintHistory === 'function') {
+                        loadSprintHistory();
+                    }
+
+                } else {
+                    deniedMessageEl.classList.remove('d-none');
+                }
+
+            } catch (error) {
+                // Este bloco agora só captura erros de rede/execução real, e não mais o conflito de código.
+                console.error('AJAX/Execution Error:', error);
+
+                loadingEl.classList.add('d-none');
+
+                deniedMessageEl.innerHTML =
+                    `<div class="alert alert-danger">Error verifying sprint status.</div>`;
+                deniedMessageEl.classList.remove('d-none');
+            }
+        });
+    </script>
+}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script> @* <-- ADICIONE ESTA LINHA *@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
