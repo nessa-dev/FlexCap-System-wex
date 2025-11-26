@@ -644,6 +644,110 @@ namespace FlexCap.Web.Controllers
             return View(); // Retorna Views/Sprint/Rh.cshtml
         }
 
+        // Retorna a lista de todas as equipes (nomes únicos) para popular o `<select>`.
+
+        // EM SprintController.cs
+
+        [HttpGet]
+        [Route("Sprint/GetAllTeams")]
+        public async Task<IActionResult> GetAllTeams()
+        {
+            // Busca todos os nomes de equipe únicos (ignorando nulos ou vazios)
+            var teams = await _context.Colaboradores
+                // 💡 CRÍTICO: Filtra para garantir que o nome do time não seja nulo, vazio, 
+                // e que não contenha "RH" ou "HR" (case-insensitive para segurança).
+                .Where(c => c.TeamName != null && c.TeamName != "" &&
+                            !c.TeamName.Contains("RH") &&
+                            !c.TeamName.Contains("HR"))
+                .Select(c => c.TeamName)
+                .Distinct()
+                .OrderBy(name => name)
+                .ToListAsync();
+
+            // Retorna a lista de nomes de equipe em um formato JSON amigável
+            return Json(teams.Select(t => new { TeamName = t }));
+        }
+
+
+        // Busca a sprint ativa que pertence à equipe selecionada.
+
+        // EM SprintController.cs
+
+        // EM SprintController.cs
+
+        [HttpGet]
+        [Route("Sprint/GetActiveSprintByTeam")]
+        public async Task<IActionResult> GetActiveSprintByTeam(string teamName)
+        {
+            if (string.IsNullOrEmpty(teamName)) return BadRequest();
+
+            // 1. Ids da Equipe (Números)
+            var teamMemberIds = await _context.Colaboradores
+                .Where(c => c.TeamName == teamName)
+                .Select(c => c.Id)
+                .ToListAsync();
+
+            if (!teamMemberIds.Any())
+            {
+                return NotFound();
+            }
+
+            // 2. Busca todas as Sprints Ativas (para filtrar localmente)
+            var activeSprints = await _context.Sprints
+                .Where(s => s.IsActive == true)
+                .ToListAsync();
+
+            // 3. CRÍTICO: Filtragem por conversão rigorosa
+            var teamActiveSprint = activeSprints.FirstOrDefault(s =>
+            {
+                if (string.IsNullOrEmpty(s.ParticipatingMemberIds)) return false;
+
+                try
+                {
+                    // Converte a string do banco (ex: "1,2,10") em uma lista de inteiros {1, 2, 10}
+                    var sprintParticipantIds = s.ParticipatingMemberIds
+                        .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(idStr => int.TryParse(idStr.Trim(), out int id) ? id : 0)
+                        .Where(id => id > 0)
+                        .ToHashSet(); // Usa HashSet para busca rápida
+
+                    // Verifica se ALGUM dos IDs da equipe selecionada (teamMemberIds)
+                    // está presente no conjunto de IDs da sprint (sprintParticipantIds).
+                    return teamMemberIds.Any(teamId => sprintParticipantIds.Contains(teamId));
+                }
+                catch (Exception ex)
+                {
+                    // Se o split/parse falhar por dados ruins, logamos e ignoramos esta sprint.
+                    Console.WriteLine($"Erro ao processar IDs de sprint {s.Id}: {ex.Message}");
+                    return false;
+                }
+            });
+
+            if (teamActiveSprint == null)
+            {
+                return NotFound();
+            }
+
+            return Json(teamActiveSprint);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         public IActionResult Colaborador()
         {
             ViewData["Title"] = "Minhas Sprints";

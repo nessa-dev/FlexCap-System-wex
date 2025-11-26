@@ -3,10 +3,228 @@
     Layout = "~/Views/Shared/Template.cshtml";
 }
 
-<div class="py-4" style="max-width: 850px; width: 100%; margin-left: 0.5rem; margin-right: auto; overflow-y: hidden; height: calc(100vh - 5rem);">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <h3 class="fw-bold mb-3">Sprint e Gantt</h3>
-    <div class="p-3 border rounded">
+<style>
+    /* 🎨 Estilos do Gantt (Reutilizados do Manager/Colaborador) */
+    #gantt-chart-container {
+        border: 1px solid #ccc;
+        background-color: #fff;
+    }
+
+    .gantt-row-header {
+        font-weight: 600;
+        background-color: #f8f9fa;
+        color: #495057;
+        text-align: center;
+    }
+
+    .gantt-month-row, .gantt-day-row {
+        display: flex;
+    }
+
+    .gantt-month-row {
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .gantt-cell {
+        border-right: 1px solid #eee;
+        border-bottom: 1px solid #eee;
+        text-align: center;
+        padding: 4px 0;
+        font-size: 0.8rem;
+        min-width: 25px;
+    }
+
+    .gantt-body {
+        position: relative;
+        background-color: #ffffff;
+        border-left: 1px solid #dee2e6;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .gantt-bar {
+        position: absolute;
+        height: 35px;
+        border-radius: 6px;
+        color: #fff;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        cursor: default; /* Sempre somente leitura para o RH */
+    }
+
+    .sprint-bar {
+        background-color: #0d6efd;
+    }
+</style>
+
+
+<div class="py-4" style="max-width: 950px; width: 100%; margin-left: 0.5rem; margin-right: auto; height: 100%;">
+
+    <h3 class="fw-bold mb-4">@ViewData["Title"]</h3>
+
+    <!-- CONTROLE DE FILTRO POR EQUIPE -->
+    <div class="d-flex align-items-center gap-3 mb-4 p-3 border rounded shadow-sm bg-white">
+        <label for="teamSelector" class="form-label mb-0 fw-semibold">View Team Sprint:</label>
+        <select id="teamSelector" class="form-select form-select-sm" style="max-width: 300px;">
+            <option value="" disabled selected>Loading teams...</option>
+        </select>
+        <button id="detailsButton" class="btn btn-outline-info btn-sm fw-semibold" disabled data-bs-toggle="modal" data-bs-target="#sprintDetailsModal">
+            More Details
+        </button>
+    </div>
+
+    <!-- GANTT CHART (Container para o gráfico) -->
+    <div id="ganttArea" class="p-3 border rounded shadow-sm bg-white overflow-x-auto">
+
+        <h4 id="ganttTitle" class="fw-bold mb-3 text-muted">Select a team above.</h4>
+
+        <div id="ganttStatus" class="alert alert-secondary text-center">Awaiting team selection.</div>
+
+        <div id="ganttDisplay" class="d-none">
+            <div id="gantt-chart-container" class="position-relative" style="min-width: 800px;">
+                <div id="gantt-header" class="gantt-row-header d-flex flex-column border-bottom"></div>
+                <div id="gantt-body" class="gantt-body position-relative" style="height: 250px;"></div>
+            </div>
+        </div>
+
     </div>
 
 </div>
+
+<!-- Sprint Details Modal (Copiar do Manager, para exibir informações detalhadas) -->
+<div class="modal fade" id="sprintDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content p-4">
+            <div class="modal-header border-0">
+                <h4 class="modal-title fw-bold" id="detailTitle"></h4>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <p class="text-muted" id="detailDates"></p>
+            <div class="modal-body">
+                <h6 class="fw-bold">Sprint Goal</h6>
+                <p id="detailGoal"></p>
+                <h6 class="fw-bold">Notes</h6>
+                <p id="detailNotes"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/sprint-gantt.js"></script>
+    <script>
+        let currentActiveSprintId = null; // Stores the current active sprint ID
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const teamSelector = document.getElementById('teamSelector');
+            const ganttStatus = document.getElementById('ganttStatus');
+            const ganttDisplay = document.getElementById('ganttDisplay');
+            const ganttTitle = document.getElementById('ganttTitle');
+            const detailsButton = document.getElementById('detailsButton');
+
+            // Helper function to show status (English messages)
+            const setStatus = (message, alertClass = 'alert-secondary') => {
+                ganttStatus.className = `alert ${alertClass} text-center`;
+                ganttStatus.textContent = message;
+                ganttStatus.classList.remove('d-none');
+                ganttDisplay.classList.add('d-none');
+                detailsButton.disabled = true;
+                ganttTitle.textContent = "Sprint Summary"; // Translated
+            };
+
+            // 1. LOAD TEAM LIST
+            try {
+                const teamResponse = await fetch('/Sprint/GetAllTeams');
+                // 💡 Mensagem de erro traduzida
+                if (!teamResponse.ok) throw new Error('Failed to load teams.');
+
+                const teams = await teamResponse.json();
+
+                // 💡 Mensagem do seletor traduzida
+                teamSelector.innerHTML = '<option value="" disabled selected>Select a Team</option>';
+                teams.forEach(team => {
+                    teamSelector.innerHTML += `<option value="${team.teamName}">${team.teamName}</option>`;
+                });
+            } catch (error) {
+                // 💡 Mensagem de erro traduzida
+                setStatus('Error loading team list.', 'alert-danger');
+                return;
+            }
+
+            // 2. ADD LISTENER TO TEAM SELECTOR
+            teamSelector.addEventListener('change', async (e) => {
+                const selectedTeamName = e.target.value;
+                if (!selectedTeamName) return;
+
+                // 💡 Mensagem de status traduzida
+                setStatus(`Searching for active sprint for ${selectedTeamName}...`, 'alert-info');
+
+                try {
+                    const sprintResponse = await fetch(`/Sprint/GetActiveSprintByTeam?teamName=${selectedTeamName}`);
+
+                    if (sprintResponse.status === 404) {
+                        // 💡 Mensagem de erro 404 traduzida
+                        setStatus(`No active sprint found for team: ${selectedTeamName}`, 'alert-warning');
+                        currentActiveSprintId = null;
+                        return;
+                    }
+                    if (!sprintResponse.ok) throw new Error('API communication failed.');
+
+                    const sprint = await sprintResponse.json();
+
+                    currentActiveSprintId = sprint.id;
+
+                    // CALL GANTT: loadGanttData must be accessible globally
+                    if (typeof loadGanttData === 'function') {
+                        loadGanttData(sprint.id, true);
+                    }
+
+                    // UPDATE SUCCESS UI
+                    ganttStatus.classList.add('d-none');
+                    ganttDisplay.classList.remove('d-none');
+                    // 💡 Título do Gantt traduzido
+                    ganttTitle.textContent = `Active Sprint Progress: ${sprint.name}`;
+                    detailsButton.disabled = false;
+
+                    // Armazena detalhes para o modal (Mantém dados de nota em inglês)
+                    detailsButton.dataset.sprint = JSON.stringify({
+                        name: sprint.name,
+                        startDate: sprint.startDate,
+                        endDate: sprint.endDate,
+                        goal: sprint.goal,
+                        // 💡 Nota traduzida para o JSON
+                        notes: sprint.notes || 'No notes provided.',
+                    });
+
+
+                } catch (error) {
+                    console.error('Error fetching sprint by team:', error);
+                    // 💡 Mensagem de erro traduzida
+                    setStatus('Error fetching the sprint. Please try again.', 'alert-danger');
+                }
+            });
+
+            // 3. ADD LISTENER TO DETAILS BUTTON
+            detailsButton.addEventListener('click', () => {
+                try {
+                    const sprint = JSON.parse(detailsButton.dataset.sprint);
+
+                    document.getElementById("detailTitle").textContent = sprint.name;
+                    document.getElementById("detailDates").textContent = `${new Date(sprint.startDate).toLocaleDateString()} - ${new Date(sprint.endDate).toLocaleDateString()}`;
+                    document.getElementById("detailGoal").textContent = sprint.goal;
+                    document.getElementById("detailNotes").textContent = sprint.notes;
+
+                } catch (e) {
+                    console.error("Error opening sprint details:", e);
+                    // 💡 Mensagem de alerta traduzida
+                    alert("Could not load sprint details.");
+                }
+            });
+        });
+    </script>
+}
