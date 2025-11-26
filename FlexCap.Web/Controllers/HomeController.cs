@@ -11,7 +11,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using FlexCap.Web.Models.Requests;
-using FlexCap.Web.Models.Sprint; // Certifique-se de que este namespace existe para SprintModel
+using FlexCap.Web.Models.Sprint; 
 
 namespace FlexCap.Web.Controllers
 {
@@ -28,13 +28,11 @@ namespace FlexCap.Web.Controllers
             _requestService = requestService;
         }
 
-        // --- MÉTODOS AUXILIARES DE SPRINT (ADICIONADOS) ---
-
         private async Task<SprintModel> GetActiveTeamSprint(Colaborador loggedUser)
         {
             if (loggedUser.TeamName == null) return null;
 
-            // 1. Identifica os IDs dos membros da equipe do usuário logado
+            // Identifica os IDs dos membros da equipe do usuário logado
             var teamMemberIds = await _context.Colaboradores
                 .Where(c => c.TeamName == loggedUser.TeamName)
                 .Select(c => c.Id)
@@ -42,7 +40,7 @@ namespace FlexCap.Web.Controllers
 
             var teamMemberIdStrings = teamMemberIds.Select(i => i.ToString()).ToList();
 
-            // 2. Busca todas as sprints ATIVAS
+            // Busca todas as sprints ATIVAS
             var activeSprints = await _context.Sprints
                 .Where(s => s.IsActive == true)
                 .ToListAsync();
@@ -65,7 +63,7 @@ namespace FlexCap.Web.Controllers
                 return summary;
             }
 
-            // --- 1. Cálculo de Progresso ---
+            // --- Cálculo de Progresso ---
             var today = DateTime.Today;
             var start = teamActiveSprint.StartDate.Date;
             var end = teamActiveSprint.EndDate.Date;
@@ -78,14 +76,10 @@ namespace FlexCap.Web.Controllers
             {
                 progress = Math.Min(100, (passedDays / totalDays) * 100);
             }
-
-            // --- 2. Obter Notificações (SIMULAÇÃO) ---
-            // IMPORTANTE: Aqui você deve chamar as Actions do SprintController (GetHolidayNotifications/GetAbsenceImpact)
-            // ou ter métodos de serviço para obter os dados reais. 
+ 
 
             var impactNotifications = new List<string>();
 
-            // Simulação (Substitua por lógica real de notificação)
             if (progress > 50 && progress < 80)
             {
                 impactNotifications.Add("Sprint is progressing well. Current phase: Testing.");
@@ -97,7 +91,7 @@ namespace FlexCap.Web.Controllers
 
          
 
-            // --- 3. Montar o Summary ---
+            // ---  Montar o Summary ---
             summary.IsSprintActive = true;
             summary.SprintName = teamActiveSprint.Name;
             summary.SprintDuration = $"{start:MMM dd} - {end:MMM dd}";
@@ -106,8 +100,6 @@ namespace FlexCap.Web.Controllers
 
             return summary;
         }
-
-        // --- ACTION PRINCIPAL (CORRIGIDA) ---
 
         [Authorize]
         public async Task<IActionResult> Index()
@@ -124,12 +116,10 @@ namespace FlexCap.Web.Controllers
             bool isRh = colaboradorLogado.Position.Contains("HR");
             bool isManager = colaboradorLogado.Position == "Project Manager";
 
-            // ----------------------------------------------------
-            // 🔥 PASSO 1: OBTÉM O RESUMO DA SPRINT (Comum a todos os perfis)
-            // ----------------------------------------------------
+           
             var sprintSummary = await GetSprintSummary(colaboradorLogado);
 
-            // 🔹 RH
+            //  RH
             if (isRh)
             {
                 int pendingHrCount = await _requestService.GetPendingHRRequestsCountAsync();
@@ -169,7 +159,7 @@ namespace FlexCap.Web.Controllers
                 return View("Rh", viewModel);
             }
 
-            // 🔹 Manager
+            //  Manager
             else if (isManager)
             {
                 var managerIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -211,7 +201,7 @@ namespace FlexCap.Web.Controllers
                     ActiveSprintCount = activeSprintCount,
                     PendingManagerRequests = pendingRequests,
 
-                    // 🔥 ADICIONA OS DADOS DA SPRINT
+                    // ADICIONA OS DADOS DA SPRINT
                     IsSprintActive = sprintSummary.IsSprintActive,
                     SprintName = sprintSummary.SprintName,
                     SprintDuration = sprintSummary.SprintDuration,
@@ -222,7 +212,6 @@ namespace FlexCap.Web.Controllers
                 return View("~/Views/Home/Manager.cshtml", viewModel);
             }
 
-            // 🔹 Colaborador
             else
             {
                 var collaboratorIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -257,7 +246,7 @@ namespace FlexCap.Web.Controllers
                     TotalMembers = totalMembrosTime,
                     ColaboratorHistory = recentRequests,
 
-                    // 🔥 ADICIONA OS DADOS DA SPRINT
+                    // ADICIONA OS DADOS DA SPRINT
                     IsSprintActive = sprintSummary.IsSprintActive,
                     SprintName = sprintSummary.SprintName,
                     SprintDuration = sprintSummary.SprintDuration,

@@ -8,109 +8,94 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
- <style>
-                                               COMPLETA DO RH.CSHTML AQUI)
-                                               }
-                                               }
+ <style >
+    #calendar {
+        margin-bottom: 1rem;
+        width: 100%;
+    }
 
-                                               <style >
-                                               /* Layout principal */
-                                               #calendar {
-                                                   margin-bottom: 1rem;
-                                                   width: 100%;
-                                               }
+    .fc {
+        text-align: left;
+    }
 
-                                               /* Alinhamento à esquerda */
-                                               .fc {
-                                                   text-align: left;
-                                               }
+    @@media (max-width: 768px) {
+        #calendar {
+            font-size: 0.7rem;
+        }
 
-                                               /* Responsividade geral */
-                                               @@media (max-width: 768px) {
-                                                   #calendar {
-                                                       font-size: 0.7rem;
-                                                   }
+        .fc-toolbar-title {
+            font-size: 1rem;
+        }
 
-                                                   .fc-toolbar-title {
-                                                       font-size: 1rem;
-                                                   }
+        .fc .fc-daygrid-day-number {
+            font-size: 0.6rem;
+        }
 
-                                                   .fc .fc-daygrid-day-number {
-                                                       font-size: 0.6rem;
-                                                   }
+        .fc .fc-col-header-cell {
+            font-size: 0.6rem;
+        }
 
-                                                   .fc .fc-col-header-cell {
-                                                       font-size: 0.6rem;
-                                                   }
+        #monthEventsCard {
+            margin-top: 1rem;
+        }
+    }
 
-                                                   #monthEventsCard {
-                                                       margin-top: 1rem;
-                                                   }
-                                               }
+    .fc-header-toolbar {
+        padding: 0;
+        margin-bottom: 0 !important;
+        font-size: 0.8rem;
+    }
 
-                                               /* Cabeçalho compacto */
-                                               .fc-header-toolbar {
-                                                   padding: 0;
-                                                   margin-bottom: 0 !important;
-                                                   font-size: 0.8rem;
-                                               }
+    .fc .fc-daygrid-day-frame {
+        min-height: 10px;
+        height: 100% !important;
+    }
 
-                                               /* Altura das células */
-                                               .fc .fc-daygrid-day-frame {
-                                                   min-height: 10px;
-                                                   height: 100% !important;
-                                               }
+    .fc .fc-daygrid-day-number {
+        font-size: 0.65rem;
+        padding: 2px;
+        margin: 0;
+    }
 
-                                               /* Números dos dias */
-                                               .fc .fc-daygrid-day-number {
-                                                   font-size: 0.65rem;
-                                                   padding: 2px;
-                                                   margin: 0;
-                                               }
+    .fc .fc-col-header-cell {
+        font-size: 0.7rem;
+        padding: 2px 0;
+    }
 
-                                               /* Cabeçalho dos dias (Sun, Mon...) */
-                                               .fc .fc-col-header-cell {
-                                                   font-size: 0.7rem;
-                                                   padding: 2px 0;
-                                               }
+    .fc-daygrid-event-dot {
+        width: 5px;
+        height: 5px;
+        margin: 0 2px;
+    }
 
-                                               /* Compactar eventos */
-                                               .fc-daygrid-event-dot {
-                                                   width: 5px;
-                                                   height: 5px;
-                                                   margin: 0 2px;
-                                               }
+    .fc-daygrid-event {
+        padding: 0 !important;
+        font-size: 0.65rem;
+    }
 
-                                               .fc-daygrid-event {
-                                                   padding: 0 !important;
-                                                   font-size: 0.65rem;
-                                               }
+    #monthEventsCard {
+        font-size: 0.75rem;
+        border-radius: 0.5rem;
+    }
 
-                                               /* Lista lateral de eventos do mês */
-                                               #monthEventsCard {
-                                                   font-size: 0.75rem;
-                                                   border-radius: 0.5rem;
-                                               }
+        #monthEventsCard h6 {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
 
-                                                   #monthEventsCard h6 {
-                                                       font-weight: 600;
-                                                       font-size: 0.9rem;
-                                                   }
+    #eventList {
+        max-height: 300px;
+        overflow-y: auto;
+    }
 
-                                               #eventList {
-                                                   max-height: 300px;
-                                                   overflow-y: auto;
-                                               }
-
-                                               /* Cores de eventos */
-                                               .badge-color-box {
-                                                   display: inline-block;
-                                                   width: 10px;
-                                                   height: 10px;
-                                                   border-radius: 2px;
-                                                   margin-right: 4px;
-                                                   vertical-align: middle;
-                                               }
+    .badge-color-box {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        margin-right: 4px;
+        vertical-align: middle;
+    }
 </style>
 
 <div class="py-4 container-fluid">
@@ -163,7 +148,7 @@
             alert('Error processing request. See console for details.');
         }
 
-        // --- Funções Auxiliares (COPIADAS DO RH.CSHTML) ---
+        // --- Funções Auxiliares ---
 
         function getColorByType(type) {
             switch (type) {
@@ -176,16 +161,11 @@
             }
         }
 
-        // A função deleteEvent é necessária para que o JS não quebre, mas nunca será chamada
-        // já que não há botões de delete. Mantenha-a vazia se não for necessária.
-        // Já que a lista lateral não tem botões de delete, nem precisamos desta função aqui.
-
         // --- Inicialização do Calendário e Carregamento de Dados ---
 
         async function loadAndRenderEvents(month, year) {
             let events = [];
             try {
-                // Chama o mesmo endpoint do Controller
                 const url = `/Calendar/GetEvents`;
                 const resp = await fetch(url);
                 if (!resp.ok) throw new Error('GET /Calendar/GetEvents returned ' + resp.status);
@@ -204,7 +184,7 @@
             }));
 
             if (!calendarInstance) {
-                // Inicializa FullCalendar na primeira carga
+                // Inicializa FullCalendar 
                 calendarInstance = new FullCalendar.Calendar(calendarEl, {
                     initialView: 'dayGridMonth',
                     height: 'auto',
@@ -218,10 +198,8 @@
                     },
                     events: fcEvents,
 
-                    // Removido dateClick
-
                     datesSet: function (info) {
-                        // Sincroniza filtros com o mês/ano exibido (após navegação)
+                        // Sincroniza filtros com o mês/ano exibido 
                         const currentMonth = info.view.currentStart.getMonth() + 1;
                         const currentYear = info.view.currentStart.getFullYear();
 
@@ -240,7 +218,6 @@
             renderEventList();
         }
 
-        // Função para renderizar a lista lateral de eventos do mês atual
         function renderEventList() {
             if (!calendarInstance) return;
 
@@ -271,7 +248,6 @@
                 const dateStr = e.start.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
                 const li = document.createElement("li");
-                // Removida a classe 'justify-content-between' e os botões de delete
                 li.className = "d-flex align-items-center mb-1 pb-1 border-bottom";
                 li.innerHTML = `
                     <span class="d-flex align-items-center gap-2 flex-grow-1">
@@ -283,7 +259,6 @@
                 eventListEl.appendChild(li);
             });
 
-            // REMOVIDO O CÓDIGO DE ADIÇÃO DE LISTENERS DE DELEÇÃO
         }
 
         // --- Lógica dos Filtros ---
@@ -318,7 +293,6 @@
             monthFilter.value = currentMonth;
             yearFilter.value = currentYear;
 
-            // LISTENERS PARA FILTROS: move o calendário para a data selecionada
             monthFilter.addEventListener('change', () => {
                 const selectedMonth = monthFilter.value;
                 const selectedYear = yearFilter.value;
@@ -332,8 +306,7 @@
         }
 
         initializeFilters();
-        loadAndRenderEvents(monthFilter.value, yearFilter.value); // Primeira carga de dados
+        loadAndRenderEvents(monthFilter.value, yearFilter.value); 
 
-        // REMOVIDA TODA A LÓGICA DE SALVAR EVENTO/FERIADO
     });
 </script>

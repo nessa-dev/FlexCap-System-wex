@@ -66,7 +66,7 @@ public class RequestController : Controller
                 throw new InvalidOperationException("User ID could not be determined or is invalid.");
             }
 
-            // 🔥 VERIFICAÇÃO: permitir apenas 1 solicitação por dia
+            // permitir apenas 1 solicitação por dia
             var today = DateTime.UtcNow.Date;
 
             bool alreadySubmittedToday = await _context.Requests
@@ -79,7 +79,7 @@ public class RequestController : Controller
                 return await ReturnSubmitViewWithHistory(model);
             }
 
-            // 🔥 Salva a solicitação normalmente
+            // Salva a solicitação normalmente
             await _requestService.SubmitNewRequest(model, collaboratorId);
 
             TempData["SuccessMessage"] = "Request submitted successfully! It is awaiting Manager approval.";
@@ -98,18 +98,11 @@ public class RequestController : Controller
     }
 
 
-
-
-
-
-
-
     private async Task<List<PendingRequestListItemViewModel>> GetRequestHistoryAsync(int collaboratorId)
     {
-        // Adicionar Include para carregar RequestType se o TypeName na ViewModel precisar dele
         return await _context.Requests
             .Include(r => r.Colaborador)
-            .Include(r => r.RequestType) // Adicione este include se você mapear r.RequestType.Name
+            .Include(r => r.RequestType) 
             .Where(r => r.CollaboratorId == collaboratorId)
             .OrderByDescending(r => r.CreationDate)
             .Select(r => new PendingRequestListItemViewModel
@@ -118,16 +111,16 @@ public class RequestController : Controller
                 SubmissionDate = r.CreationDate,
                 CurrentStatus = r.Status,
 
-                // 🛑 CORREÇÃO CRÍTICA: Mapear o motivo de rejeição/ajuste
+                // Mapear o motivo de rejeição/ajuste
                 RejectionReason = r.RejectionReason,
 
-                // Mapeamentos para a tabela de histórico (opcional, mas bom)
+                // Mapeamentos para a tabela de histórico 
                 StartDate = r.StartDate,
                 EndDate = r.EndDate,
 
                 // Mapeamentos existentes:
                 CollaboratorName = r.Colaborador.FullName,
-                TypeName = r.RequestType.Name // Assumindo que você quer o nome do tipo
+                TypeName = r.RequestType.Name 
             })
             .ToListAsync();
     }

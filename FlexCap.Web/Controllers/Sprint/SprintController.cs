@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 
 namespace FlexCap.Web.Controllers
 {
-    // A classe deve herdar de Controller
     public class SprintController : Controller
     {
         private readonly AppDbContext _context;
@@ -33,10 +32,6 @@ namespace FlexCap.Web.Controllers
         }
 
 
-
-
-       
-
         [HttpGet]
         public IActionResult GetTeamMembers()
         {
@@ -51,14 +46,13 @@ namespace FlexCap.Web.Controllers
 
             if (loggedUser == null)
             {
-                // Caso não encontre o usuário
                 return Json(new List<object>());
             }
 
-            // 3️⃣ Identifica o nome da equipe do usuário
+            // Identifica o nome da equipe do usuário
             var teamName = loggedUser.TeamName;
 
-            // 4️⃣ Busca todos os colaboradores da mesma equipe
+            // Busca todos os colaboradores da mesma equipe
             var sameTeamMembers = _context.Colaboradores
                 .Where(c => c.TeamName == teamName)
                 .Select(c => new
@@ -71,21 +65,15 @@ namespace FlexCap.Web.Controllers
                 })
                 .ToList();
 
-            // 5️⃣ Retorna os dados em formato JSON
+            // Retorna os dados em formato JSON
             return Json(sameTeamMembers);
         }
 
 
-        // EM SprintController.cs
-
-        // EM SprintController.cs
-
-        // EM SprintController.cs
-
         [HttpGet]
-        public async Task<IActionResult> GetActive(int? id = null) // Mantemos 'id' para o fluxo do Colaborador
+        public async Task<IActionResult> GetActive(int? id = null) 
         {
-            // 1. Obtém o usuário logado
+            // Obtém o usuário logado
             var loggedInUserName = User.FindFirst(ClaimTypes.Name)?.Value;
             if (string.IsNullOrEmpty(loggedInUserName)) return Unauthorized();
 
@@ -94,20 +82,15 @@ namespace FlexCap.Web.Controllers
 
             if (loggedUser == null) return NotFound();
 
-            // 2. Caso de Uso: Busca por ID (Usado pelo Colaborador, se aplicável)
             if (id.HasValue && id.Value > 0)
             {
                 var specificSprint = await _context.Sprints
                     .FirstOrDefaultAsync(s => s.Id == id.Value && s.IsActive == true);
 
                 if (specificSprint != null) return Json(specificSprint);
-                // Se a busca por ID falhar, continuamos buscando a sprint da equipe
             }
 
-            // 3. Caso de Uso: Busca pela Sprint ATIVA da equipe
-
-            // Primeiro, obtemos os IDs dos membros da equipe do usuário logado
-            // (Assumimos que o time é definido pelo TeamName do Colaborador/Manager)
+            // Busca pela Sprint ATIVA da equipe
             var teamMemberIds = await _context.Colaboradores
                 .Where(c => c.TeamName == loggedUser.TeamName)
                 .Select(c => c.Id)
@@ -124,7 +107,6 @@ namespace FlexCap.Web.Controllers
             var teamActiveSprint = activeSprints
                 .FirstOrDefault(s => teamMemberIdStrings.Any(idStr => s.ParticipatingMemberIds.Contains(idStr)));
 
-
             if (teamActiveSprint == null)
             {
                 return NotFound(); // Não há sprint ativa para esta equipe
@@ -132,8 +114,6 @@ namespace FlexCap.Web.Controllers
 
             return Json(teamActiveSprint);
         }
-
-        // EM SprintController.cs
 
         [HttpPut]
         [Route("Sprint/Update")]
@@ -144,27 +124,23 @@ namespace FlexCap.Web.Controllers
                 return BadRequest(ModelState);
             }
 
-            // 1. Busca a sprint original no banco de dados
+            //  Busca a sprint original no banco de dados
             var originalSprint = await _context.Sprints.FindAsync(updatedSprint.Id);
             if (originalSprint == null) return NotFound();
 
-            // 2. Atualiza apenas os campos permitidos
+            // Atualiza apenas os campos 
             originalSprint.Name = updatedSprint.Name;
             originalSprint.Goal = updatedSprint.Goal;
             originalSprint.StartDate = updatedSprint.StartDate;
             originalSprint.EndDate = updatedSprint.EndDate;
             originalSprint.Notes = updatedSprint.Notes;
 
-            // Nota: Mantemos ParticipatingMemberIds se você não os mudou no modal de edição
-
-            // 3. Salva
+            // Salva
             _context.Sprints.Update(originalSprint);
             await _context.SaveChangesAsync();
 
-            return NoContent(); // 204 Success
+            return NoContent(); 
         }
-
-        // EM SprintController.cs
 
         [HttpDelete("Sprint/Delete/{id}")]
         public async Task<IActionResult> Delete(int id)
@@ -176,31 +152,26 @@ namespace FlexCap.Web.Controllers
             _context.Sprints.Remove(sprintToDelete);
             await _context.SaveChangesAsync();
 
-            return NoContent(); // 204 Success
+            return NoContent(); 
         }
-
-
-        // --- Endpoint para criar a Sprint ---
-        // EM SprintController.cs
 
         [HttpPost]
         [Route("Sprint/CreateSprint")]
         public async Task<IActionResult> CreateSprint([FromBody] SprintModel model, [FromQuery] List<int> memberIds)
         {
-            // 1. Validação do Estado do Modelo
+            // Validação do Estado do Modelo
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            // 2. Validação simples de datas
+            // Validação simples de datas
             if (model.StartDate > model.EndDate)
             {
                 ModelState.AddModelError("EndDate", "End date must be after start date.");
                 return BadRequest(ModelState);
             }
 
-            // --- 🔒 IMPLEMENTAÇÃO DA REGRA DE NEGÓCIO: SÓ PODE HAVER UMA ATIVA POR PARTICIPANTE ---
 
             // Converte os IDs de membro para strings para a checagem no banco de dados
             var memberIdStrings = memberIds.Select(id => id.ToString()).ToList();
@@ -208,20 +179,16 @@ namespace FlexCap.Web.Controllers
             // 2. Checa se algum dos membros selecionados JÁ está em outra sprint ATIVA
             var conflictingActiveSprint = await _context.Sprints
                 .Where(s => s.IsActive == true)
-                .ToListAsync(); // Busca todas as ativas para fazer a checagem de string em memória
+                .ToListAsync(); 
 
             var conflict = conflictingActiveSprint.FirstOrDefault(s =>
                 memberIdStrings.Any(idStr => s.ParticipatingMemberIds.Contains(idStr)));
 
             if (conflict != null)
             {
-                // 🛑 Falha na regra de negócio: Conflito de participante
                 return StatusCode(409, $"A new sprint cannot be created. At least one selected member is already participating in active sprint '{conflict.Name}' (ID: {conflict.Id}).");
             }
 
-            // --- FIM DA REGRA DE NEGÓCIO ---
-
-            // 3. Configuração e Salvamento
             model.ParticipatingMemberIds = string.Join(",", memberIds.Distinct());
             model.IsActive = true;
 
@@ -232,39 +199,28 @@ namespace FlexCap.Web.Controllers
         }
 
 
-
-
-
-
         [HttpPost]
         [Route("Sprint/Finish")]
         public async Task<IActionResult> Finish([FromBody] SprintResultModel result)
         {
-            // 1. Validação de Estado
+            // Validação de Estado
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // 2. Salva o resultado da retrospectiva no banco (Histórico)
+            // Salva o resultado da retrospectiva no banco (Histórico)
             _context.SprintResults.Add(result);
 
-            // 3. Marca a sprint original como inativa/completa
+            // Marca a sprint original como inativa/completa
             var sprint = await _context.Sprints.FindAsync(result.SprintId);
 
             if (sprint != null)
             {
-                // 💡 CORREÇÃO: Usando a propriedade IsActive ou IsCompleted
-                sprint.IsActive = false; // Se você adicionou 'IsActive', use false.
-                                         // OU sprint.IsCompleted = true; // Se você adicionou 'IsCompleted', use true.
-
-                // O Entity Framework rastreia a mudança, mas chamar Update é uma boa prática
-                // se o objeto não foi rastreado em outro lugar.
+                sprint.IsActive = false; 
                 _context.Sprints.Update(sprint);
             }
 
-            // 4. Salva as mudanças (SprintResult e Sprint status)
+            // Salva as mudanças (SprintResult e Sprint status)
             await _context.SaveChangesAsync();
-
-            // Retorna 204 No Content (padrão para sucesso em POST/PUT que não retorna objeto)
             return NoContent();
         }
 
@@ -274,7 +230,6 @@ namespace FlexCap.Web.Controllers
         [Route("Sprint/GetFinished")]
         public async Task<IActionResult> GetFinished()
         {
-            // 1. Obtém o usuário logado (Manager)
             var loggedInUserName = User.FindFirst(ClaimTypes.Name)?.Value;
             if (string.IsNullOrEmpty(loggedInUserName)) return Unauthorized();
 
@@ -283,7 +238,7 @@ namespace FlexCap.Web.Controllers
 
             if (loggedUser == null) return NotFound("User not found.");
 
-            // 2. Identifica todos os membros da equipe do Manager logado
+            // Identifica todos os membros da equipe do Manager logado
             var teamMemberIds = await _context.Colaboradores
                 .Where(c => c.TeamName == loggedUser.TeamName) // Filtra pelo nome da equipe
                 .Select(c => c.Id)
@@ -291,24 +246,22 @@ namespace FlexCap.Web.Controllers
 
             var teamMemberIdStrings = teamMemberIds.Select(i => i.ToString()).ToList();
 
-            // 3. Busca todas as Sprints que JÁ FORAM FINALIZADAS (IsActive == false)
+            // Busca todas as Sprints que JÁ FORAM FINALIZADAS 
             var finishedSprints = await _context.Sprints
                 .Where(s => s.IsActive == false)
                 .ToListAsync();
 
             var relevantSprintIds = new HashSet<int>();
 
-            // 4. CRÍTICO: Filtra as Sprints que pertencem à equipe do Manager logado
+            // Filtra as Sprints que pertencem à equipe do Manager logado
             foreach (var sprint in finishedSprints)
             {
-                // Checa se a string de participantes da sprint finalizada contém o ID de alguém da equipe
                 if (teamMemberIdStrings.Any(idStr => sprint.ParticipatingMemberIds != null && sprint.ParticipatingMemberIds.Contains(idStr)))
                 {
                     relevantSprintIds.Add(sprint.Id);
                 }
             }
 
-            // 5. Busca os resultados de retrospectiva (SprintResults) APENAS para as Sprints relevantes
             if (!relevantSprintIds.Any())
             {
                 return Json(new List<SprintResultModel>()); // Retorna vazio se não houver histórico para esta equipe
@@ -317,12 +270,11 @@ namespace FlexCap.Web.Controllers
             var results = await _context.SprintResults
                 .Where(r => relevantSprintIds.Contains(r.SprintId))
                 .OrderByDescending(r => r.ActualFinishDate)
-                .Take(50) // Mantém o limite de segurança
+                .Take(50) 
                 .ToListAsync();
 
             return Json(results);
         }
-
 
 
         //Notificações
@@ -366,11 +318,10 @@ namespace FlexCap.Web.Controllers
 
             if (sprint == null)
             {
-                // Retorna JSON vazio se não houver sprint ativa
                 return Json(new List<SprintHolidayNotificationDto>());
             }
 
-            // 2) Identificar membros participantes
+            // Identificar membros participantes
             List<int> memberIds = new List<int>();
             if (!string.IsNullOrWhiteSpace(sprint.ParticipatingMemberIds))
             {
@@ -382,7 +333,6 @@ namespace FlexCap.Web.Controllers
                     .ToList();
             }
 
-            // Se não há IDs na sprint, busca todos os membros da equipe (fallback do seu código)
             List<Colaborador> members;
             if (memberIds.Count > 0)
             {
@@ -392,23 +342,21 @@ namespace FlexCap.Web.Controllers
             }
             else
             {
-                // Se a sprint não tem IDs, este fallback é necessário para evitar 0 membros
                 members = await _context.Colaboradores.ToListAsync();
             }
 
             int totalMembers = members.Count;
 
-            // Se a equipe não tem membros, não há impacto a ser calculado
             if (totalMembers == 0)
             {
                 return Json(new List<SprintHolidayNotificationDto>());
             }
 
-            // 3) Pegar eventos do calendário que caem dentro do período da sprint
+            // Pegar eventos do calendário que caem dentro do período da sprint
             var start = sprint.StartDate.Date;
             var end = sprint.EndDate.Date;
 
-            var events = await _context.CalendarEvents // 💡 Assume DbSet<CalendarEvents> no AppDbContext
+            var events = await _context.CalendarEvents 
                 .Where(e => e.Date.Date >= start && e.Date.Date <= end)
                 .OrderBy(e => e.Date)
                 .ToListAsync();
@@ -419,11 +367,6 @@ namespace FlexCap.Web.Controllers
 
             var notifications = new List<SprintHolidayNotificationDto>();
 
-            // ----------------------------------------------------------------------------------
-            // FUNÇÕES UTILIÁRIAS LOCAIS (para evitar erros de escopo e garantir a compilação)
-            // ----------------------------------------------------------------------------------
-
-            // Utilitário para extrair o País/Chave do título do evento (Ex: 'Brazil' de 'Holiday (Brazil)')
             string ExtractCountryKey(string type)
             {
                 var startIdx = type.IndexOf('(');
@@ -435,7 +378,6 @@ namespace FlexCap.Web.Controllers
                 return string.Empty;
             }
 
-            // Utilitário para checar se o Colaborador é afetado pelo país/chave
             bool MemberMatchesEventCountry(Colaborador member, string countryKey)
             {
                 if (member == null || string.IsNullOrWhiteSpace(member.Country) || string.IsNullOrWhiteSpace(countryKey))
@@ -444,7 +386,6 @@ namespace FlexCap.Web.Controllers
                 var memberCountry = member.Country.Trim().ToLowerInvariant();
                 var key = countryKey.Trim().ToLowerInvariant();
 
-                // Esta é a lógica de normalização complexa (sinônimos) que você já tinha:
                 if (key == "eua" || key == "usa" || key == "united states" || key == "united states of america")
                 {
                     return memberCountry.Contains("united states") || memberCountry.Contains("usa") || memberCountry.Contains("eua");
@@ -471,22 +412,16 @@ namespace FlexCap.Web.Controllers
                 }
             }
 
-            // ----------------------------------------------------------------------------------
-
-
             foreach (var ev in holidayEvents)
             {
                 var countryKey = ExtractCountryKey(ev.Type);
 
-                // Contar quantos membros da sprint pertencem a esse countryKey
+                // Contar quantos membros da sprint pertencem ao countryKey
                 int affected = members.Count(m => MemberMatchesEventCountry(m, countryKey));
 
                 if (affected == 0) continue;
 
-                // 💡 CÁLCULO FINAL: Porcentagem de MEMBROS AFETADOS
                 double affectedPercent = Math.Round((double)affected / totalMembers * 100, 1);
-
-                // Monta a mensagem final:
                 string icon = "<span style='font-size: 22px; margin-right:6px;'>🔥</span>";
                 string message = $"<span class='me-1'>{icon}</span> **{affectedPercent}% of the team** will be unavailable on **{ev.Date.ToString("MMM dd")}** due to a national holiday in {countryKey}.";
 
@@ -502,19 +437,12 @@ namespace FlexCap.Web.Controllers
                     TotalMembers = totalMembers,
                     AffectedPercent = affectedPercent,
                     CountryKey = countryKey,
-                    // 💡 NOVO: Mensagem formatada
                     Message = message
                 });
             }
 
-            // 💡 IMPORTANTE: Você precisa garantir que o DTO SprintHolidayNotificationDto tenha o campo Message.
-
             return Json(notifications);
         }
-
-
-
-
 
 
 
@@ -529,7 +457,6 @@ namespace FlexCap.Web.Controllers
 
             while (date <= end.Date)
             {
-                // Ignora Sábado (DayOfWeek.Saturday) e Domingo (DayOfWeek.Sunday)
                 if (date.DayOfWeek != DayOfWeek.Saturday && date.DayOfWeek != DayOfWeek.Sunday)
                 {
                     workingDays++;
@@ -539,18 +466,18 @@ namespace FlexCap.Web.Controllers
             return workingDays;
         }
 
-        // 2. Verifica se um dia é útil
+        // Verifica se um dia é útil
         private bool IsWorkingDay(DateTime date)
         {
             return date.DayOfWeek != DayOfWeek.Saturday && date.DayOfWeek != DayOfWeek.Sunday;
         }
 
 
+
         [HttpGet]
         [Route("Sprint/GetAbsenceImpact")]
         public async Task<IActionResult> GetAbsenceImpact(int? sprintId = null)
         {
-            // 1. Usuário logado
             var loggedUserName = User.FindFirst(ClaimTypes.Name)?.Value;
             if (string.IsNullOrEmpty(loggedUserName))
                 return Unauthorized("User must be logged in.");
@@ -561,7 +488,6 @@ namespace FlexCap.Web.Controllers
             if (manager == null)
                 return Unauthorized("User not found.");
 
-            // 2. Sprint ativa
             SprintModel sprint = sprintId.HasValue
                 ? await _context.Sprints.FindAsync(sprintId.Value)
                 : await _context.Sprints.FirstOrDefaultAsync(s => s.IsActive == true);
@@ -569,7 +495,7 @@ namespace FlexCap.Web.Controllers
             if (sprint == null)
                 return Json(new List<SprintAbsenceImpactDto>());
 
-            // 3. Buscar TODOS os membros da equipe do manager
+            // Buscar TODOS os membros da equipe do manager
             var teamMembers = await _context.Colaboradores
                 .Where(c => c.TeamName == manager.TeamName)
                 .ToListAsync();
@@ -577,7 +503,7 @@ namespace FlexCap.Web.Controllers
             if (!teamMembers.Any())
                 return Json(new List<SprintAbsenceImpactDto>());
 
-            // 4. Cálculo da capacidade total
+            // Cálculo da capacidade total
             DateTime sprintStart = sprint.StartDate.Date;
             DateTime sprintEnd = sprint.EndDate.Date;
             const int HoursPerDay = 8;
@@ -585,19 +511,17 @@ namespace FlexCap.Web.Controllers
             int totalWorkingDays = GetWorkingDays(sprintStart, sprintEnd);
             double totalAvailableHours = totalWorkingDays * teamMembers.Count * HoursPerDay;
 
-            // 5. Processar ausências
+            // Processar ausências
             var notifications = new List<SprintAbsenceImpactDto>();
 
             foreach (var m in teamMembers)
             {
-                // Se não tiver datas, não está ausente
                 if (m.StartDate == null || m.EndDate == null)
                     continue;
 
                 DateTime absenceStart = m.StartDate.Value.Date;
                 DateTime absenceEnd = m.EndDate.Value.Date;
 
-                // Se não cruzar com a sprint, ignora
                 if (absenceEnd < sprintStart || absenceStart > sprintEnd)
                     continue;
 
@@ -641,12 +565,9 @@ namespace FlexCap.Web.Controllers
         {
             ViewData["Title"] = "Sprint e Gantt do RH";
             ViewData["Profile"] = "Rh";
-            return View(); // Retorna Views/Sprint/Rh.cshtml
+            return View(); 
         }
 
-        // Retorna a lista de todas as equipes (nomes únicos) para popular o `<select>`.
-
-        // EM SprintController.cs
 
         [HttpGet]
         [Route("Sprint/GetAllTeams")]
@@ -654,8 +575,6 @@ namespace FlexCap.Web.Controllers
         {
             // Busca todos os nomes de equipe únicos (ignorando nulos ou vazios)
             var teams = await _context.Colaboradores
-                // 💡 CRÍTICO: Filtra para garantir que o nome do time não seja nulo, vazio, 
-                // e que não contenha "RH" ou "HR" (case-insensitive para segurança).
                 .Where(c => c.TeamName != null && c.TeamName != "" &&
                             !c.TeamName.Contains("RH") &&
                             !c.TeamName.Contains("HR"))
@@ -664,87 +583,61 @@ namespace FlexCap.Web.Controllers
                 .OrderBy(name => name)
                 .ToListAsync();
 
-            // Retorna a lista de nomes de equipe em um formato JSON amigável
             return Json(teams.Select(t => new { TeamName = t }));
         }
 
 
-        // Busca a sprint ativa que pertence à equipe selecionada.
+[HttpGet]
+[Route("Sprint/GetActiveSprintByTeam")]
+public async Task<IActionResult> GetActiveSprintByTeam(string teamName)
+{
+    if (string.IsNullOrEmpty(teamName)) return BadRequest();
 
-        // EM SprintController.cs
+    // Ids da Equipe (Números)
+    var teamMemberIds = await _context.Colaboradores
+        .Where(c => c.TeamName == teamName)
+        .Select(c => c.Id)
+        .ToListAsync();
 
-        // EM SprintController.cs
+    if (!teamMemberIds.Any())
+    {
+        return NotFound(); 
+    }
 
-        [HttpGet]
-        [Route("Sprint/GetActiveSprintByTeam")]
-        public async Task<IActionResult> GetActiveSprintByTeam(string teamName)
+    // Busca todas as Sprints Ativas 
+    var activeSprints = await _context.Sprints
+        .Where(s => s.IsActive == true)
+        .ToListAsync(); 
+
+    var teamActiveSprint = activeSprints.FirstOrDefault(s =>
+    {
+        if (string.IsNullOrEmpty(s.ParticipatingMemberIds)) return false;
+
+        try
         {
-            if (string.IsNullOrEmpty(teamName)) return BadRequest();
+            var sprintParticipantIds = s.ParticipatingMemberIds
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(idStr => int.TryParse(idStr.Trim(), out int id) ? id : 0)
+                .Where(id => id > 0)
+                .ToHashSet(); 
 
-            // 1. Ids da Equipe (Números)
-            var teamMemberIds = await _context.Colaboradores
-                .Where(c => c.TeamName == teamName)
-                .Select(c => c.Id)
-                .ToListAsync();
-
-            if (!teamMemberIds.Any())
-            {
-                return NotFound();
-            }
-
-            // 2. Busca todas as Sprints Ativas (para filtrar localmente)
-            var activeSprints = await _context.Sprints
-                .Where(s => s.IsActive == true)
-                .ToListAsync();
-
-            // 3. CRÍTICO: Filtragem por conversão rigorosa
-            var teamActiveSprint = activeSprints.FirstOrDefault(s =>
-            {
-                if (string.IsNullOrEmpty(s.ParticipatingMemberIds)) return false;
-
-                try
-                {
-                    // Converte a string do banco (ex: "1,2,10") em uma lista de inteiros {1, 2, 10}
-                    var sprintParticipantIds = s.ParticipatingMemberIds
-                        .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                        .Select(idStr => int.TryParse(idStr.Trim(), out int id) ? id : 0)
-                        .Where(id => id > 0)
-                        .ToHashSet(); // Usa HashSet para busca rápida
-
-                    // Verifica se ALGUM dos IDs da equipe selecionada (teamMemberIds)
-                    // está presente no conjunto de IDs da sprint (sprintParticipantIds).
-                    return teamMemberIds.Any(teamId => sprintParticipantIds.Contains(teamId));
-                }
-                catch (Exception ex)
-                {
-                    // Se o split/parse falhar por dados ruins, logamos e ignoramos esta sprint.
-                    Console.WriteLine($"Erro ao processar IDs de sprint {s.Id}: {ex.Message}");
-                    return false;
-                }
-            });
-
-            if (teamActiveSprint == null)
-            {
-                return NotFound();
-            }
-
-            return Json(teamActiveSprint);
+            return teamMemberIds.Any(teamId => sprintParticipantIds.Contains(teamId));
         }
+        catch (Exception ex)
+        {
+            // Se o split/parse falhar por dados ruins, logamos e ignoramos esta sprint.
+            Console.WriteLine($"Erro ao processar IDs de sprint {s.Id}: {ex.Message}");
+            return false;
+        }
+    });
 
+    if (teamActiveSprint == null)
+    {
+        return NotFound(); 
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return Json(teamActiveSprint);
+}
 
 
 
@@ -752,19 +645,12 @@ namespace FlexCap.Web.Controllers
         {
             ViewData["Title"] = "Minhas Sprints";
             ViewData["Profile"] = "Colaborador";
-            return View(); // Retorna Views/Sprint/Colaborador.cshtml
+            return View(); 
         }
 
-
-        // EM SprintController.cs
-
-        // ----------------------------------------------------------
-// NOVO ENDPOINT NECESSÁRIO PARA A VIEW DO COLABORADOR FUNCIONAR
-// ----------------------------------------------------------
 [HttpGet]
 public IActionResult IsParticipatingAndGetTeamData()
 {
-    // PEGA O USUÁRIO LOGADO
     var loggedInUserIdentifier = User.FindFirst(ClaimTypes.Name)?.Value;
 
     if (string.IsNullOrEmpty(loggedInUserIdentifier))
@@ -781,7 +667,6 @@ public IActionResult IsParticipatingAndGetTeamData()
     if (activeSprint == null)
         return Ok(new { isParticipating = false });
 
-    // PARTICIPAÇÃO?
     bool isParticipating = false;
 
     if (!string.IsNullOrEmpty(activeSprint.ParticipatingMemberIds))
@@ -809,29 +694,23 @@ public IActionResult IsParticipatingAndGetTeamData()
 }
 
 
-        // EM SprintController.cs
-
-        // 🎯 NOVO ENDPOINT: Histórico filtrado para a equipe
+        //  Histórico filtrado para a equipe
         [HttpGet]
         [Route("Sprint/GetFinishedByTeam")]
         public async Task<IActionResult> GetFinishedByTeam([FromQuery] List<int> memberIds)
         {
-            // Se nenhum ID de membro for fornecido, retorna vazio (segurança)
             if (memberIds == null || !memberIds.Any())
             {
                 return Json(new List<object>());
             }
 
-            // 1. Encontrar todos os IDs de sprints que têm resultados e cujo ID
-            // está na lista de IDs de membros participantes (ParticipatingMemberIds)
             var finishedSprints = await _context.Sprints
-                .Where(s => s.IsActive == false) // Garante que foi finalizado
+                .Where(s => s.IsActive == false) 
                 .Where(s => s.ParticipatingMemberIds != null && s.ParticipatingMemberIds != "")
                 .ToListAsync();
 
             var relevantSprintIds = new HashSet<int>();
 
-            // Filtra as Sprints onde pelo menos um dos 'memberIds' está na lista de participantes da Sprint
             foreach (var sprint in finishedSprints)
             {
                 var sprintParticipantIds = sprint.ParticipatingMemberIds
@@ -840,26 +719,20 @@ public IActionResult IsParticipatingAndGetTeamData()
                     .Where(id => id > 0)
                     .ToList();
 
-                // Checa se há intersecção entre os IDs da equipe e os participantes do sprint
                 if (sprintParticipantIds.Any(id => memberIds.Contains(id)))
                 {
                     relevantSprintIds.Add(sprint.Id);
                 }
             }
 
-            // 2. Buscar os resultados de retrospectiva (SprintResults) para as Sprints relevantes
             var results = await _context.SprintResults
                 .Where(r => relevantSprintIds.Contains(r.SprintId))
                 .OrderByDescending(r => r.ActualFinishDate)
-                .Take(20) // Exibe os 20 mais recentes
+                .Take(20) 
                 .ToListAsync();
 
-            // 3. Retorna os resultados do histórico (apenas da equipe)
             return Json(results);
         }
-
-
-
 
     }
 }

@@ -304,7 +304,6 @@ namespace FlexCap.Web.Controllers
                 return Content("<p class='text-danger'>Colaborador não encontrado.</p>");
             }
 
-            // 🔥 Normaliza status aqui também
             if (colaborador.Status?.Trim().Equals("Ativo", StringComparison.OrdinalIgnoreCase) == true)
                 colaborador.Status = "Active";
 

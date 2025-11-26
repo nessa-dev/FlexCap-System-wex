@@ -38,11 +38,10 @@ namespace FlexCap.Web.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            model.Date = model.Date.Date; // Garante que apenas a data seja salva
+            model.Date = model.Date.Date; 
             _context.CalendarEvents.Add(model);
             await _context.SaveChangesAsync();
 
-            // Retorna o objeto com o ID e o Type para o JavaScript
             return Json(new
             {
                 id = model.Id,
@@ -53,7 +52,7 @@ namespace FlexCap.Web.Controllers
             });
         }
 
-        // DELETE: Exclui um evento (CORRIGIDO A ROTA)
+        // Exclui um evento 
         [HttpDelete("Calendar/DeleteEvent/{id}")]
         public async Task<IActionResult> DeleteEvent(int id)
         {
@@ -64,9 +63,8 @@ namespace FlexCap.Web.Controllers
             _context.CalendarEvents.Remove(ev);
             await _context.SaveChangesAsync();
 
-            return NoContent(); // 204 Success
+            return NoContent(); 
         }
-
 
         // Action Manager (Somente Visualização)
         public async Task<IActionResult> Manager()
@@ -82,13 +80,11 @@ namespace FlexCap.Web.Controllers
             return View("~/Views/Calendar/Colaborador.cshtml", events);
         }
 
-        // GET: Endpoint para a Dashboard 'This Week'
         [HttpGet]
         public async Task<IActionResult> GetThisWeekEvents()
         {
             var now = DateTime.Now.Date;
 
-            // Define o início da semana (ajustável para Segunda ou Domingo)
             DayOfWeek firstDay = DayOfWeek.Sunday;
 
             int diff = (7 + (now.DayOfWeek - firstDay)) % 7;
@@ -113,7 +109,6 @@ namespace FlexCap.Web.Controllers
             return Json(formattedEvents);
         }
 
-        // Função auxiliar para mapear o tipo de evento para um ícone
         private string GetIconClassByType(string type)
         {
             switch (type)
@@ -132,7 +127,6 @@ namespace FlexCap.Web.Controllers
         }
     }
 
-    // ADICIONE ESTA CLASSE AQUI OU CRIE O ARQUIVO WeeklyEventViewModel.cs NO SEU DIRETÓRIO DE MODELS
     public class WeeklyEventViewModel
     {
         public string Title { get; set; }

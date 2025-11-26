@@ -27,11 +27,9 @@ namespace FlexCap.Web.Controllers
         // --- MÉTODO SEED ---
         public IActionResult Seed()
         {
-            // 1. LIMPAR E CRIAR O BANCO PRIMEIRO (CORREÇÃO DA SEQUÊNCIA)
+            // 1. LIMPAR E CRIAR O BANCO PRIMEIRO 
             _context.Database.EnsureDeleted();
             _context.Database.EnsureCreated();
-
-            // Agora, o banco está novo e vazio.
 
             // 2. INSERIR TIPOS DE REQUISIÇÃO
             var requestTypes = new List<RequestType>
@@ -284,16 +282,8 @@ namespace FlexCap.Web.Controllers
             _context.Colaboradores.AddRange(colaboradores);
             _context.SaveChanges(); // Salva os colaboradores
 
-            // ----------------------------------------------------
-            // 4. RETORNO
-            // ----------------------------------------------------
-
-            // Remove o bloco 'if (Database already contains...)' que estava no final, pois o teste está no topo.
-            return RedirectToAction("Index", "Login");
+                      return RedirectToAction("Index", "Login");
         }
-
-
-
 
 
 
@@ -310,9 +300,6 @@ namespace FlexCap.Web.Controllers
             ViewData["TotalSetores"] = colaboradores.Select(c => c.Department).Distinct().Count();
             return RedirectToAction("Index", "Home");
         }
-
-
-
 
 
 
@@ -393,9 +380,6 @@ namespace FlexCap.Web.Controllers
         }
 
 
-
-
-        // Editar Colaborador (POST)
         // Editar Colaborador (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -436,7 +420,6 @@ namespace FlexCap.Web.Controllers
             return View("EditarUsuario", colaborador);
         }
 
-
         private void PopulateViewBags()
         {
             ViewBag.Departments = new SelectList(new[] { "Benefits", "Mobility", "Corporate Payments", "RH" });
@@ -460,7 +443,6 @@ namespace FlexCap.Web.Controllers
     });
         }
 
-
         // Excluir Colaborador (GET - confirmação)
         public IActionResult Excluir(int id)
         {
@@ -479,9 +461,6 @@ namespace FlexCap.Web.Controllers
             _context.SaveChanges();
             return RedirectToAction("Listar");
         }
-
-
-
 
         [HttpGet]
         public async Task<IActionResult> Colaborador()
@@ -518,9 +497,6 @@ namespace FlexCap.Web.Controllers
         }
 
 
-
-
-
         [HttpGet]
         public async Task<IActionResult> ListarEquipe()
         {
@@ -555,7 +531,7 @@ namespace FlexCap.Web.Controllers
             {
                 if (string.IsNullOrWhiteSpace(c.Status))
                 {
-                    c.Status = "Inactive"; // evita N/A
+                    c.Status = "Inactive"; 
                 }
 
                 var status = c.Status.Trim().ToLowerInvariant();
@@ -567,7 +543,7 @@ namespace FlexCap.Web.Controllers
                     c.Status = "Inactive";
 
                 else if (status != "active" && status != "inactive")
-                    c.Status = "Inactive"; // fallback seguro
+                    c.Status = "Inactive"; 
             }
 
             ViewData["Title"] = $"Membros da Equipe: {equipeDoUsuario}";
@@ -577,11 +553,6 @@ namespace FlexCap.Web.Controllers
 
             return View("TimeDetalhes", colaboradoresDoTime);
         }
-
-
-
-
-
 
         [Authorize(Roles = "HR Manager, HR Analyst, HR Consultant")]
         public IActionResult BuscarColaboradores(string nomeBusca, string statusBusca, string countryBusca, string sectorBusca, string teamBusca)
@@ -623,7 +594,6 @@ namespace FlexCap.Web.Controllers
             return View("Rh", colaboradores.ToList());
         }
 
-
         [HttpGet]
         [Authorize(Roles = "Project Manager")]
         public async Task<IActionResult> Manager()
@@ -660,11 +630,6 @@ namespace FlexCap.Web.Controllers
 
             return View("~/Views/Home/Manager.cshtml");
         }
-
-
-
-
-
 
     }
 }

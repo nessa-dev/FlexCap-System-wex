@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="~/css/Template.css" asp-append-version="true" />
 </head>
 <body class="d-flex">
+
+
     @{
         var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
         var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
@@ -44,10 +46,6 @@
         bool isHomeActive = currentController == "Home" &&
         (currentAction == "Index" || currentAction == "Manager" || currentAction == "Rh" || currentAction == "Colaborador");
     }
-
-
-
-
 
     <div class="sidebar">
         <div>

@@ -66,7 +66,6 @@
                         @foreach (var notification in Model.SprintImpactNotifications)
                         {
                             <div class="alert alert-warning d-flex align-items-center p-1 mt-1" role="alert" style="font-size: 0.75rem;">
-                                @* O ícone e a cor são estáticos, pois a mensagem já deve conter o significado de "impacto" *@
                                 <i class="bi bi-fire me-1" style="font-size: 0.9rem; color: #dc3545;"></i>
                                 <p class="mb-0">@notification</p>
                             </div>
@@ -143,12 +142,6 @@
             </div>
         </div>
 
-
-
-
-
-
-
         <!-- This Week -->
         <div class="col-12 col-md-6 mb-4">
             <div class="card shadow-sm h-100">
@@ -170,7 +163,6 @@
             listEl.innerHTML = '<li class="text-muted small">Loading events...</li>';
 
             try {
-                // Chama o endpoint C#: /Calendar/GetThisWeekEvents
                 const resp = await fetch('/Calendar/GetThisWeekEvents');
                 if (!resp.ok) throw new Error('Failed to fetch events: ' + resp.status);
                 
@@ -187,8 +179,6 @@
                     const li = document.createElement('li');
                     li.classList.add('mb-3', 'd-flex', 'align-items-start');
                     
-                    // O HTML injetado, usando o IconClass (e.g., bi-calendar-check-fill) 
-                    // e o DayOfWeekShort (e.g., (Tue)) que vêm do Controller.
                             li.innerHTML = `
                     <i class="bi ${event.iconClass} me-3 fs-5" style="color: #007bff;"></i>
                     <div class="d-flex justify-content-between flex-grow-1">

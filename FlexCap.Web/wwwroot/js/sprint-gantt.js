@@ -1,6 +1,6 @@
 ﻿let selectedMemberIds = [];
-let teamMembers = []; // Será preenchido via AJAX
-const totalDays = 30; // Número de colunas no grid
+let teamMembers = []; 
+const totalDays = 30; 
 
 document.addEventListener('DOMContentLoaded', function () {
     const headerEl = document.getElementById('gantt-header');
@@ -10,19 +10,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const clearSelectionBtn = document.getElementById('clearSelection');
     const saveSprintBtn = document.getElementById('saveSprintBtn');
 
-    // Modais e botões de navegação
     const registerSprintModalEl = document.getElementById('registerSprintModal');
     const membersModalEl = document.getElementById('membersModal');
     const backToRegisterModalBtn = document.getElementById('backToRegisterModalBtn');
     const doneSelectingMembersBtn = document.getElementById('doneSelectingMembersBtn');
     const selectMembersBtn = document.getElementById('selectMembersBtn');
 
-    // --- FUNÇÃO CRÍTICA DE NAVEGAÇÃO ASSÍNCRONA (corrigida) ---
     function hideModalAndShowParent(hideModalEl, showModalEl) {
         const hideModalInstance = bootstrap.Modal.getInstance(hideModalEl);
 
         function cleanBackdrops() {
-            // remove backdrops extras e garante body limpo
             const backdrops = document.querySelectorAll('.modal-backdrop');
             if (backdrops.length) {
                 backdrops.forEach(b => b.remove());
@@ -35,7 +32,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (hideModalInstance) {
             hideModalEl.addEventListener('hidden.bs.modal', function handler() {
                 hideModalEl.removeEventListener('hidden.bs.modal', handler);
-                // leve delay para garantir que bootstrap terminou a animação
                 setTimeout(() => {
                     cleanBackdrops();
                     const showModalInstance = new bootstrap.Modal(showModalEl);
@@ -45,18 +41,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
             hideModalInstance.hide();
         } else {
-            // Se já estiver fechado, limpa e mostra direto
             cleanBackdrops();
             const showModalInstance = new bootstrap.Modal(showModalEl);
             showModalInstance.show();
         }
     }
 
-    // --- HANDLER GLOBAL DE LIMPEZA (protege contra backdrops sobrando) ---
     document.addEventListener('hidden.bs.modal', function () {
         const backdrops = document.querySelectorAll('.modal-backdrop');
         if (backdrops.length > 0) {
-            // remove todos os backdrops (segurança)
             backdrops.forEach(b => b.remove());
         }
         document.body.classList.remove('modal-open');
@@ -64,7 +57,6 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.style.removeProperty('padding-right');
     });
 
-    // --- LÓGICA AJAX: CARREGAMENTO DOS MEMBROS DA EQUIPE (corrigido) ---
     async function loadTeamMembers() {
         membersListContainer.innerHTML = '<p class="text-info small text-center"><i class="bi bi-arrow-clockwise spin"></i> Carregando membros da equipe...</p>';
 
@@ -81,16 +73,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const data = await response.json();
 
-            // FIX: usa corretamente 'name' ou 'fullName' conforme o JSON
             teamMembers = data.map(m => ({
                 id: m.id,
-                name: m.name || m.fullName || '',      // aceita 'name' ou 'fullName'
+                name: m.name || m.fullName || '',      
                 position: m.position || '',
                 photoUrl: m.photoUrl || '',
                 status: m.status || ''
             }));
 
-            // Se quiser marcar todos por padrão:
             selectedMemberIds = teamMembers.map(m => m.id);
 
             renderMembersList();
@@ -100,8 +90,6 @@ document.addEventListener('DOMContentLoaded', function () {
             membersListContainer.innerHTML = `<p class="text-danger small">Erro ao carregar membros. Verifique o console.</p>`;
         }
     }
-
-    // --- LÓGICA DE RENDERIZAÇÃO DOS MEMBROS ---
     function renderMembersList() {
         membersListContainer.innerHTML = '';
 
@@ -136,7 +124,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Lógica de Seleção Rápida
     if (selectAllBtn) {
         selectAllBtn.addEventListener('click', () => {
             selectedMemberIds = teamMembers.map(m => m.id);
@@ -154,8 +141,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-
-    // --- LÓGICA DO GRÁFICO DE GANTT (mantida) ---
     function generateHeader() {
         let html = '';
         let currentMonth = '';
@@ -238,8 +223,6 @@ document.addEventListener('DOMContentLoaded', function () {
         tooltipEl.style.top = `${y}px`;
     }
 
-    // --- MANUSEIO DA NAVEGAÇÃO E SUBMISSÃO ---
-
     if (saveSprintBtn) {
         saveSprintBtn.addEventListener('click', async () => {
             const sprintData = {
@@ -266,7 +249,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
 
                 if (resp.ok) {
-                    // 🟢 SUCESSO
                     const savedSprint = await resp.json();
                     alert(`Sprint '${savedSprint.Name}' successfully created!`);
 
@@ -274,20 +256,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     const modal = bootstrap.Modal.getInstance(registerSprintModalEl);
                     if (modal) modal.hide();
 
-                    // Recarrega a página para atualizar o Gantt, o Histórico e o status do botão "Criar Sprint".
                     window.location.reload();
 
                 } else if (resp.status === 409) {
-                    // 🛑 TRATAMENTO ESPECÍFICO DA REGRA DE NEGÓCIO (Conflito: Já existe uma ativa)
                     const errorText = await resp.text();
                     console.error("Server Conflict Response:", errorText);
                     alert(`Atenção: ${errorText}`);
 
                 } else {
-                    // 🛑 ERROS GERAIS (Ex: 400 Bad Request por falha de validação de ModelState/Datas)
                     const errorText = await resp.text();
                     console.error("Server Response Error:", errorText);
-                    // Tenta parsear o JSON para dar um feedback melhor, se for 400
                     try {
                         const errorJson = JSON.parse(errorText);
                         alert(`Falha na criação da sprint: ${JSON.stringify(errorJson)}`);
@@ -303,32 +281,24 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 1. Botão "Back" (Modal de Membros -> Modal de Registro)
     if (backToRegisterModalBtn) {
         backToRegisterModalBtn.addEventListener('click', () => {
             hideModalAndShowParent(membersModalEl, registerSprintModalEl);
         });
     }
 
-    // 2. Botão "Done" (Modal de Membros -> Modal de Registro)
     if (doneSelectingMembersBtn) {
         doneSelectingMembersBtn.addEventListener('click', () => {
-            // Aqui você pode passar os selectedMemberIds pro modal pai antes de abrir
             hideModalAndShowParent(membersModalEl, registerSprintModalEl);
         });
     }
-
-    // 3. Botão "Members" (Modal de Registro -> Modal de Membros)
     if (selectMembersBtn) {
         selectMembersBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            // Carrega os membros antes de trocar de modal (espera terminar)
             await loadTeamMembers();
             hideModalAndShowParent(registerSprintModalEl, membersModalEl);
         });
     }
-
-    // --- INICIA O GANTT NA CARGA DA PÁGINA ---
     generateHeader();
     positionBars();
     setupTooltips();
@@ -338,26 +308,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Elementos do Modal e Formulário
     const editModalEl = document.getElementById('editSprintModal');
-    // Adicione um container para mensagens/loading dentro do modal:
     const loadingEl = editModalEl ? editModalEl.querySelector('#editSprintLoading') : null;
     const formEl = editModalEl ? editModalEl.querySelector('#editSprintForm') : null;
-
-    // Certifique-se de que esses IDs existem no seu modal de edição
     const deleteBtn = document.getElementById('deleteSprintBtn');
     const saveBtn = document.getElementById('saveSprintChangesBtn');
 
-    // Campos de Input
     const nameInput = document.getElementById('editSprintName');
     const goalInput = document.getElementById('editSprintGoal');
     const startInput = document.getElementById('editSprintStartDate');
     const endInput = document.getElementById('editSprintEndDate');
     const notesInput = document.getElementById('editSprintNotes');
 
-    let currentSprint = null; // Armazena os dados da Sprint carregada
+    let currentSprint = null; 
 
-    // Verifica se os elementos críticos existem antes de anexar listeners
     if (!editModalEl || !loadingEl || !formEl || !deleteBtn || !saveBtn) {
         console.error("Missing critical element IDs for Edit Sprint Modal.");
         return;
@@ -365,7 +329,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Função para carregar sprint ativa ---
     async function loadActiveSprint() {
-        // Estado de Carregamento
         loadingEl.classList.remove('d-none');
         loadingEl.innerHTML = `<p class="text-info">Loading active sprint...</p>`;
         formEl.classList.add('d-none');
@@ -374,7 +337,6 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSprint = null;
 
         try {
-            // CRÍTICO: Chama o endpoint GET para a sprint ativa
             const resp = await fetch('/Sprint/GetActive');
 
             if (!resp.ok) {
@@ -387,18 +349,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const sprint = await resp.json();
             currentSprint = sprint;
-
-            // Preenche os campos (Assumindo camelCase no JSON do C#)
             nameInput.value = sprint.name || '';
             goalInput.value = sprint.goal || '';
 
-            // Datas vêm no formato ISO 8601 (ex: "2025-11-12T00:00:00"), precisamos apenas da data ("2025-11-12")
             startInput.value = sprint.startDate ? sprint.startDate.split('T')[0] : '';
             endInput.value = sprint.endDate ? sprint.endDate.split('T')[0] : '';
 
             notesInput.value = sprint.notes || '';
-
-            // Exibe o formulário
             loadingEl.classList.add('d-none');
             formEl.classList.remove('d-none');
             deleteBtn.classList.remove('d-none');
@@ -414,12 +371,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!currentSprint) return alert('No active sprint to edit.');
 
         const updated = {
-            // CRÍTICO: Envia o ID original para saber qual sprint atualizar
             id: currentSprint.id,
             name: nameInput.value,
             goal: goalInput.value,
-            startDate: startInput.value, // Deve ser YYYY-MM-DD
-            endDate: endInput.value,    // Deve ser YYYY-MM-DD
+            startDate: startInput.value, 
+            endDate: endInput.value,    
             notes: notesInput.value,
             participatingMemberIds: currentSprint.participatingMemberIds
         };
@@ -435,28 +391,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(updated)
             });
 
-            // 💡 CORREÇÃO CRÍTICA: Trata tanto 200 OK quanto 204 No Content como sucesso.
             if (resp.ok || resp.status === 204) {
 
-                // 1. Fecha o modal
                 bootstrap.Modal.getInstance(editModalEl).hide();
 
-                // 2. Avisa o usuário
                 alert('Sprint updated successfully! The page will now refresh.');
-
-                // 💡 SOLUÇÃO FINAL: Força o recarregamento da página. 
-                // Isso garante que o Gantt, notificações e todos os dados sejam atualizados.
                 window.location.reload();
 
             } else {
-                // Se houver um erro real (4xx ou 5xx), tentamos ler o corpo da resposta
                 let errorMessage = `Error saving sprint (Status: ${resp.status}).`;
                 try {
-                    // Tenta ler JSON para feedback detalhado
                     const errorBody = await resp.json();
                     errorMessage += ` Details: ${JSON.stringify(errorBody)}`;
                 } catch {
-                    // Se não for JSON, apenas retorna o status
                     errorMessage += ` Check server logs.`;
                 }
 
@@ -478,41 +425,29 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const resp = await fetch(`/Sprint/Delete/${currentSprint.id}`, { method: 'DELETE' });
 
-            // 💡 CORREÇÃO 1: Trata tanto 200 OK quanto 204 No Content como sucesso.
-            // Isso impede que o fluxo caia no 'else' se o servidor retornar 204.
             if (resp.ok || resp.status === 204) {
 
-                // 1. Fecha o modal (importante fazer isso antes da recarga)
                 const modalInstance = bootstrap.Modal.getInstance(editModalEl);
                 if (modalInstance) {
                     modalInstance.hide();
                 }
 
-                // 2. Avisa o usuário
                 alert('Sprint deleted successfully!');
-
-                // 💡 CORREÇÃO 2: Força o recarregamento da página. 
-                // Esta é a forma mais robusta e completa de garantir que o Gantt e 
-                // todos os botões (ex: "Criar Sprint") atualizem corretamente.
-                // Isso interrompe o JS, evitando que o bloco 'catch' seja acionado depois.
+ 
                 window.location.reload();
 
             } else {
-                // Se falhar (e o status for 4xx ou 5xx)
                 const errorText = await resp.text();
                 console.error('Delete Error Details (Server Status > 204):', errorText);
                 alert(`Error deleting sprint (Status: ${resp.status}). Check console.`);
             }
 
         } catch (err) {
-            // 🛑 CORREÇÃO 3: O bloco 'catch' só deve tratar falhas de rede/execução crítica.
-            // A lógica de sucesso (com o reload) deve ser suficiente para evitar que esta mensagem apareça.
             console.error('Critical Error on Delete Execution:', err);
             alert('An unexpected error occurred during deletion. See console for details.');
         }
     });
 
-    // --- Quando o modal abrir ---
     editModalEl.addEventListener('show.bs.modal', () => {
         loadActiveSprint();
     });
@@ -521,12 +456,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- gannt ---
 
-
-
-
-// ===================================================================================
-// GANTT RENDERING
-// ===================================================================================
 document.addEventListener('DOMContentLoaded', async function () {
     const headerEl = document.getElementById('gantt-header');
     const bodyEl = document.getElementById('gantt-body');
@@ -603,26 +532,16 @@ document.addEventListener('DOMContentLoaded', async function () {
 });
 
 
-// ===================================================================================
-// VARIABLES
-// ===================================================================================
 let sprintChart = null;
 let activeSprint = null;
 let allFinishedSprints = [];
 
-
-// ===================================================================================
-// INITIALIZATION
-// ===================================================================================
 document.addEventListener("DOMContentLoaded", () => {
     setupFinishSprintModal();
     loadSprintHistory();
 });
 
 
-// ===================================================================================
-// FINISH SPRINT MODAL
-// ===================================================================================
 function setupFinishSprintModal() {
 
     const modalEl = document.getElementById("finishedSprintModal");
@@ -751,9 +670,8 @@ function setupFinishSprintModal() {
 
 
 
-// ===================================================================================
-//  SECTION 2 — SPRINT HISTORY UI
-// ===================================================================================
+//SPRINT HISTORY UI
+
 async function loadSprintHistory() {
 
     const container = document.getElementById("finishedSprintsContainer");
@@ -787,18 +705,14 @@ async function loadSprintHistory() {
     }
 }
 
-// ------------------------------
 // CREATE CARD FOR EACH FINISHED SPRINT
-// ------------------------------
 function renderSprintCard(s) {
     const container = document.getElementById("finishedSprintsContainer");
 
-    // 💡 REMOVEMOS p-3 PARA DIMINUIR O PADDING E USAMOS gap-2
-    // No HTML, o container deve ter gap-2: <div id="finishedSprintsContainer" class="d-grid gap-2">
+   
     const card = document.createElement("div");
-    card.classList.add("card", "shadow-sm"); // Remove p-3 daqui
+    card.classList.add("card", "shadow-sm"); 
 
-    // Monta o card
     const cardHtml = `
         <div class="d-flex align-items-center p-2 justify-content-between">
             
@@ -828,16 +742,14 @@ function renderSprintCard(s) {
         </div>
     `;
 
-    // 💡 INJETAMOS O HTML DENTRO DO CARD, NÃO NO CONTAINER.
-    // Isso é mais seguro e garante que os estilos customizados sejam aplicados.
     card.innerHTML = cardHtml;
     container.appendChild(card);
 
     renderHistoryChart(`chart-${s.id}`, s.completionPercentage);
 }
-// ------------------------------
+
 // MINI PIE CHART FOR HISTORY CARDS
-// ------------------------------
+
 function renderHistoryChart(canvasId, pct) {
     const ctx = document.getElementById(canvasId);
 
@@ -857,9 +769,8 @@ function renderHistoryChart(canvasId, pct) {
     });
 }
 
-// ===================================================================================
-//  SECTION 3 — VIEW ALL SPRINTS
-// ===================================================================================
+// VIEW ALL SPRINTS
+
 function loadAllSprintsModal(sprints) {
     const list = document.getElementById("allSprintsList");
     list.innerHTML = "";
@@ -893,9 +804,8 @@ function loadAllSprintsModal(sprints) {
     });
 }
 
-// ===================================================================================
 //  SECTION 4 — SPRINT DETAILS
-// ===================================================================================
+
 document.addEventListener("click", (event) => {
     const btn = event.target.closest(".view-details-btn");
     if (!btn) return;
@@ -917,9 +827,7 @@ function openSprintDetailsModal(s) {
     new bootstrap.Modal(document.getElementById("sprintDetailsModal")).show();
 }
 
-// ===================================================================================
 //  UTILS
-// ===================================================================================
 function formatDate(dateStr) {
     return new Date(dateStr).toLocaleDateString("en-US", {
         month: "short",
@@ -929,47 +837,27 @@ function formatDate(dateStr) {
 }
 
 
-
-
-
-
-
-
-
-// ----------------------------------------------------------------------
-// FUNÇÃO PRINCIPAL DE INICIALIZAÇÃO E LIMPEZA (ÚNICA CHAMADA)
-// ----------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', async () => {
     const container = document.getElementById("impactNotificationsContainer");
 
-    // 1. VERIFICAÇÃO CRÍTICA DO CONTAINER
     if (!container) {
         console.error("ERRO CRÍTICO: Container #impactNotificationsContainer não encontrado.");
         return;
     }
 
-    // Zera o container ANTES de qualquer carregamento.
     container.innerHTML = "";
 
-    // 2. Chama as funções sequencialmente. O await garante que a execução termine antes de seguir.
-    // Usamos await para que o erro de uma não interrompa a injeção da outra.
-
-    // 🚨 1º Chamada: Licença Individual (que não estava aparecendo)
     await loadAbsenceImpact();
-
-    // 🚨 2º Chamada: Feriado (que estava aparecendo)
     await loadSprintHolidayNotifications();
 
-    // 3. Se o container estiver vazio no final, adiciona mensagem de fallback.
     if (container.innerHTML.trim() === "") {
         container.innerHTML = '<div class="text-muted small">Nenhuma notificação de impacto para esta sprint.</div>';
     }
 });
-// (As funções loadAbsenceImpact e loadSprintHolidayNotifications devem ser definidas abaixo)
 
-// ----------------------------------------------------------------------
-// FUNÇÃO 1: Notificação de Feriado (SÓ ADICIONA CONTEÚDO)
-// ----------------------------------------------------------------------
+
+// FUNÇÃO 1: Notificação de Feriado
+
 async function loadSprintHolidayNotifications() {
     const container = document.getElementById('impactNotificationsContainer');
     if (!container) return; // Proteção
@@ -990,7 +878,6 @@ async function loadSprintHolidayNotifications() {
                     ${n.message}
                 </div>
             `;
-            // 🚨 APENAS ADICIONAMOS (appendChild)
             container.insertAdjacentHTML('beforeend', html);
         });
 
@@ -1000,9 +887,8 @@ async function loadSprintHolidayNotifications() {
 }
 
 
-// ----------------------------------------------------------------------
-// FUNÇÃO 2: Notificação de Ausência Individual (SÓ ADICIONA CONTEÚDO)
-// ----------------------------------------------------------------------
+// FUNÇÃO 2: Notificação de Ausência Individual 
+
 async function loadAbsenceImpact() {
     const container = document.getElementById("impactNotificationsContainer");
     if (!container) return; // Proteção
@@ -1035,13 +921,12 @@ async function loadAbsenceImpact() {
 
 
 
-// ======================================================================
 //  SPRINT HISTORY — COLLABORATOR VIEW
-// ======================================================================
 
-// ------------------------------
-// 1. LOAD HISTORY
-// ------------------------------
+
+
+// LOAD HISTORY
+
 async function loadSprintHistory() {
 
     const container = document.getElementById("finishedSprintsContainer");
@@ -1069,11 +954,9 @@ async function loadSprintHistory() {
             return;
         }
 
-        // render only the last 2 on home
         const latestTwo = sprints.slice(0, 2);
         latestTwo.forEach(renderSprintCard);
 
-        // Show "view all" button if more exist
         if (sprints.length > 2) {
             const wrapper = document.getElementById("viewAllSprintsWrapper");
             if (wrapper) wrapper.classList.remove("d-none");
@@ -1091,9 +974,6 @@ async function loadSprintHistory() {
 
 
 
-// ------------------------------
-// 2. CARD COMPONENT
-// ------------------------------
 function renderSprintCard(s) {
     const container = document.getElementById("finishedSprintsContainer");
     if (!container) return;
@@ -1137,9 +1017,8 @@ function renderSprintCard(s) {
 
 
 
-// ------------------------------
-// 3. MINI PIE CHART
-// ------------------------------
+// MINI PIE CHART
+
 function renderHistoryChart(canvasId, pct) {
     const ctx = document.getElementById(canvasId);
     if (!ctx) return;
@@ -1162,10 +1041,8 @@ function renderHistoryChart(canvasId, pct) {
 }
 
 
+// VIEW ALL SPRINTS — MODAL LIST
 
-// ======================================================================
-// 4. VIEW ALL SPRINTS — MODAL LIST
-// ======================================================================
 function loadAllSprintsModal(sprints) {
     const list = document.getElementById("allSprintsList");
     if (!list) return;
@@ -1197,11 +1074,8 @@ function loadAllSprintsModal(sprints) {
     });
 }
 
+// OPEN DETAILS MODAL
 
-
-// ======================================================================
-// 5. OPEN DETAILS MODAL
-// ======================================================================
 document.addEventListener("click", (event) => {
     const btn = event.target.closest(".view-details-btn");
     if (!btn) return;
@@ -1227,10 +1101,8 @@ function openSprintDetailsModal(s) {
 }
 
 
+//  UTILS
 
-// ======================================================================
-// 6. UTILS
-// ======================================================================
 function formatDate(dateStr) {
     return new Date(dateStr).toLocaleDateString("en-US", {
         month: "short",
@@ -1240,10 +1112,8 @@ function formatDate(dateStr) {
 }
 
 
+// AUTO LOAD WHEN PAGE OPENS
 
-// ======================================================================
-// 7. AUTO LOAD WHEN PAGE OPENS
-// ======================================================================
 document.addEventListener("DOMContentLoaded", () => {
     loadSprintHistory();
 });

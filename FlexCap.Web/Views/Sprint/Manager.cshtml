@@ -38,7 +38,6 @@
         min-width: 25px;
     }
 
-    /* Corpo do gráfico */
     .gantt-body {
         position: relative;
         background-color: #ffffff;
@@ -46,7 +45,6 @@
         border-bottom: 1px solid #dee2e6;
     }
 
-    /* Barras */
     .gantt-bar {
         position: absolute;
         height: 35px;
@@ -64,7 +62,6 @@
         background-color: #0d6efd;
     }
 
-    /* Tooltip */
     .gantt-tooltip {
         position: absolute;
         padding: 6px 10px;
@@ -103,32 +100,22 @@
             <button class="btn btn-dark fw-semibold" data-bs-toggle="modal" data-bs-target="#editSprintModal">Edit Sprint</button>
         </div>
 
+        <!-- notificações -->
 
         <div class="d-flex flex-column gap-2 flex-grow-1" style="max-width: 600px;">
             <div id="impactNotificationsContainer" class="d-grid gap-2 mb-4" style="max-width: 600px;">
-                <!-- Se houver notificações, o JavaScript irá injetá-las aqui. -->
             </div>
 
 
-
+            <!-- notificações -->
 
             <div id="absenceImpactContainer" class="d-grid gap-2 mb-4" style="max-width: 700px;">
-                <!-- JS vai colocar as notificações aqui -->
             </div>
 
 
         </div>
 
     </div>
-
-
-    <!-- 2. HTML do card usa as variáveis calculadas acima -->
-
-
-
-
-
-
 
 
     <div class="border rounded p-3 shadow-sm bg-white overflow-x-auto">
@@ -140,7 +127,7 @@
 
 
 
-    <!-- Finished Sprints Button -->
+    <!-- Finished Sprints -->
     <button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#finishedSprintModal">
         Finished sprints
     </button>
@@ -150,28 +137,24 @@
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
 
-                <!-- HEADER -->
                 <div class="modal-header border-0 pb-0">
                     <h4 class="modal-title fw-bold">Finished Sprints</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
-                <!-- BODY -->
                 <div class="modal-body pt-0">
 
-                    <!-- No Sprint Created -->
                     <div id="noSprintSection" class="text-center d-none">
                         <p class="text-muted fs-5">
                             There is no active sprint to display results.
                         </p>
                     </div>
 
-                    <!-- FORM MUST BE INSIDE MODAL-BODY -->
                     <form id="sprintResultsForm" class="d-none">
 
                         <div class="row">
 
-                            <!-- LEFT SIDE – FORM -->
+                            <!-- FORM -->
                             <div class="col-md-7 pe-4">
 
                                 <div class="mb-3">
@@ -219,7 +202,6 @@
 
                             </div>
 
-                            <!-- RIGHT SIDE – PIE CHART -->
                             <div class="col-md-5 border-start d-flex justify-content-center align-items-center">
                                 <div style="width: 100%; max-width: 300px; height: 300px; margin: auto;">
                                     <canvas id="progressPieChart"></canvas>
@@ -228,7 +210,6 @@
 
                         </div>
 
-                        <!-- FOOTER MUST BE INSIDE THE FORM AND INSIDE modal-content -->
                         <div class="modal-footer mt-3 border-0">
                             <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button id="saveSprintResultsBtn" class="btn btn-primary" type="submit">Save Results</button>
@@ -240,9 +221,6 @@
             </div>
         </div>
     </div>
-
-
-
 
 
 
@@ -313,20 +291,7 @@
         </div>
     </div>
 
-
-
- 
-
-
-
-
-
-
-
-
-
-
-    
+   
     <!-- CRIAR SPRINT  -->
 
 <div class="modal fade" id="registerSprintModal" tabindex="-1" aria-labelledby="registerSprintModalLabel" aria-hidden="true">
@@ -372,6 +337,8 @@
 </div>
 
 
+    <!-- MODAL TEAM MEMBERS  -->
+
 <div class="modal fade" id="membersModal" tabindex="-1" aria-labelledby="membersModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
@@ -403,6 +370,7 @@
 
 
 
+    <!-- EDIT SPRINT  -->
 
 <div class="modal fade" id="editSprintModal" tabindex="-1" aria-labelledby="editSprintModalLabel" aria-hidden="true">
     <div class="modal-dialog">

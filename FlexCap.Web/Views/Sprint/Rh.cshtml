@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-    /* 🎨 Estilos do Gantt (Reutilizados do Manager/Colaborador) */
+    /* Estilos do Gantt  */
     #gantt-chart-container {
         border: 1px solid #ccc;
         background-color: #fff;
@@ -54,7 +54,7 @@
         align-items: center;
         justify-content: center;
         box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-        cursor: default; /* Sempre somente leitura para o RH */
+        cursor: default; 
     }
 
     .sprint-bar {
@@ -67,7 +67,7 @@
 
     <h3 class="fw-bold mb-4">@ViewData["Title"]</h3>
 
-    <!-- CONTROLE DE FILTRO POR EQUIPE -->
+    <!-- FILTRO POR EQUIPE -->
     <div class="d-flex align-items-center gap-3 mb-4 p-3 border rounded shadow-sm bg-white">
         <label for="teamSelector" class="form-label mb-0 fw-semibold">View Team Sprint:</label>
         <select id="teamSelector" class="form-select form-select-sm" style="max-width: 300px;">
@@ -78,7 +78,7 @@
         </button>
     </div>
 
-    <!-- GANTT CHART (Container para o gráfico) -->
+    <!-- GANTT CHART  -->
     <div id="ganttArea" class="p-3 border rounded shadow-sm bg-white overflow-x-auto">
 
         <h4 id="ganttTitle" class="fw-bold mb-3 text-muted">Select a team above.</h4>
@@ -96,7 +96,7 @@
 
 </div>
 
-<!-- Sprint Details Modal (Copiar do Manager, para exibir informações detalhadas) -->
+<!-- Sprint Details Modal  -->
 <div class="modal fade" id="sprintDetailsModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content p-4">
@@ -118,7 +118,7 @@
 @section Scripts {
     <script src="~/js/sprint-gantt.js"></script>
     <script>
-        let currentActiveSprintId = null; // Stores the current active sprint ID
+        let currentActiveSprintId = null; 
 
         document.addEventListener('DOMContentLoaded', async () => {
             const teamSelector = document.getElementById('teamSelector');
@@ -127,48 +127,40 @@
             const ganttTitle = document.getElementById('ganttTitle');
             const detailsButton = document.getElementById('detailsButton');
 
-            // Helper function to show status (English messages)
             const setStatus = (message, alertClass = 'alert-secondary') => {
                 ganttStatus.className = `alert ${alertClass} text-center`;
                 ganttStatus.textContent = message;
                 ganttStatus.classList.remove('d-none');
                 ganttDisplay.classList.add('d-none');
                 detailsButton.disabled = true;
-                ganttTitle.textContent = "Sprint Summary"; // Translated
+                ganttTitle.textContent = "Sprint Summary"; 
             };
 
-            // 1. LOAD TEAM LIST
             try {
                 const teamResponse = await fetch('/Sprint/GetAllTeams');
-                // 💡 Mensagem de erro traduzida
                 if (!teamResponse.ok) throw new Error('Failed to load teams.');
 
                 const teams = await teamResponse.json();
 
-                // 💡 Mensagem do seletor traduzida
                 teamSelector.innerHTML = '<option value="" disabled selected>Select a Team</option>';
                 teams.forEach(team => {
                     teamSelector.innerHTML += `<option value="${team.teamName}">${team.teamName}</option>`;
                 });
             } catch (error) {
-                // 💡 Mensagem de erro traduzida
                 setStatus('Error loading team list.', 'alert-danger');
                 return;
             }
 
-            // 2. ADD LISTENER TO TEAM SELECTOR
             teamSelector.addEventListener('change', async (e) => {
                 const selectedTeamName = e.target.value;
                 if (!selectedTeamName) return;
 
-                // 💡 Mensagem de status traduzida
                 setStatus(`Searching for active sprint for ${selectedTeamName}...`, 'alert-info');
 
                 try {
                     const sprintResponse = await fetch(`/Sprint/GetActiveSprintByTeam?teamName=${selectedTeamName}`);
 
                     if (sprintResponse.status === 404) {
-                        // 💡 Mensagem de erro 404 traduzida
                         setStatus(`No active sprint found for team: ${selectedTeamName}`, 'alert-warning');
                         currentActiveSprintId = null;
                         return;
@@ -179,37 +171,31 @@
 
                     currentActiveSprintId = sprint.id;
 
-                    // CALL GANTT: loadGanttData must be accessible globally
                     if (typeof loadGanttData === 'function') {
                         loadGanttData(sprint.id, true);
                     }
 
-                    // UPDATE SUCCESS UI
                     ganttStatus.classList.add('d-none');
                     ganttDisplay.classList.remove('d-none');
-                    // 💡 Título do Gantt traduzido
                     ganttTitle.textContent = `Active Sprint Progress: ${sprint.name}`;
                     detailsButton.disabled = false;
 
-                    // Armazena detalhes para o modal (Mantém dados de nota em inglês)
+                    // Armazena detalhes para o modal
                     detailsButton.dataset.sprint = JSON.stringify({
                         name: sprint.name,
                         startDate: sprint.startDate,
                         endDate: sprint.endDate,
                         goal: sprint.goal,
-                        // 💡 Nota traduzida para o JSON
                         notes: sprint.notes || 'No notes provided.',
                     });
 
 
                 } catch (error) {
                     console.error('Error fetching sprint by team:', error);
-                    // 💡 Mensagem de erro traduzida
                     setStatus('Error fetching the sprint. Please try again.', 'alert-danger');
                 }
             });
 
-            // 3. ADD LISTENER TO DETAILS BUTTON
             detailsButton.addEventListener('click', () => {
                 try {
                     const sprint = JSON.parse(detailsButton.dataset.sprint);
@@ -221,7 +207,6 @@
 
                 } catch (e) {
                     console.error("Error opening sprint details:", e);
-                    // 💡 Mensagem de alerta traduzida
                     alert("Could not load sprint details.");
                 }
             });

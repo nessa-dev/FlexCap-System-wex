@@ -102,7 +102,7 @@
                     {
                         "Approved" => "bg-success",
                         "Rejected" => "bg-danger",
-                        "Adjustment Requested" => "bg-info text-dark", // Status de Ajuste/Correção
+                        "Adjustment Requested" => "bg-info text-dark", 
                         _ => "bg-warning text-dark"
                     };
 
@@ -159,7 +159,6 @@
             if (reasonModal) {
                 reasonModal.addEventListener('show.bs.modal', function (event) {
                     var button = event.relatedTarget;
-                    // Lê o texto diretamente do atributo 'data-reason-text' do botão
                     var reasonText = button.getAttribute('data-reason-text');
 
                     var modalBody = reasonModal.querySelector('#rejectionReasonText');

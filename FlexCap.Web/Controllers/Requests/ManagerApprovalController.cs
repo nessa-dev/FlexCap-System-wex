@@ -40,7 +40,6 @@ public class ManagerApprovalController : Controller
             return NotFound("Attachment not found or path not specified.");
         }
 
-        // Usamos a variável 'env' (sem underscore) injetada no método
         var uploadsFolder = Path.Combine(env.WebRootPath, "Uploads");
 
         var filePath = Path.Combine(uploadsFolder, request.AttachmentPath);
@@ -53,7 +52,6 @@ public class ManagerApprovalController : Controller
         var mimeType = "application/pdf";
         var fileName = Path.GetFileName(request.AttachmentPath);
 
-        // Retorna o arquivo (FileResult)
         return File(filePath, mimeType, fileName);
     }
 
@@ -155,7 +153,7 @@ public class ManagerApprovalController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ProcessAction(RequestActionViewModel model)
     {
-        // 🔹 Validação do model base
+        // Validação do model base
         if (!ModelState.IsValid)
         {
             TempData["ErrorMessage"] = "Invalid action. Please provide justification if required.";

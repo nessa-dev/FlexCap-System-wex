@@ -29,7 +29,6 @@
                 <div class="d-flex align-items-center justify-content-between p-3 mb-2 rounded border request-item">
 
                     <div class="d-flex align-items-center">
-                        @* <img src="@request.CollaboratorPhotoUrl" class="rounded-circle me-3" style="width: 40px; height: 40px;" alt="Avatar" /> *@
 
                         <div class="ms-3">
                             <h6 class="mb-0 fw-bold">@request.CollaboratorName</h6>
@@ -130,7 +129,6 @@
 </div>
 
 
-
 <div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <form asp-controller="ManagerApproval" asp-action="ProcessAction" method="post">
@@ -155,8 +153,6 @@
         </form>
     </div>
 </div>
-
-
 <div class="modal fade" id="requestDetailModal" tabindex="-1" aria-labelledby="requestDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -170,8 +166,6 @@
                         <span class="visually-hidden">Loading...</span>
                     </div>
                 </div>
-
-
                 <div id="requestDetailsContent" style="display:none;">
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -190,8 +184,6 @@
                     <h6 class="fw-bold" id="detailSubject"></h6>
                     <p id="detailDescription" class="text-muted"></p>
 
-
-
                     <div id="attachmentSection" class="mt-4">
                         <h6 class="fw-bold">Annex</h6>
                         <a id="detailAttachmentLink" href="#" target="_blank" class="btn btn-sm btn-outline-primary" style="display:none;">
@@ -199,11 +191,7 @@
                         </a>
                         <p id="noAttachmentText" class="text-muted" style="display:none;">No attachments were provided for this request.</p>
                     </div>
-
-
                 </div>
-
-
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -216,9 +204,8 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 
-            // =========================================================
-            // CONFIGURAÇÕES GERAIS DE MODAIS (Reject e Adjust)
-            // =========================================================
+            // CONFIGURAÇÕES GERAIS DE MODAIS 
+
             function setupModal(modalId, hiddenInputId) {
                 var modal = document.getElementById(modalId);
                 if (modal) {
@@ -237,11 +224,9 @@
             setupModal('adjustModal', 'modal-adjust-request-id');
 
             setupModal('approveModal', 'modal-approve-request-id');
-            // =========================================================
-            // LÓGICA DO MODAL DE DETALHES (AJAX)
-            // =========================================================
 
-            // URL gerada pelo Razor de forma segura, dentro de aspas
+            // LÓGICA DO MODAL DE DETALHES (AJAX)
+
             const urlRequestDetails = '@Url.Action("GetRequestDetails", "ManagerApproval")';
 
             var detailModal = document.getElementById('requestDetailModal');
@@ -250,15 +235,12 @@
                     var button = event.relatedTarget;
                     var requestId = button.getAttribute('data-request-id');
 
-                    // Exibir o spinner e esconder o conteúdo
                     document.getElementById('loadingDetails').style.display = 'block';
                     document.getElementById('requestDetailsContent').style.display = 'none';
 
-                    // Requisição AJAX
                     fetch(`${urlRequestDetails}?requestId=${requestId}`)
                         .then(response => {
                             if (!response.ok) {
-                                // Se o status HTTP for 404/500, ainda tentamos ler o JSON
                                 return response.json().then(error => {
                                     throw new Error(error.error || `Falha HTTP: ${response.status} ${response.statusText}`);
                                 });
@@ -266,7 +248,6 @@
                             return response.json();
                         })
                         .then(data => {
-                            // Verifica se o JSON retornado contém um erro de backend
 
                             if (data.error) {
                                 throw new Error(`Erro do Servidor: ${data.error}`);
@@ -302,7 +283,6 @@
                             var noAttachmentText = document.getElementById('noAttachmentText');
 
                             if (data.attachmentPath) {
-                                // Simplificação: usa o último segmento do caminho como nome do arquivo
                                 var fileName = data.attachmentPath.substring(data.attachmentPath.lastIndexOf('/') + 1);
                                 document.getElementById('detailAttachmentName').textContent = fileName;
                                 attachmentLink.href = data.attachmentPath;
@@ -321,7 +301,6 @@
                         .catch(error => {
                             console.error('Error in AJAX processing:', error);
 
-                            // Mostra a mensagem de erro no corpo do modal
                             document.getElementById('requestDetailsContent').innerHTML =
                                 `<p class="text-danger text-center py-5">
                                     <i class="bi bi-x-octagon-fill me-2"></i> Failed to load.
@@ -337,7 +316,6 @@
     </script>
 
     @{
-        // Isso resolve o "jQuery is not defined" se a Partial View for o problema.
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }

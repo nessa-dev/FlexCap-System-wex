@@ -10,7 +10,7 @@
         public string IconClass { get; set; } = "";
         public int AffectedMembers { get; set; }
         public int TotalMembers { get; set; }
-        public double AffectedPercent { get; set; } // 0..100
+        public double AffectedPercent { get; set; } 
         public string CountryKey { get; set; } = "";
         public string Message { get; set; } = "";
 

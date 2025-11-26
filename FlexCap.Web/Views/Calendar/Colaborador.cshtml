@@ -8,110 +8,97 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
- <style>
-                                               COMPLETA DO RH.CSHTML/MANAGER.CSHTML AQUI)
-                                               }
-                                               }
+                                             
 
-                                               <style >
-                                               /* Layout principal */
-                                               #calendar {
-                                                   margin-bottom: 1rem;
-                                                   width: 100%;
-                                               }
+    <style >
+    #calendar {
+        margin-bottom: 1rem;
+        width: 100%;
+    }
 
-                                               /* Alinhamento à esquerda */
-                                               .fc {
-                                                   text-align: left;
-                                               }
+    .fc {
+        text-align: left;
+    }
 
-                                               /* Responsividade geral */
-                                               @@media (max-width: 768px) {
-                                                   #calendar {
-                                                       font-size: 0.7rem;
-                                                   }
+    @@media (max-width: 768px) {
+        #calendar {
+            font-size: 0.7rem;
+        }
 
-                                                   .fc-toolbar-title {
-                                                       font-size: 1rem;
-                                                   }
+        .fc-toolbar-title {
+            font-size: 1rem;
+        }
 
-                                                   .fc .fc-daygrid-day-number {
-                                                       font-size: 0.6rem;
-                                                   }
+        .fc .fc-daygrid-day-number {
+            font-size: 0.6rem;
+        }
 
-                                                   .fc .fc-col-header-cell {
-                                                       font-size: 0.6rem;
-                                                   }
+        .fc .fc-col-header-cell {
+            font-size: 0.6rem;
+        }
 
-                                                   #monthEventsCard {
-                                                       margin-top: 1rem;
-                                                   }
-                                               }
+        #monthEventsCard {
+            margin-top: 1rem;
+        }
+    }
 
-                                               /* Cabeçalho compacto */
-                                               .fc-header-toolbar {
-                                                   padding: 0;
-                                                   margin-bottom: 0 !important;
-                                                   font-size: 0.8rem;
-                                               }
+    .fc-header-toolbar {
+        padding: 0;
+        margin-bottom: 0 !important;
+        font-size: 0.8rem;
+    }
 
-                                               /* Altura das células */
-                                               .fc .fc-daygrid-day-frame {
-                                                   min-height: 10px;
-                                                   height: 100% !important;
-                                               }
+    .fc .fc-daygrid-day-frame {
+        min-height: 10px;
+        height: 100% !important;
+    }
 
-                                               /* Números dos dias */
-                                               .fc .fc-daygrid-day-number {
-                                                   font-size: 0.65rem;
-                                                   padding: 2px;
-                                                   margin: 0;
-                                               }
+    .fc .fc-daygrid-day-number {
+        font-size: 0.65rem;
+        padding: 2px;
+        margin: 0;
+    }
 
-                                               /* Cabeçalho dos dias (Sun, Mon...) */
-                                               .fc .fc-col-header-cell {
-                                                   font-size: 0.7rem;
-                                                   padding: 2px 0;
-                                               }
+    .fc .fc-col-header-cell {
+        font-size: 0.7rem;
+        padding: 2px 0;
+    }
 
-                                               /* Compactar eventos */
-                                               .fc-daygrid-event-dot {
-                                                   width: 5px;
-                                                   height: 5px;
-                                                   margin: 0 2px;
-                                               }
+    .fc-daygrid-event-dot {
+        width: 5px;
+        height: 5px;
+        margin: 0 2px;
+    }
 
-                                               .fc-daygrid-event {
-                                                   padding: 0 !important;
-                                                   font-size: 0.65rem;
-                                               }
+    .fc-daygrid-event {
+        padding: 0 !important;
+        font-size: 0.65rem;
+    }
 
-                                               /* Lista lateral de eventos do mês */
-                                               #monthEventsCard {
-                                                   font-size: 0.75rem;
-                                                   border-radius: 0.5rem;
-                                               }
+    #monthEventsCard {
+        font-size: 0.75rem;
+        border-radius: 0.5rem;
+    }
 
-                                                   #monthEventsCard h6 {
-                                                       font-weight: 600;
-                                                       font-size: 0.9rem;
-                                                   }
+        #monthEventsCard h6 {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
 
-                                               #eventList {
-                                                   max-height: 300px;
-                                                   overflow-y: auto;
-                                               }
+    #eventList {
+        max-height: 300px;
+        overflow-y: auto;
+    }
 
-                                               /* Cores de eventos */
-                                               .badge-color-box {
-                                                   display: inline-block;
-                                                   width: 10px;
-                                                   height: 10px;
-                                                   border-radius: 2px;
-                                                   margin-right: 4px;
-                                                   vertical-align: middle;
-                                               }
-</style>
+    .badge-color-box {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        margin-right: 4px;
+        vertical-align: middle;
+    }
+  </style>
 
 <div class="py-4 container-fluid">
     <h3 class="fw-bold mb-4 text-start">Employee Calendar</h3>
@@ -162,7 +149,7 @@
             alert('Error processing request. See console for details.');
         }
 
-        // --- Funções Auxiliares (COPIADAS DO MANAGER/RH) ---
+        // --- Funções Auxiliares ---
 
         function getColorByType(type) {
             switch (type) {
@@ -180,7 +167,6 @@
         async function loadAndRenderEvents(month, year) {
             let events = [];
             try {
-                // Chama o mesmo endpoint do Controller: /Calendar/GetEvents
                 const url = `/Calendar/GetEvents`;
                 const resp = await fetch(url);
                 if (!resp.ok) throw new Error('GET /Calendar/GetEvents returned ' + resp.status);
@@ -199,12 +185,12 @@
             }));
 
             if (!calendarInstance) {
-                // Inicializa FullCalendar na primeira carga
+                // Inicializa FullCalendar 
                 calendarInstance = new FullCalendar.Calendar(calendarEl, {
                     initialView: 'dayGridMonth',
                     height: 'auto',
                     expandRows: false,
-                    selectable: false, // Não permite seleção
+                    selectable: false, 
                     displayEventTime: false,
                     headerToolbar: {
                         left: 'prev,next',
@@ -250,7 +236,7 @@
                 return start.getFullYear() === year && start.getMonth() === month;
             }).sort((a, b) => a.start - b.start);
 
-            eventListEl.innerHTML = ""; // Limpa a lista
+            eventListEl.innerHTML = ""; 
 
             if (monthEvents.length === 0) {
                 eventListEl.innerHTML = '<li class="list-group-item text-muted small">No events this month.</li>';
@@ -274,7 +260,6 @@
                 eventListEl.appendChild(li);
             });
 
-            // Lógica de deleção removida
         }
 
         // --- Lógica dos Filtros ---
@@ -323,6 +308,6 @@
         }
 
         initializeFilters();
-        loadAndRenderEvents(monthFilter.value, yearFilter.value); // Primeira carga de dados
+        loadAndRenderEvents(monthFilter.value, yearFilter.value); 
     });
 </script>

@@ -29,15 +29,6 @@ namespace FlexCap.Web.Controllers
         }
 
 
-
-
-
-
-
-
-
-
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
@@ -52,7 +43,6 @@ namespace FlexCap.Web.Controllers
                     string userIdString = colaborador.Id.ToString();
                     string formattedName = ToTitleCase(colaborador.FullName);
 
-                    // Determina a Role correta para todos os colaboradores, incluindo o "HR Manager"
                     string role = colaborador.Email.Equals("recursoshumanos@flexcap.com", StringComparison.OrdinalIgnoreCase) ? "HR Manager" : colaborador.Position;
 
                     var claims = new List<Claim>
@@ -60,7 +50,7 @@ namespace FlexCap.Web.Controllers
                 new Claim(ClaimTypes.Name, formattedName),
                 new Claim(ClaimTypes.Email, colaborador.Email),
                 new Claim("TeamName", colaborador.TeamName),
-                new Claim(ClaimTypes.Role, role), // Usando a role definida acima
+                new Claim(ClaimTypes.Role, role), 
                 new Claim(ClaimTypes.NameIdentifier, userIdString)
             };
 
@@ -68,7 +58,6 @@ namespace FlexCap.Web.Controllers
                     var principal = new ClaimsPrincipal(identity);
                     await HttpContext.SignInAsync(principal);
 
-                    // Agora, o redirecionamento usa apenas a lógica de Position/Role:
                     if (role == "HR Manager" || colaborador.Position == "HR Analyst" || colaborador.Position == "HR Consultant")
                     {
                         // Redireciona para o dashboard RH
@@ -94,26 +83,6 @@ namespace FlexCap.Web.Controllers
         }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         private string ToTitleCase(string text)
         {
             if (string.IsNullOrEmpty(text))
@@ -131,24 +100,6 @@ namespace FlexCap.Web.Controllers
 
             return titleCaseText;
         }
-
-
-
-
-
-
-
-
-
-        
-
-
-
-
-
-
-
-
 
 
         public async Task<IActionResult> Logout()

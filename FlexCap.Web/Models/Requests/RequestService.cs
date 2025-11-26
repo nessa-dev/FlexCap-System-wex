@@ -38,7 +38,7 @@ namespace FlexCap.Web.Services
                     subject = "Manager Approved - Awaiting Final HR Validation";
                     body = $"Your request '{request.Subject}' was approved by your Manager and is now with HR for final validation.";
                     break;
-                case "Adjustment Requested": // <<< NOVO STATUS PARA O FLUXO DE AJUSTE
+                case "Adjustment Requested": 
                     subject = "Request Requires Adjustment/Correction";
                     body = $"Your request '{request.Subject}' requires adjustment by you, as requested by {decisionMaker}. Details: {request.RejectionReason}";
                     break;
@@ -48,7 +48,6 @@ namespace FlexCap.Web.Services
                     break;
                 case "Rejected":
                     subject = "Request Rejected";
-                    // Usamos RejectionReason para justificativas de rejeição e de ajuste
                     body = $"Your request '{request.Subject}' was rejected by {decisionMaker}. Reason: {request.RejectionReason}";
                     break;
 
@@ -63,8 +62,6 @@ namespace FlexCap.Web.Services
             return await _context.SaveChangesAsync();
         }
 
-
-
         public async Task<int> SubmitNewRequest(AbsenceRequestSubmitViewModel model, int collaboratorId)
         {
             var colaborador = await _context.Colaboradores.FirstOrDefaultAsync(c => c.Id == collaboratorId);
@@ -77,7 +74,7 @@ namespace FlexCap.Web.Services
             if (managerDaEquipe == null)
                 throw new InvalidOperationException($"Project Manager not found for team {colaborador.TeamName}.");
 
-            // 🟢 Upload do arquivo PDF (opcional)
+            // Upload do arquivo PDF (opcional)
             string? savedAttachmentPath = null;
             if (model.AttachmentFile != null && model.AttachmentFile.Length > 0)
             {
@@ -95,7 +92,7 @@ namespace FlexCap.Web.Services
                 savedAttachmentPath = $"/Uploads/{uniqueFileName}";
             }
 
-            // 🟢 Criação do request
+            // Criação do request
             var newRequest = new RequestEntity
             {
                 CollaboratorId = collaboratorId,
@@ -108,7 +105,7 @@ namespace FlexCap.Web.Services
                 CurrentManagerId = managerDaEquipe.Id,
                 CreationDate = DateTime.Now,
                 LastUpdateDate = DateTime.Now,
-                AttachmentPath = savedAttachmentPath // pode ser null se não tiver arquivo
+                AttachmentPath = savedAttachmentPath 
             };
 
             _context.Requests.Add(newRequest);
@@ -119,18 +116,13 @@ namespace FlexCap.Web.Services
             return newRequest.Id;
         }
 
-
-
-
-
         public async Task ProcessManagerDecision(int requestId, int managerUserId, string actionType, string justification)
         {
-            // CORREÇÃO ESSENCIAL: Garante que o valor não é NULL para ser usado no Log
             string logComment = justification ?? "";
 
             var request = await _context.Requests.FindAsync(requestId);
 
-            // 1. Validação de Status (OK)
+            // Validação de Status 
             if (request == null || request.Status != "Waiting For Manager")
             {
                 throw new InvalidOperationException("Request not pending Manager approval.");
@@ -152,7 +144,6 @@ namespace FlexCap.Web.Services
             request.CurrentManagerId = managerUserId;
             request.LastUpdateDate = DateTime.Now;
 
-            // 2. Descomentar e Ativar o Log (ESSENCIAL)
             _context.RequestLogs.Add(new RequestLogEntity
             {
                 RequestId = requestId,
@@ -160,19 +151,15 @@ namespace FlexCap.Web.Services
                 ActionType = actionDescription,
                 NewStatus = newStatus,
                 ActionTimestamp = DateTime.Now,
-                // CORREÇÃO CRÍTICA: Use a variável segura contra NULL
-                Comment = logComment // Agora, se a aprovação for enviada, o valor é "", não NULL
+                Comment = logComment 
             });
 
             // 3. Salvar as Mudanças (Muda o Status no DB)
             await _context.SaveChangesAsync();
 
-            // 4. Notificação (Comente se der problema de travamento SMTP)
+            // 4. Notificação 
             await NotifyCollaboratorAsync(request, "Manager");
         }
-
-
-
 
 
         public async Task<int> GetPendingHRRequestsCountAsync()
@@ -185,12 +172,11 @@ namespace FlexCap.Web.Services
 
         public async Task ProcessHRDecision(int requestId, int hrUserId, string actionType, string justification)
         {
-            // 🛑 CORREÇÃO CRÍTICA: Garante que o justification é uma string vazia ("") se for nulo.
             string logComment = justification ?? "";
 
             var request = await _context.Requests.FindAsync(requestId);
 
-            // 1. Validação de Status (OK)
+            // Validação de Status 
             if (request == null || request.Status != "Waiting For HR")
             {
                 throw new InvalidOperationException("Request not pending HR validation.");
@@ -205,19 +191,18 @@ namespace FlexCap.Web.Services
                 case "approve":
                     newStatus = "Approved";
                     actionDescription = "HR Approved";
-                    // O logComment será "" aqui.
                     break;
 
                 case "reject":
                     newStatus = "Rejected";
                     actionDescription = "HR Rejected";
-                    request.RejectionReason = logComment; // Usa a justificativa para a razão
+                    request.RejectionReason = logComment; 
                     break;
 
                 case "returntomanager":
                     newStatus = "Waiting For Manager";
                     actionDescription = "HR Returned to Manager";
-                    request.RejectionReason = logComment; // Usa a justificativa para a razão
+                    request.RejectionReason = logComment; 
                     break;
 
                 default:
@@ -228,7 +213,6 @@ namespace FlexCap.Web.Services
             request.CurrentHRId = hrUserId;
             request.LastUpdateDate = DateTime.Now;
 
-            // 2. Registro do Log (Agora usa a variável segura logComment)
             _context.RequestLogs.Add(new RequestLogEntity
             {
                 RequestId = requestId,
@@ -236,11 +220,10 @@ namespace FlexCap.Web.Services
                 ActionType = actionDescription,
                 NewStatus = newStatus,
                 ActionTimestamp = DateTime.Now,
-                // CORREÇÃO: Usa a variável segura logComment
                 Comment = logComment
             });
 
-            // 3. Salvar as Mudanças (Persiste o status final e o log)
+            // 3. Salvar as Mudanças 
             await _context.SaveChangesAsync();
 
             // 4. Notificação

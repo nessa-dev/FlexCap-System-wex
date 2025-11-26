@@ -1,5 +1,4 @@
 ﻿// Nome do arquivo: MockEmailService.cs
-// Localização: FlexCap.Web.Services/
 
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;

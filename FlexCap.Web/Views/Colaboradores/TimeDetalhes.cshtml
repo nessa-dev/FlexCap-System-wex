@@ -40,9 +40,6 @@
     }
 </style>
 
-
-
-
     <div class="py-4 w-100">
         <h3 class="fw-bold mb-3">Collaborators</h3>
         <p class="text-muted mb-4">@Model.Count members</p>
@@ -62,11 +59,11 @@
                 dbStatus.Equals("Active", StringComparison.OrdinalIgnoreCase) ? "bg-success" : "bg-danger";
                 
                 
-                    // 🧩 MOTIVO E DATA (apenas se inativo)
+                    //  MOTIVO E DATA (apenas se inativo)
                     string reasonText = colaborador.InactivityReason?.Trim() ?? "";
                     DateTime? returnDate = colaborador.EndDate;
 
-                    // 🧩 NOME E USUÁRIO ATUAL
+                    //  NOME E USUÁRIO ATUAL
                     string nomeDisplay = colaborador.FullName;
                     bool isCurrentUser = colaborador.FullName?.Trim() == loggedInUserName?.Trim();
                     if (isCurrentUser)
@@ -93,7 +90,6 @@
                             </div>
 
                             <div class="ms-auto d-flex align-items-center">
-                                @* AQUI USAMOS O NOVO statusDisplay E dotColorClass *@
                             <span class="status-label @(dbStatus.Equals("Active", StringComparison.OrdinalIgnoreCase) ? "status-active" : "status-inactive")">
                                 @statusDisplay
 

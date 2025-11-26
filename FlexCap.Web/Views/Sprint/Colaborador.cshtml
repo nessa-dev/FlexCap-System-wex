@@ -1,5 +1,4 @@
-﻿@* SPRINT – COLLABORATOR VIEW (FULL + CORRECT) *@
-@{
+﻿@{
     ViewData["Title"] = "Sprints";
     Layout = "~/Views/Shared/Template.cshtml";
 }
@@ -186,7 +185,6 @@
             deniedMessageEl.classList.add('d-none');
 
             try {
-                // Chama o endpoint de verificação e dados
                 const response = await fetch('/Sprint/IsParticipatingAndGetTeamData');
 
                 if (!response.ok) {
@@ -201,13 +199,12 @@
 
                     restrictedContentEl.classList.remove('d-none');
 
-                    // 1. CARREGA GANTT (função global do sprint-gantt.js)
+                    //  CARREGA GANTT 
                     if (typeof loadGanttData === 'function') {
                         loadGanttData(data.sprintId, true);
                     }
 
-                    // 2. CARREGA HISTÓRICO (função global do sprint-gantt.js)
-                    // Agora, ele chama a função do Manager diretamente
+                    // 2. CARREGA HISTÓRICO 
                     if (typeof loadSprintHistory === 'function') {
                         loadSprintHistory();
                     }
@@ -217,7 +214,6 @@
                 }
 
             } catch (error) {
-                // Este bloco agora só captura erros de rede/execução real, e não mais o conflito de código.
                 console.error('AJAX/Execution Error:', error);
 
                 loadingEl.classList.add('d-none');
@@ -229,5 +225,5 @@
         });
     </script>
 }
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script> @* <-- ADICIONE ESTA LINHA *@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">

@@ -52,7 +52,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     document.getElementById("detailAttachmentName").textContent = fileName;
 
-                    // 🔗 Define o link correto para baixar
                     attachmentLink.href = `/HRApproval/DownloadAttachment?requestId=${data.requestId}`;
                     attachmentLink.style.display = "inline-block";
                     noAttachmentText.style.display = "none";
@@ -71,9 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ------------------------------
     // MODAL DE REJEIÇÃO
-    // ------------------------------
     function setupModal(modalId, hiddenInputId) {
         const modal = document.getElementById(modalId);
         if (!modal) return;

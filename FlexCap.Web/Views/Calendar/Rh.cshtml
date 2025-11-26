@@ -1,6 +1,5 @@
 ﻿@model IEnumerable<FlexCap.Web.Models.Calendar.CalendarModel>
 @{
-    // Title translated to English
     ViewData["Title"] = "HR Calendar";
     Layout = "~/Views/Shared/Template.cshtml";
 }
@@ -9,18 +8,15 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
 <style>
-    /* Layout principal */
     #calendar {
         margin-bottom: 1rem;
         width: 100%;
     }
 
-    /* Alinhamento à esquerda */
     .fc {
         text-align: left;
     }
 
-    /* Responsividade geral */
     @@media (max-width: 768px) {
         #calendar {
             font-size: 0.7rem;
@@ -43,33 +39,28 @@
         }
     }
 
-    /* Cabeçalho compacto */
     .fc-header-toolbar {
         padding: 0;
         margin-bottom: 0 !important;
         font-size: 0.8rem;
     }
 
-    /* Altura das células */
     .fc .fc-daygrid-day-frame {
         min-height: 10px;
         height: 100% !important;
     }
 
-    /* Números dos dias */
     .fc .fc-daygrid-day-number {
         font-size: 0.65rem;
         padding: 2px;
         margin: 0;
     }
 
-    /* Cabeçalho dos dias (Sun, Mon...) */
     .fc .fc-col-header-cell {
         font-size: 0.7rem;
         padding: 2px 0;
     }
 
-    /* Compactar eventos */
     .fc-daygrid-event-dot {
         width: 5px;
         height: 5px;
@@ -81,7 +72,6 @@
         font-size: 0.65rem;
     }
 
-    /* Lista lateral de eventos do mês */
     #monthEventsCard {
         font-size: 0.75rem;
         border-radius: 0.5rem;
@@ -97,7 +87,6 @@
         overflow-y: auto;
     }
 
-    /* Cores de eventos */
     .badge-color-box {
         display: inline-block;
         width: 10px;
@@ -113,7 +102,7 @@
     <h3 class="fw-bold mb-4 text-start">Corporate Calendar</h3>
 
     <div class="row align-items-start">
-        <!-- 🗓️ Calendar Section -->
+        <!--  Calendar Section -->
         <div class="col-12 col-lg-8">
             <div class="border rounded p-4 shadow-sm bg-white" style="max-width: 600px;">
                 <div class="d-flex justify-content-start align-items-center mb-3 gap-3">
@@ -139,7 +128,7 @@
             </div>
         </div>
 
-        <!-- 📅 “This Month” Panel -->
+        <!-- “This Month” Panel -->
         <div class="col-12 col-lg-4 mt-4 mt-lg-0">
             <div class="border rounded p-3 shadow-sm bg-light h-100">
                 <h6 class="fw-bold mb-3 text-start">This Month</h6>
@@ -151,7 +140,7 @@
     </div>
 </div>
 
-<!-- 🪟 Event Modal -->
+<!-- Event Modal -->
 <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -184,7 +173,7 @@
     </div>
 </div>
 
-<!-- 🪟 Holiday Modal -->
+<!-- Holiday Modal -->
 <div class="modal fade" id="holidayModal" tabindex="-1" aria-labelledby="holidayModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -220,10 +209,6 @@
     </div>
 </div>
 
-
-
-
-
 <script>
     document.addEventListener('DOMContentLoaded', async function () {
         const calendarEl = document.getElementById('calendar');
@@ -239,15 +224,15 @@
 
         function getColorByType(type) {
             switch (type) {
-                case 'Holiday (Brazil)': return '#28a745';   // Verde
+                case 'Holiday (Brazil)': return '#28a745';   
                 case 'Holiday (USA)':
-                case 'Holiday (EUA)': return '#dc3545';      // Vermelho
-                case 'Holiday (Japan)': return '#ff69b4';    // Rosa
-                case 'Holiday (Italy)': return '#17a2b8';    // Azul claro
-                case 'Holiday (Canada)': return '#6610f2';   // Roxo
-                case 'Corporate Training': return '#ffc107'; // Amarelo
-                case 'Online Event': return '#0d6efd';       // Azul
-                default: return '#6c757d';                   // Cinza
+                case 'Holiday (EUA)': return '#dc3545';      
+                case 'Holiday (Japan)': return '#ff69b4';    
+                case 'Holiday (Italy)': return '#17a2b8';    
+                case 'Holiday (Canada)': return '#6610f2';   
+                case 'Corporate Training': return '#ffc107'; 
+                case 'Online Event': return '#0d6efd';       
+                default: return '#6c757d';                   
             }
         }
 
@@ -262,7 +247,6 @@
                 events = [];
             }
 
-            // se já existir, limpa e recarrega
             if (calendarInstance) {
                 calendarInstance.removeAllEvents();
                 events.forEach(e => {
@@ -277,7 +261,6 @@
                 return;
             }
 
-            // cria o calendário apenas 1x
             calendarInstance = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 height: 'auto',
@@ -403,7 +386,6 @@
             });
         }
 
-        // Inicializa tudo
         initializeFilters();
         loadAndRenderEvents(new Date().getMonth() + 1, new Date().getFullYear());
 

@@ -25,9 +25,7 @@ public class HRApprovalController : Controller
         return int.TryParse(userIdClaim, out int hrId) ? hrId : -1;
     }
 
-    // ----------------------------------------------------------------------
-    // 1. PENDING LIST (Filtragem dinâmica e mapeamento completo)
-    // ----------------------------------------------------------------------
+  
     public async Task<IActionResult> PendingList(string statusFilter, string departmentFilter, string typeFilter)
     {
         var query = _context.Requests.AsQueryable();
@@ -90,9 +88,8 @@ public class HRApprovalController : Controller
         return View("~/Views/Requests/Rh.cshtml", viewModel);
     }
 
-    // ----------------------------------------------------------------------
-    // 2. GET DETAILS
-    // ----------------------------------------------------------------------
+    // GET DETAILS
+
     [HttpGet]
     public async Task<IActionResult> GetRequestDetails(int requestId)
     {
@@ -127,12 +124,7 @@ public class HRApprovalController : Controller
         }
     }
 
-    // ----------------------------------------------------------------------
-    // 3. PROCESS ACTION
-    // ----------------------------------------------------------------------
-
-
-
+    // PROCESS ACTION
 
     public async Task<IActionResult> DownloadAttachment(int requestId, [FromServices] IWebHostEnvironment env)
     {
@@ -152,10 +144,6 @@ public class HRApprovalController : Controller
 
         return File(filePath, mimeType, fileName);
     }
-
-
-
-
 
 
     [HttpPost]
@@ -201,13 +189,5 @@ public class HRApprovalController : Controller
 
         return RedirectToAction(nameof(PendingList));
     }
-
-
-
-
-
-
-
-
 
 }
