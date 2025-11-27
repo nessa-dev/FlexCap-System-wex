@@ -85,7 +85,17 @@
 
     <div id="restrictedContent" class="d-none">
 
-        <!-- GANTT -->
+
+        <!-- HEADER DA SPRINT ATIVA E BOTÃO DE DETALHES -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold mb-0">Active Sprint Progress</h4>
+            <button id="viewDetailsBtn" class="btn btn-outline-info btn-sm fw-semibold" disabled
+                    data-bs-toggle="modal" data-bs-target="#sprintDetailsModal">
+                View Sprint Details
+            </button>
+        </div>
+
+                        <!-- GANTT -->
         <div class="border rounded p-3 shadow-sm bg-white overflow-x-auto mb-5">
             <div id="gantt-chart-container" class="position-relative" style="min-width: 850px;">
                 <div id="gantt-header" class="gantt-row-header d-flex flex-column border-bottom"></div>
@@ -136,93 +146,133 @@
     </div>
 </div>
 
-<!-- MODAL — SPRINT DETAILS -->
+<!-- MODAL — SPRINT DETAILS  -->
+
 <div class="modal fade" id="sprintDetailsModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
 
             <div class="modal-header">
-                <h5 id="detailTitle" class="modal-title fw-bold"></h5>
+                <h5 id="detailTitle" class="modal-title fw-bold">Sprint Details</h5>
                 <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
             <div class="modal-body">
-
-                <p class="text-muted mb-1" id="detailDates"></p>
-
+                <p class="text-muted mb-1" id="detailDates">Duration: Loading...</p>
                 <hr>
-
                 <h6 class="fw-bold">Goal</h6>
                 <p id="detailGoal">—</p>
-
-                <h6 class="fw-bold">Worked Well</h6>
-                <p id="detailWorked">—</p>
-
-                <h6 class="fw-bold">Improvements</h6>
-                <p id="detailImprovement">—</p>
-
-                <h6 class="fw-bold">Blockers</h6>
-                <p id="detailBlockers">—</p>
-
+                <h6 class="fw-bold">Notes</h6>
+                <p id="detailNotes">—</p>
             </div>
-
         </div>
     </div>
 </div>
+
+
 @section Scripts {
 
     <script src="~/js/sprint-gantt.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
 
-            const loadingEl = document.getElementById('loadingStatus');
-            const restrictedContentEl = document.getElementById('restrictedContent');
-            const deniedMessageEl = document.getElementById('accessDeniedMessage');
 
-            loadingEl.classList.remove('d-none');
-            restrictedContentEl.classList.add('d-none');
-            deniedMessageEl.classList.add('d-none');
+        let activeSprintDetails = null;
 
-            try {
-                const response = await fetch('/Sprint/IsParticipatingAndGetTeamData');
+         function formatDate(dateStr) {
+             if (!dateStr) return 'N/A';
+             return new Date(dateStr).toLocaleDateString("en-US", {
+                 month: "short",
+                 day: "numeric",
+                 year: "numeric"
+             });
+         }
 
-                if (!response.ok) {
-                    throw new Error('API Failed to respond with status ' + response.status);
-                }
+         // Função para preencher e exibir o modal de detalhes da SPRINT ATIVA
+         function displayActiveSprintDetails() {
+             if (!activeSprintDetails) {
+                 return alert("Active sprint details not loaded.");
+             }
 
-                const data = await response.json();
+             // Preenche o modal (focando no plano da sprint ativa)
+             document.getElementById("detailTitle").textContent = activeSprintDetails.name || 'Active Sprint';
+             document.getElementById("detailDates").textContent = `Duration: ${formatDate(activeSprintDetails.startDate)} - ${formatDate(activeSprintDetails.endDate)}`;
 
-                loadingEl.classList.add('d-none');
+             document.getElementById("detailGoal").textContent = activeSprintDetails.goal || 'No goal set.';
+             document.getElementById("detailNotes").textContent = activeSprintDetails.notes || 'No notes available.';
 
-                if (data.isParticipating === true) {
+             // Abre o modal
+             new bootstrap.Modal(document.getElementById("sprintDetailsModal")).show();
+         }
 
-                    restrictedContentEl.classList.remove('d-none');
+         document.addEventListener('DOMContentLoaded', async () => {
 
-                    //  CARREGA GANTT 
-                    if (typeof loadGanttData === 'function') {
-                        loadGanttData(data.sprintId, true);
-                    }
+             const loadingEl = document.getElementById('loadingStatus');
+             const restrictedContentEl = document.getElementById('restrictedContent');
+             const deniedMessageEl = document.getElementById('accessDeniedMessage');
+             const viewDetailsBtn = document.getElementById('viewDetailsBtn'); 
 
-                    // 2. CARREGA HISTÓRICO 
-                    if (typeof loadSprintHistory === 'function') {
-                        loadSprintHistory();
-                    }
+             loadingEl.classList.remove('d-none');
+             restrictedContentEl.classList.add('d-none');
+             deniedMessageEl.classList.add('d-none');
+             viewDetailsBtn.disabled = true; 
 
-                } else {
-                    deniedMessageEl.classList.remove('d-none');
-                }
+             try {
+                 // 1. CHAMA O ENDPOINT PRINCIPAL (Participação)
+                 const response = await fetch('/Sprint/IsParticipatingAndGetTeamData');
 
-            } catch (error) {
-                console.error('AJAX/Execution Error:', error);
+                 if (!response.ok) {
+                     throw new Error('API Failed to respond with status ' + response.status);
+                 }
 
-                loadingEl.classList.add('d-none');
+                 const data = await response.json();
 
-                deniedMessageEl.innerHTML =
-                    `<div class="alert alert-danger">Error verifying sprint status.</div>`;
-                deniedMessageEl.classList.remove('d-none');
-            }
-        });
+                 loadingEl.classList.add('d-none');
+
+                 if (data.isParticipating === true) {
+
+                     restrictedContentEl.classList.remove('d-none');
+
+                     // 2. BUSCA DETALHES COMPLETOS DA SPRINT ATIVA (Precisa do Goal/Notes)
+                     const detailsResponse = await fetch(`/Sprint/GetActive?id=${data.sprintId}`);
+
+                     if (!detailsResponse.ok) {
+                         // Se falhar, registra o erro, mas continua com Gantt/Histórico
+                         console.error('Failed to fetch detailed sprint plan.');
+                         activeSprintDetails = null;
+                     } else {
+                         // Armazena os detalhes completos para o modal
+                         activeSprintDetails = await detailsResponse.json();
+
+                         // 3. ATIVA BOTÃO DE DETALHES e anexa a função
+                         viewDetailsBtn.disabled = false;
+                         viewDetailsBtn.addEventListener('click', displayActiveSprintDetails);
+                     }
+
+                     // 4. CARREGA GANTT (função global)
+                     if (typeof loadGanttData === 'function') {
+                         loadGanttData(data.sprintId, true);
+                     }
+
+                     // 5. CARREGA HISTÓRICO (função global)
+                     if (typeof loadSprintHistory === 'function') {
+                         loadSprintHistory();
+                     }
+
+                 } else {
+                     deniedMessageEl.classList.remove('d-none');
+                 }
+
+             } catch (error) {
+                 console.error('AJAX/Execution Error:', error);
+
+                 loadingEl.classList.add('d-none');
+
+                 deniedMessageEl.innerHTML =
+                     `<div class="alert alert-danger">Error verifying sprint status.</div>`;
+                 deniedMessageEl.classList.remove('d-none');
+             }
+         });
     </script>
 }
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
